@@ -98,4 +98,7 @@ $string['error_nopermission_submit'] = 'Desculpe, você não tem acesso para cri
 $string['error_nopermission_manage'] = 'Desculpe, você não tem acesso para gerenciar solicitações. Esta função está disponível apenas para administradores.';
 $string['error_nopermission_view']   = 'Desculpe, você não tem acesso para visualizar solicitações.';
 $string['error_nopermission_viewrequest'] = 'Desculpe, você não tem acesso para visualizar esta solicitação.';
+$string['motivo_negacao']            = 'Motivo da Negação';
+$string['motivo_negacao_label']      = 'Informe o motivo da negação';
+$string['motivo_negacao_required']   = 'Por favor, informe o motivo da negação.';
 $string['my_requests']               = 'Minhas Solicitações';

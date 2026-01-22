@@ -146,6 +146,18 @@ if (!empty($request->observacoes)) {
     echo html_writer::end_div();
 }
 
+// Card: Motivo da Negação (apenas se status = negado)
+if ($request->status === 'negado' && !empty($request->motivo_negacao)) {
+    echo html_writer::start_div('card mb-3 border-danger');
+    echo html_writer::start_div('card-header bg-danger text-white');
+    echo html_writer::tag('h5', get_string('motivo_negacao', 'local_solicitacoes'), array('class' => 'mb-0'));
+    echo html_writer::end_div();
+    echo html_writer::start_div('card-body');
+    echo html_writer::tag('div', nl2br(format_text($request->motivo_negacao)), array('class' => 'text-dark', 'style' => 'white-space: pre-wrap;'));
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+}
+
 echo html_writer::end_div(); // fim coluna esquerda
 
 // ===== COLUNA DIREITA =====
@@ -237,14 +249,9 @@ if ($canmanage) {
             array('class' => 'btn btn-success mr-2'));
     }
 
-    // Botão Negar - só mostrar se não estiver negado
+    // Botão Negar - só mostrar se não estiver negado (redireciona para página de negação)
     if ($request->status !== 'negado') {
-        $url_negar = new moodle_url($baseurl, array(
-            'action' => 'updatestatus',
-            'id' => $request->id,
-            'status' => 'negado',
-            'sesskey' => sesskey()
-        ));
+        $url_negar = new moodle_url('/local/solicitacoes/negar.php', array('id' => $request->id));
         $buttons[] = html_writer::link($url_negar, get_string('deny', 'local_solicitacoes'), 
             array('class' => 'btn btn-danger mr-2'));
     }

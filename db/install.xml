@@ -15,6 +15,7 @@
         <FIELD NAME="observacoes" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Observações adicionais"/>
         <FIELD NAME="status" TYPE="char" LENGTH="50" NOTNULL="true" DEFAULT="pendente" SEQUENCE="false" COMMENT="Status: pendente, aprovado, negado"/>
         <FIELD NAME="adminid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="ID do admin que atendeu"/>
+        <FIELD NAME="motivo_negacao" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Motivo da negação da solicitação"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

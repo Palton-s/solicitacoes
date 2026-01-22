@@ -98,4 +98,7 @@ $string['error_nopermission_submit'] = 'Sorry, you do not have access to create 
 $string['error_nopermission_manage'] = 'Sorry, you do not have access to manage requests. This function is available only for administrators.';
 $string['error_nopermission_view']   = 'Sorry, you do not have access to view requests.';
 $string['error_nopermission_viewrequest'] = 'Sorry, you do not have access to view this request.';
+$string['motivo_negacao']            = 'Denial Reason';
+$string['motivo_negacao_label']      = 'Please provide the reason for denial';
+$string['motivo_negacao_required']   = 'Please provide a reason for the denial.';
 $string['my_requests']               = 'My Requests';

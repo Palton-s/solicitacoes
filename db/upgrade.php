@@ -183,5 +183,17 @@ function xmldb_local_solicitacoes_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025120901, 'local', 'solicitacoes');
     }
 
+    // Upgrade para versão 2026012515 - Adicionar campo motivo_negacao
+    if ($oldversion < 2026012515) {
+        $table = new xmldb_table('local_solicitacoes');
+        
+        $field = new xmldb_field('motivo_negacao', XMLDB_TYPE_TEXT, null, null, null, null, null, 'adminid');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        upgrade_plugin_savepoint(true, 2026012515, 'local', 'solicitacoes');
+    }
+
     return true;
 }

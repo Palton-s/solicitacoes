@@ -29,6 +29,7 @@ $action = optional_param('action', '', PARAM_ALPHA);
 $id     = optional_param('id', 0, PARAM_INT);
 $status = optional_param('status', '', PARAM_ALPHA);
 $filter = optional_param('filter', 'pendente', PARAM_ALPHA);
+$motivo_negacao = optional_param('motivo_negacao', '', PARAM_TEXT);
 
 // Ação: Atualizar status
 if ($action === 'updatestatus' && $id && in_array($status, ['pendente','aprovado','negado'])) {
@@ -41,6 +42,15 @@ if ($action === 'updatestatus' && $id && in_array($status, ['pendente','aprovado
                 \core\notification::error($resultado['message']);
                 redirect(new moodle_url('/local/solicitacoes/manage.php', ['filter' => $filter]));
             }
+        }
+        
+        // Se for negação, validar e salvar o motivo
+        if ($status === 'negado') {
+            if (empty($motivo_negacao)) {
+                \core\notification::error(get_string('motivo_negacao_required', 'local_solicitacoes'));
+                redirect(new moodle_url('/local/solicitacoes/view.php', ['id' => $id]));
+            }
+            $request->motivo_negacao = $motivo_negacao;
         }
         
         $request->status       = $status;
