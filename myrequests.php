@@ -29,7 +29,7 @@ $newrequesturl = new moodle_url('/local/solicitacoes/index.php');
 echo html_writer::link(
     $newrequesturl, 
     '+ ' . get_string('thankyou_new_request', 'local_solicitacoes'), 
-    ['class' => 'btn btn-primary']
+    ['class' => 'btn btn-secondary']
 );
 echo html_writer::end_div();
 
@@ -108,15 +108,8 @@ foreach ($requests as $r) {
     $statuskey = 'status_' . $r->status;
     $statuslabel = get_string($statuskey, 'local_solicitacoes');
     
-    // Definir cores/classes de badge para cada status
-    $status_badge_classes = [
-        'pendente' => 'badge badge-warning text-dark',
-        'aprovado' => 'badge badge-success',
-        'negado' => 'badge badge-danger',
-        'em_andamento' => 'badge badge-info',
-        'concluido' => 'badge badge-primary'
-    ];
-    $status_class = isset($status_badge_classes[$r->status]) ? $status_badge_classes[$r->status] : 'badge badge-secondary';
+    // Badges minimalistas sem cores
+    $status_class = 'badge badge-secondary';
     
     // Traduzir tipo de ação
     $acao_strings = [

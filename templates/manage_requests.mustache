@@ -4,14 +4,18 @@
     Template para gerenciamento de solicitações
 }}
 
-<div class="mb-3">
-    <ul class="nav nav-tabs">
-        {{#filters}}
-        <li class="nav-item">
-            <a class="nav-link {{#active}}active{{/active}}" href="{{url}}">{{label}}</a>
-        </li>
-        {{/filters}}
-    </ul>
+<div class="secondary-navigation d-print-none mb-3">
+    <nav class="moremenu navigation">
+        <ul role="tablist" class="nav more-nav nav-tabs">
+            {{#filters}}
+            <li data-key="{{label}}" class="nav-item" role="none" data-forceintomoremenu="false">
+                <a role="tab" class="nav-link {{#active}}active{{/active}}" href="{{url}}" data-text="{{label}}" {{#active}}aria-selected="true"{{/active}} {{^active}}tabindex="-1"{{/active}}>
+                    {{label}}
+                </a>
+            </li>
+            {{/filters}}
+        </ul>
+    </nav>
 </div>
 
 {{#has_requests}}
@@ -41,12 +45,12 @@
                 <td>{{status_label}}</td>
                 <td>
                     {{#show_approve}}
-                    <a href="{{approve_url}}" class="btn btn-sm btn-success">{{#str}}approve, local_solicitacoes{{/str}}</a>
+                    <a href="{{approve_url}}" class="btn btn-sm btn-secondary">{{#str}}approve, local_solicitacoes{{/str}}</a>
                     {{/show_approve}}
                     {{#show_reject}}
-                    <a href="{{reject_url}}" class="btn btn-sm btn-danger">{{#str}}deny, local_solicitacoes{{/str}}</a>
+                    <a href="{{reject_url}}" class="btn btn-sm btn-secondary">{{#str}}deny, local_solicitacoes{{/str}}</a>
                     {{/show_reject}}
-                    <a href="{{view_url}}" class="btn btn-sm btn-info">{{#str}}view, local_solicitacoes{{/str}}</a>
+                    <a href="{{view_url}}" class="btn btn-sm btn-secondary">{{#str}}view, local_solicitacoes{{/str}}</a>
                     <a href="{{delete_url}}" class="btn btn-sm btn-secondary" onclick="return confirm('{{confirm_delete_msg}}');">{{#str}}delete, local_solicitacoes{{/str}}</a>
                 </td>
             </tr>

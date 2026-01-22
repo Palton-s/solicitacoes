@@ -41,8 +41,9 @@ class solicitacoes_controller {
                 // Salvar usuários relacionados
                 self::save_related_users($id, $data);
                 
-                // Enviar email de confirmação (DESABILITADO para evitar lentidão)
-                // self::send_confirmation_email($id, $record);
+                // Enviar notificação de solicitação criada
+                local_solicitacoes_notify_criada($id);
+                
                 echo $OUTPUT->notification(get_string('success_submit', 'local_solicitacoes'), 'success');
                 return true;
             } else {

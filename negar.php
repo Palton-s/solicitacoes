@@ -65,6 +65,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $DB->update_record('local_solicitacoes', $request);
         
+        // Enviar notificação de negação
+        local_solicitacoes_notify_negada($id);
+        
         redirect(
             new moodle_url('/local/solicitacoes/manage.php'),
             'Solicitação negada com sucesso.',
@@ -77,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 echo $OUTPUT->header();
 
 // Exibir informações da solicitação
-echo html_writer::start_div('alert alert-info');
+echo html_writer::start_div('alert alert-secondary');
 echo html_writer::tag('h5', 'Você está prestes a negar esta solicitação:', array('class' => 'mb-3'));
 
 // Traduzir tipo de ação
@@ -143,7 +146,7 @@ echo html_writer::tag('small', 'Este motivo será visível para o solicitante.',
 echo html_writer::end_div();
 
 echo html_writer::start_div('form-group mt-4');
-echo html_writer::tag('button', 'Confirmar Negação', array('type' => 'submit', 'class' => 'btn btn-warning btn-lg mr-2'));
+echo html_writer::tag('button', 'Confirmar Negação', array('type' => 'submit', 'class' => 'btn btn-secondary btn-lg mr-2'));
 
 $cancel_url = new moodle_url('/local/solicitacoes/view.php', array('id' => $id));
 echo html_writer::link($cancel_url, 'Cancelar', array('class' => 'btn btn-secondary btn-lg'));

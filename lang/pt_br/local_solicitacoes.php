@@ -101,4 +101,16 @@ $string['error_nopermission_viewrequest'] = 'Desculpe, você não tem acesso par
 $string['motivo_negacao']            = 'Motivo da Negação';
 $string['motivo_negacao_label']      = 'Informe o motivo da negação';
 $string['motivo_negacao_required']   = 'Por favor, informe o motivo da negação.';
+
+// Notificações
+$string['messageprovider:solicitacao_criada'] = 'Notificação de solicitação criada';
+$string['messageprovider:solicitacao_aprovada'] = 'Notificação de solicitação aprovada';
+$string['messageprovider:solicitacao_negada'] = 'Notificação de solicitação negada';
+$string['notification_criada_subject'] = 'Solicitação Criada com Sucesso';
+$string['notification_criada_body'] = 'Sua solicitação de {$a->tipo_acao} para o curso "{$a->curso}" foi criada com sucesso e está aguardando aprovação.';
+$string['notification_aprovada_subject'] = 'Solicitação Aprovada';
+$string['notification_aprovada_body'] = 'Sua solicitação de {$a->tipo_acao} para o curso "{$a->curso}" foi aprovada!';
+$string['notification_negada_subject'] = 'Solicitação Negada';
+$string['notification_negada_body'] = 'Sua solicitação de {$a->tipo_acao} para o curso "{$a->curso}" foi negada.\n\nMotivo: {$a->motivo}';
+
 $string['my_requests']               = 'Minhas Solicitações';

@@ -57,6 +57,12 @@ if ($action === 'updatestatus' && $id && in_array($status, ['pendente','aprovado
         $request->timemodified = time();
         $request->adminid      = $USER->id;
         $DB->update_record('local_solicitacoes', $request);
+        
+        // Enviar notificação apropriada
+        if ($status === 'aprovado') {
+            local_solicitacoes_notify_aprovada($id);
+        }
+        
         \core\notification::success(get_string('success_update', 'local_solicitacoes'));
         redirect(new moodle_url('/local/solicitacoes/manage.php', ['filter' => $filter]));
     }

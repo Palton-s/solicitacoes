@@ -5,8 +5,8 @@
 }}
 
 {{#can_manage}}
-<div class="alert alert-info">
-    <a href="{{config.wwwroot}}/local/solicitacoes/manage.php" class="btn btn-primary">
+<div class="alert alert-secondary">
+    <a href="{{config.wwwroot}}/local/solicitacoes/manage.php" class="btn btn-secondary">
         {{#str}}list_title, local_solicitacoes{{/str}}
     </a>
 </div>
@@ -38,7 +38,7 @@
                     <span class="{{status_badge_class}}">{{status_label}}</span>
                 </td>
                 <td>
-                    <a href="{{view_url}}" class="btn btn-sm btn-info">{{#str}}view, local_solicitacoes{{/str}}</a>
+                    <a href="{{view_url}}" class="btn btn-sm btn-secondary">{{#str}}view, local_solicitacoes{{/str}}</a>
                 </td>
             </tr>
             {{/requests}}
@@ -48,9 +48,9 @@
 {{/has_requests}}
 
 {{^has_requests}}
-<div class="alert alert-info">
+<div class="alert alert-secondary">
     <p>{{#str}}no_requests, local_solicitacoes{{/str}}</p>
-    <a href="{{config.wwwroot}}/local/solicitacoes/index.php" class="btn btn-primary">
+    <a href="{{config.wwwroot}}/local/solicitacoes/index.php" class="btn btn-secondary">
         {{#str}}request_form_title, local_solicitacoes{{/str}}
     </a>
 </div>

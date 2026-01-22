@@ -101,4 +101,16 @@ $string['error_nopermission_viewrequest'] = 'Sorry, you do not have access to vi
 $string['motivo_negacao']            = 'Denial Reason';
 $string['motivo_negacao_label']      = 'Please provide the reason for denial';
 $string['motivo_negacao_required']   = 'Please provide a reason for the denial.';
+
+// Notifications
+$string['messageprovider:solicitacao_criada'] = 'Request created notification';
+$string['messageprovider:solicitacao_aprovada'] = 'Request approved notification';
+$string['messageprovider:solicitacao_negada'] = 'Request denied notification';
+$string['notification_criada_subject'] = 'Request Created Successfully';
+$string['notification_criada_body'] = 'Your {$a->tipo_acao} request for the course "{$a->curso}" has been created successfully and is awaiting approval.';
+$string['notification_aprovada_subject'] = 'Request Approved';
+$string['notification_aprovada_body'] = 'Your {$a->tipo_acao} request for the course "{$a->curso}" has been approved!';
+$string['notification_negada_subject'] = 'Request Denied';
+$string['notification_negada_body'] = 'Your {$a->tipo_acao} request for the course "{$a->curso}" has been denied.\n\nReason: {$a->motivo}';
+
 $string['my_requests']               = 'My Requests';

@@ -145,3 +145,145 @@ function local_solicitacoes_extend_navigation(global_navigation $navigation) {
         }
     }
 }
+
+/**
+ * Envia notificação ao solicitante quando uma solicitação é criada.
+ *
+ * @param int $solicitacao_id ID da solicitação
+ * @return bool
+ */
+function local_solicitacoes_notify_criada($solicitacao_id) {
+    global $DB;
+    
+    $solicitacao = $DB->get_record('local_solicitacoes', ['id' => $solicitacao_id], '*', MUST_EXIST);
+    $usuario = core_user::get_user($solicitacao->userid);
+    
+    // Buscar curso
+    $sql_curso = "SELECT c.fullname FROM {local_curso_solicitacoes} cs
+                  JOIN {course} c ON cs.curso_id = c.id
+                  WHERE cs.solicitacao_id = :id LIMIT 1";
+    $curso = $DB->get_record_sql($sql_curso, ['id' => $solicitacao_id]);
+    $curso_nome = $curso ? $curso->fullname : $solicitacao->curso_nome;
+    
+    // Traduzir tipo de ação
+    $acao_strings = [
+        'inscricao' => get_string('acao_inscricao', 'local_solicitacoes'),
+        'remocao' => get_string('acao_remocao', 'local_solicitacoes'),
+        'suspensao' => get_string('acao_suspensao', 'local_solicitacoes')
+    ];
+    $tipo_acao = isset($acao_strings[$solicitacao->tipo_acao]) ? $acao_strings[$solicitacao->tipo_acao] : $solicitacao->tipo_acao;
+    
+    $message = new \core\message\message();
+    $message->component = 'local_solicitacoes';
+    $message->name = 'solicitacao_criada';
+    $message->userfrom = core_user::get_noreply_user();
+    $message->userto = $usuario;
+    $message->subject = get_string('notification_criada_subject', 'local_solicitacoes');
+    $message->fullmessage = get_string('notification_criada_body', 'local_solicitacoes', [
+        'tipo_acao' => $tipo_acao,
+        'curso' => $curso_nome
+    ]);
+    $message->fullmessageformat = FORMAT_PLAIN;
+    $message->fullmessagehtml = '';
+    $message->smallmessage = get_string('notification_criada_subject', 'local_solicitacoes');
+    $message->notification = 1;
+    $message->contexturl = new moodle_url('/local/solicitacoes/view.php', ['id' => $solicitacao_id]);
+    $message->contexturlname = get_string('details', 'local_solicitacoes');
+    
+    return message_send($message);
+}
+
+/**
+ * Envia notificação ao solicitante quando uma solicitação é aprovada.
+ *
+ * @param int $solicitacao_id ID da solicitação
+ * @return bool
+ */
+function local_solicitacoes_notify_aprovada($solicitacao_id) {
+    global $DB;
+    
+    $solicitacao = $DB->get_record('local_solicitacoes', ['id' => $solicitacao_id], '*', MUST_EXIST);
+    $usuario = core_user::get_user($solicitacao->userid);
+    
+    // Buscar curso
+    $sql_curso = "SELECT c.fullname FROM {local_curso_solicitacoes} cs
+                  JOIN {course} c ON cs.curso_id = c.id
+                  WHERE cs.solicitacao_id = :id LIMIT 1";
+    $curso = $DB->get_record_sql($sql_curso, ['id' => $solicitacao_id]);
+    $curso_nome = $curso ? $curso->fullname : $solicitacao->curso_nome;
+    
+    // Traduzir tipo de ação
+    $acao_strings = [
+        'inscricao' => get_string('acao_inscricao', 'local_solicitacoes'),
+        'remocao' => get_string('acao_remocao', 'local_solicitacoes'),
+        'suspensao' => get_string('acao_suspensao', 'local_solicitacoes')
+    ];
+    $tipo_acao = isset($acao_strings[$solicitacao->tipo_acao]) ? $acao_strings[$solicitacao->tipo_acao] : $solicitacao->tipo_acao;
+    
+    $message = new \core\message\message();
+    $message->component = 'local_solicitacoes';
+    $message->name = 'solicitacao_aprovada';
+    $message->userfrom = core_user::get_noreply_user();
+    $message->userto = $usuario;
+    $message->subject = get_string('notification_aprovada_subject', 'local_solicitacoes');
+    $message->fullmessage = get_string('notification_aprovada_body', 'local_solicitacoes', [
+        'tipo_acao' => $tipo_acao,
+        'curso' => $curso_nome
+    ]);
+    $message->fullmessageformat = FORMAT_PLAIN;
+    $message->fullmessagehtml = '';
+    $message->smallmessage = get_string('notification_aprovada_subject', 'local_solicitacoes');
+    $message->notification = 1;
+    $message->contexturl = new moodle_url('/local/solicitacoes/view.php', ['id' => $solicitacao_id]);
+    $message->contexturlname = get_string('details', 'local_solicitacoes');
+    
+    return message_send($message);
+}
+
+/**
+ * Envia notificação ao solicitante quando uma solicitação é negada.
+ *
+ * @param int $solicitacao_id ID da solicitação
+ * @return bool
+ */
+function local_solicitacoes_notify_negada($solicitacao_id) {
+    global $DB;
+    
+    $solicitacao = $DB->get_record('local_solicitacoes', ['id' => $solicitacao_id], '*', MUST_EXIST);
+    $usuario = core_user::get_user($solicitacao->userid);
+    
+    // Buscar curso
+    $sql_curso = "SELECT c.fullname FROM {local_curso_solicitacoes} cs
+                  JOIN {course} c ON cs.curso_id = c.id
+                  WHERE cs.solicitacao_id = :id LIMIT 1";
+    $curso = $DB->get_record_sql($sql_curso, ['id' => $solicitacao_id]);
+    $curso_nome = $curso ? $curso->fullname : $solicitacao->curso_nome;
+    
+    // Traduzir tipo de ação
+    $acao_strings = [
+        'inscricao' => get_string('acao_inscricao', 'local_solicitacoes'),
+        'remocao' => get_string('acao_remocao', 'local_solicitacoes'),
+        'suspensao' => get_string('acao_suspensao', 'local_solicitacoes')
+    ];
+    $tipo_acao = isset($acao_strings[$solicitacao->tipo_acao]) ? $acao_strings[$solicitacao->tipo_acao] : $solicitacao->tipo_acao;
+    
+    $message = new \core\message\message();
+    $message->component = 'local_solicitacoes';
+    $message->name = 'solicitacao_negada';
+    $message->userfrom = core_user::get_noreply_user();
+    $message->userto = $usuario;
+    $message->subject = get_string('notification_negada_subject', 'local_solicitacoes');
+    $message->fullmessage = get_string('notification_negada_body', 'local_solicitacoes', [
+        'tipo_acao' => $tipo_acao,
+        'curso' => $curso_nome,
+        'motivo' => $solicitacao->motivo_negacao
+    ]);
+    $message->fullmessageformat = FORMAT_PLAIN;
+    $message->fullmessagehtml = '';
+    $message->smallmessage = get_string('notification_negada_subject', 'local_solicitacoes');
+    $message->notification = 1;
+    $message->contexturl = new moodle_url('/local/solicitacoes/view.php', ['id' => $solicitacao_id]);
+    $message->contexturlname = get_string('details', 'local_solicitacoes');
+    
+    return message_send($message);
+}

@@ -74,11 +74,11 @@ $acao_label = isset($acao_strings[$request->tipo_acao]) ? $acao_strings[$request
 
 // Preparar status badge
 $status_badges = array(
-    'pendente' => array('class' => 'badge-warning', 'label' => get_string('status_pendente', 'local_solicitacoes')),
-    'aprovado' => array('class' => 'badge-success', 'label' => get_string('status_aprovado', 'local_solicitacoes')),
-    'negado' => array('class' => 'badge-danger', 'label' => get_string('status_negado', 'local_solicitacoes')),
-    'em_andamento' => array('class' => 'badge-info', 'label' => get_string('status_em_andamento', 'local_solicitacoes')),
-    'concluido' => array('class' => 'badge-success', 'label' => get_string('status_concluido', 'local_solicitacoes'))
+    'pendente' => array('class' => 'badge-secondary', 'label' => get_string('status_pendente', 'local_solicitacoes')),
+    'aprovado' => array('class' => 'badge-secondary', 'label' => get_string('status_aprovado', 'local_solicitacoes')),
+    'negado' => array('class' => 'badge-secondary', 'label' => get_string('status_negado', 'local_solicitacoes')),
+    'em_andamento' => array('class' => 'badge-secondary', 'label' => get_string('status_em_andamento', 'local_solicitacoes')),
+    'concluido' => array('class' => 'badge-secondary', 'label' => get_string('status_concluido', 'local_solicitacoes'))
 );
 $badge_info = isset($status_badges[$request->status]) ? $status_badges[$request->status] : array('class' => 'badge-secondary', 'label' => $request->status);
 
@@ -165,7 +165,7 @@ echo html_writer::start_div('col-lg-4');
 
 // Card: Dados do Curso
 echo html_writer::start_div('card mb-3');
-echo html_writer::start_div('card-header bg-info text-white');
+echo html_writer::start_div('card-header');
 echo html_writer::tag('h6', get_string('course', 'local_solicitacoes'), array('class' => 'mb-0'));
 echo html_writer::end_div();
 echo html_writer::start_div('card-body');
@@ -246,14 +246,14 @@ if ($canmanage) {
             'sesskey' => sesskey()
         ));
         $buttons[] = html_writer::link($url_aprovar, get_string('approve', 'local_solicitacoes'), 
-            array('class' => 'btn btn-success mr-2'));
+            array('class' => 'btn btn-secondary mr-2'));
     }
 
     // Botão Negar - só mostrar se não estiver negado (redireciona para página de negação)
     if ($request->status !== 'negado') {
         $url_negar = new moodle_url('/local/solicitacoes/negar.php', array('id' => $request->id));
         $buttons[] = html_writer::link($url_negar, get_string('deny', 'local_solicitacoes'), 
-            array('class' => 'btn btn-danger mr-2'));
+            array('class' => 'btn btn-secondary mr-2'));
     }
 
     // Botão Excluir - sempre mostrar
@@ -263,7 +263,7 @@ if ($canmanage) {
         'sesskey' => sesskey()
     ));
     $buttons[] = html_writer::link($url_delete, get_string('delete', 'local_solicitacoes'), 
-        array('class' => 'btn btn-warning mr-2', 'onclick' => 'return confirm("' . get_string('confirm_delete', 'local_solicitacoes') . '");'));
+        array('class' => 'btn btn-secondary mr-2', 'onclick' => 'return confirm("' . get_string('confirm_delete', 'local_solicitacoes') . '");'));
 
     echo implode(' ', $buttons);
     echo html_writer::end_div();
