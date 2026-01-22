@@ -44,11 +44,11 @@ if ($action === 'updatestatus' && $id && in_array($status, ['pendente','aprovado
             }
         }
         
-        // Se for negação, validar e salvar o motivo
+        // Se for negação, redirecionar para página de negação se não houver motivo
         if ($status === 'negado') {
             if (empty($motivo_negacao)) {
-                \core\notification::error(get_string('motivo_negacao_required', 'local_solicitacoes'));
-                redirect(new moodle_url('/local/solicitacoes/view.php', ['id' => $id]));
+                // Redirecionar para página de negação
+                redirect(new moodle_url('/local/solicitacoes/negar.php', ['id' => $id]));
             }
             $request->motivo_negacao = $motivo_negacao;
         }
@@ -223,11 +223,8 @@ foreach ($requests as $r) {
             'status' => 'aprovado',
             'sesskey' => sesskey(),
         ]))->out(false),
-        'reject_url' => (new moodle_url($baseurl, [
-            'action' => 'updatestatus',
+        'reject_url' => (new moodle_url('/local/solicitacoes/negar.php', [
             'id' => $r->id,
-            'status' => 'negado',
-            'sesskey' => sesskey(),
         ]))->out(false),
         'view_url' => (new moodle_url('/local/solicitacoes/view.php', ['id' => $r->id]))->out(false),
         'delete_url' => (new moodle_url($baseurl, [
