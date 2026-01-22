@@ -148,11 +148,11 @@ if (!empty($request->observacoes)) {
 
 // Card: Motivo da Negação (apenas se status = negado)
 if ($request->status === 'negado' && !empty($request->motivo_negacao)) {
-    echo html_writer::start_div('card mb-3 border-danger');
-    echo html_writer::start_div('card-header bg-danger text-white');
-    echo html_writer::tag('h5', get_string('motivo_negacao', 'local_solicitacoes'), array('class' => 'mb-0'));
+    echo html_writer::start_div('card mb-3');
+    echo html_writer::start_div('card-header bg-light');
+    echo html_writer::tag('h5', get_string('motivo_negacao', 'local_solicitacoes'), array('class' => 'mb-0 text-dark'));
     echo html_writer::end_div();
-    echo html_writer::start_div('card-body');
+    echo html_writer::start_div('card-body bg-light');
     echo html_writer::tag('div', nl2br(format_text($request->motivo_negacao)), array('class' => 'text-dark', 'style' => 'white-space: pre-wrap;'));
     echo html_writer::end_div();
     echo html_writer::end_div();

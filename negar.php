@@ -121,7 +121,7 @@ echo html_writer::end_div();
 
 // Formulário para informar motivo
 echo html_writer::start_div('card mt-4');
-echo html_writer::start_div('card-header bg-light border-warning');
+echo html_writer::start_div('card-header bg-light');
 echo html_writer::tag('h5', get_string('motivo_negacao_label', 'local_solicitacoes'), array('class' => 'mb-0 text-dark'));
 echo html_writer::end_div();
 echo html_writer::start_div('card-body');
