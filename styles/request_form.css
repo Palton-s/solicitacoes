@@ -1,0 +1,69 @@
+/* Estilos customizados para Tom Select */
+
+.tom-select .ts-control {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px;
+    min-height: 40px;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .1);
+}
+
+.tom-select .ts-control.focus {
+    border-color: #0073aa;
+    box-shadow: 0 0 0 2px rgba(0, 115, 170, .25);
+}
+
+.tom-select .ts-dropdown {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.tom-select .ts-dropdown .option {
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.tom-select .ts-dropdown .option:last-child {
+    border-bottom: none;
+}
+
+.tom-select .ts-dropdown .option.active {
+    background-color: #e3f2fd;
+}
+
+.tom-select .ts-item {
+    background: #e3f2fd;
+    border: 1px solid #90caf9;
+    border-radius: 3px;
+    padding: 2px 6px;
+    margin: 1px;
+    font-size: 13px;
+}
+
+.tom-select.multi .ts-control>div {
+    margin: 2px;
+}
+
+
+/* Melhoria na apresentação das opções */
+
+.ts-dropdown .option strong {
+    display: block;
+    margin-bottom: 2px;
+}
+
+.ts-dropdown .option small {
+    color: #666;
+    font-size: 12px;
+}
+
+
+/* Responsividade */
+
+@media (max-width: 768px) {
+    .tom-select .ts-control {
+        font-size: 16px;
+        /* Previne zoom no iOS */
+    }
+}

@@ -1,0 +1,105 @@
+<?php
+
+// Endpoint AJAX para busca de usuários
+define('AJAX_SCRIPT', true);
+
+try {
+    // Carregar configuração do Moodle
+    require_once('../../../config.php');
+    
+    // Headers para AJAX
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-cache, no-store, must-revalidate');
+    header('Access-Control-Allow-Origin: *');
+    
+    // Obter parâmetros da URL
+    $query = isset($_GET['query']) ? trim($_GET['query']) : '';
+    $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
+    
+    // Debug - log dos parâmetros
+    error_log("Search Users - Query: '$query', Limit: $limit");
+    
+    // Validar parâmetros
+    if (empty($query) || strlen($query) < 2) {
+        error_log("Search Users - Query muito curta: '$query'");
+        echo json_encode(array('debug' => 'Query muito curta'));
+        exit;
+    }
+    
+    if ($limit > 50) {
+        $limit = 50;
+    }
+    
+    global $DB;
+    
+    // Verificar se $DB está disponível
+    if (!isset($DB)) {
+        error_log("Search Users - \$DB não está disponível");
+        echo json_encode(array('error' => 'Database não disponível'));
+        exit;
+    }
+    
+    // Escape da query para SQL LIKE
+    $searchterm = '%' . str_replace(array('%', '_'), array('\\%', '\\_'), $query) . '%';
+    
+    // SQL para buscar usuários reais do Moodle com filtro
+    $sql = "SELECT u.id, u.firstname, u.lastname, u.username, u.email, u.suspended
+            FROM {user} u 
+            WHERE (u.firstname LIKE ? OR u.lastname LIKE ? OR u.username LIKE ? OR u.email LIKE ?)
+            AND u.deleted = ?
+            AND u.confirmed = ?
+            AND u.id > ?
+            ORDER BY u.suspended ASC, u.lastname ASC, u.firstname ASC";
+
+    $params = array($searchterm, $searchterm, $searchterm, $searchterm, 0, 1, 1);
+    
+    error_log("Search Users - SQL: $sql");
+    error_log("Search Users - Params: " . print_r($params, true));
+    
+    try {
+        // Executar consulta no banco com limite
+        $users = $DB->get_records_sql($sql, $params, 0, $limit);
+        
+        error_log("Search Users - Usuários encontrados: " . count($users));
+        
+        $results = array();
+        foreach ($users as $user) {
+            // Limpar strings para output seguro
+            $firstname = htmlspecialchars($user->firstname, ENT_QUOTES, 'UTF-8');
+            $lastname = htmlspecialchars($user->lastname, ENT_QUOTES, 'UTF-8');
+            $username = htmlspecialchars($user->username, ENT_QUOTES, 'UTF-8');
+            $email = htmlspecialchars($user->email, ENT_QUOTES, 'UTF-8');
+            
+            $fullname = trim($firstname . ' ' . $lastname);
+            
+            $results[] = array(
+                'id' => (int)$user->id,
+                'firstname' => $firstname,
+                'lastname' => $lastname,
+                'username' => $username,
+                'email' => $email,
+                'fullname' => $fullname,
+                'label' => $fullname . ' (' . $username . ')',
+                'display' => $fullname . ' - ' . $email,
+                'suspended' => (int)$user->suspended === 1
+            );
+        }
+        
+        error_log("Search Users - Resultados processados: " . count($results));
+        
+    } catch (Exception $dbError) {
+        error_log("Erro na consulta de usuários: " . $dbError->getMessage());
+        echo json_encode(array('error' => 'Erro na consulta: ' . $dbError->getMessage()));
+        exit;
+    }
+    
+    // Retornar resultados em JSON
+    echo json_encode($results);
+    
+} catch (Exception $e) {
+    // Log do erro e retorno de erro genérico
+    error_log("Erro no search_users.php: " . $e->getMessage());
+    header('HTTP/1.0 500 Internal Server Error');
+    header('Content-Type: application/json');
+    echo json_encode(array('error' => 'Erro interno'));
+}

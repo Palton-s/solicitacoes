@@ -1,0 +1,100 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Language strings for the Solicitações plugin (Portuguese BR).
+ *
+ * @package    local_solicitacoes
+ * @copyright  2025
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+$string['pluginname'] = 'Solicitações de Gerenciamento de Curso';
+
+// Capabilities
+$string['solicitacoes:view']    = 'Ver próprias solicitações';
+$string['solicitacoes:viewall'] = 'Ver todas as solicitações';
+$string['solicitacoes:submit']  = 'Enviar solicitações de gerenciamento de curso';
+$string['solicitacoes:manage']  = 'Gerenciar solicitações de curso (aprovar/negar/excluir)';
+
+$string['request_form_title']   = 'Solicitação de Gerenciamento de Curso';
+$string['tipo_acao']            = 'Tipo de Ação';
+$string['curso_nome']           = 'Nome do Curso';
+$string['curso_nome_help']      = 'Digite o nome do curso e selecione da lista de sugestões';
+$string['usuarios_nomes']       = 'Nomes dos Usuários';
+$string['usuarios_nomes_help']  = 'Digite um nome por linha. Use o nome completo ou nome de usuário conforme aparece no Moodle.';
+$string['papel']                = 'Papel no Curso';
+$string['papel_help']           = 'Selecione o papel que os usuários devem ter no curso (apenas para inscrições).';
+$string['observacoes']          = 'Observações';
+$string['observacoes_help']     = 'Informações adicionais sobre a solicitação (opcional).';
+$string['request_submit']       = 'Enviar Solicitação';
+$string['no_courses_found']     = 'Nenhum curso encontrado';
+$string['searching_courses']    = 'Buscando cursos...';
+
+$string['acao_inscricao']       = 'Inscrição';
+$string['acao_remocao']         = 'Remoção';
+$string['acao_suspensao']       = 'Suspensão';
+
+$string['papel_student']        = 'Estudante';
+$string['papel_teacher']        = 'Professor';
+$string['papel_editingteacher'] = 'Professor Editor';
+$string['papel_manager']        = 'Gerente';
+
+$string['list_title']           = 'Solicitações de Gerenciamento de Curso';
+$string['status_pendente']      = 'Pendente';
+$string['status_aprovado']      = 'Aprovado';
+$string['status_negado']        = 'Negado';
+$string['approve']              = 'Aprovar';
+$string['deny']                 = 'Negar';
+$string['aprovar']              = 'Aprovar';
+$string['negar']                = 'Negar';
+$string['delete']               = 'Excluir';
+$string['confirm_delete']       = 'Tem certeza que deseja excluir esta solicitação?';
+$string['success_delete']       = 'Solicitação excluída com sucesso.';
+$string['status_em_andamento']  = 'Em andamento';
+$string['status_concluido']     = 'Concluído';
+
+$string['no_requests']          = 'Nenhuma solicitação encontrada.';
+$string['created_at']           = 'Criado em';
+$string['user']                 = 'Solicitante';
+$string['course']               = 'Curso';
+$string['action_type']          = 'Ação';
+$string['target_users']         = 'Usuários';
+$string['role']                 = 'Papel';
+$string['status']               = 'Status';
+$string['actions']              = 'Ações';
+$string['view']                 = 'Ver';
+$string['update_status']        = 'Atualizar status';
+$string['success_submit']       = 'Sua solicitação foi enviada com sucesso.';
+$string['success_update']       = 'Status atualizado.';
+$string['details']              = 'Detalhes da Solicitação';
+$string['back_to_list']         = 'Voltar para lista';
+$string['handled_by']           = 'Tratada por';
+$string['last_modified']        = 'Última modificação';
+
+// Página de confirmação
+$string['thankyou_title']       = 'Solicitação Registrada';
+$string['thankyou_message']     = 'Sua solicitação foi registrada com sucesso e está aguardando aprovação do administrador.';
+$string['thankyou_next_steps']  = 'Próximos Passos';
+$string['thankyou_info']        = 'Você receberá uma notificação quando sua solicitação for processada. Você pode acompanhar o status através do painel de solicitações.';
+$string['thankyou_new_request'] = 'Nova Solicitação';
+$string['thankyou_back_home']   = 'Voltar ao Início';
+
+// Erros de permissão
+$string['error_nopermission_submit'] = 'Você não tem permissão para enviar solicitações.';
+$string['error_nopermission_manage'] = 'Você não tem permissão para gerenciar solicitações.';
+$string['error_nopermission_view']   = 'Você não tem permissão para visualizar esta solicitação.';
+$string['my_requests']               = 'Minhas Solicitações';

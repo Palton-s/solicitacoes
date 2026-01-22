@@ -1,0 +1,57 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Template para visualização de próprias solicitações
+}}
+
+{{#can_manage}}
+<div class="alert alert-info">
+    <a href="{{config.wwwroot}}/local/solicitacoes/manage.php" class="btn btn-primary">
+        {{#str}}list_title, local_solicitacoes{{/str}}
+    </a>
+</div>
+{{/can_manage}}
+
+{{#has_requests}}
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>{{#str}}action_type, local_solicitacoes{{/str}}</th>
+                <th>{{#str}}course, local_solicitacoes{{/str}}</th>
+                <th>{{#str}}target_users, local_solicitacoes{{/str}}</th>
+                <th>{{#str}}role, local_solicitacoes{{/str}}</th>
+                <th>{{#str}}created_at, local_solicitacoes{{/str}}</th>
+                <th>{{#str}}status, local_solicitacoes{{/str}}</th>
+                <th>{{#str}}actions, local_solicitacoes{{/str}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#requests}}
+            <tr>
+                <td>{{acao_label}}</td>
+                <td>{{{cursos_display}}}</td>
+                <td>{{{usuarios_display}}}</td>
+                <td>{{papel_display}}</td>
+                <td>{{created_date}}</td>
+                <td>
+                    <span class="{{status_class}}">{{status_label}}</span>
+                </td>
+                <td>
+                    <a href="{{view_url}}" class="btn btn-sm btn-info">{{#str}}view, local_solicitacoes{{/str}}</a>
+                </td>
+            </tr>
+            {{/requests}}
+        </tbody>
+    </table>
+</div>
+{{/has_requests}}
+
+{{^has_requests}}
+<div class="alert alert-info">
+    <p>{{#str}}no_requests, local_solicitacoes{{/str}}</p>
+    <a href="{{config.wwwroot}}/local/solicitacoes/index.php" class="btn btn-primary">
+        {{#str}}request_form_title, local_solicitacoes{{/str}}
+    </a>
+</div>
+{{/has_requests}}

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/solicitacoes/db" VERSION="20251209" COMMENT="XMLDB file for Moodle local/solicitacoes"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="local_solicitacoes" COMMENT="Tabela principal de solicitações de gerenciamento de curso">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID do usuário que fez a solicitação"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Timestamp de criação"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Timestamp da última modificação"/>
+        <FIELD NAME="tipo_acao" TYPE="char" LENGTH="50" NOTNULL="true" DEFAULT="inscricao" SEQUENCE="false" COMMENT="Tipo: inscricao, remocao, suspensao"/>
+        <FIELD NAME="papel" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Papel no curso (apenas para inscrição)"/>
+        <FIELD NAME="observacoes" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Observações adicionais"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="50" NOTNULL="true" DEFAULT="pendente" SEQUENCE="false" COMMENT="Status: pendente, aprovado, negado"/>
+        <FIELD NAME="adminid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="ID do admin que atendeu"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="adminid" TYPE="foreign" FIELDS="adminid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="status_idx" UNIQUE="false" FIELDS="status"/>
+        <INDEX NAME="tipo_acao_idx" UNIQUE="false" FIELDS="tipo_acao"/>
+      </INDEXES>
+    </TABLE>
+    
+    <TABLE NAME="local_curso_solicitacoes" COMMENT="Cursos relacionados às solicitações">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="solicitacao_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID da solicitação"/>
+        <FIELD NAME="curso_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID do curso"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Timestamp de criação"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="solicitacao_id" TYPE="foreign" FIELDS="solicitacao_id" REFTABLE="local_solicitacoes" REFFIELDS="id"/>
+        <KEY NAME="curso_id" TYPE="foreign" FIELDS="curso_id" REFTABLE="course" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="solicitacao_curso_idx" UNIQUE="false" FIELDS="solicitacao_id, curso_id"/>
+      </INDEXES>
+    </TABLE>
+    
+    <TABLE NAME="local_usuarios_solicitacoes" COMMENT="Usuários relacionados às solicitações">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="solicitacao_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID da solicitação"/>
+        <FIELD NAME="usuario_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID do usuário afetado"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Timestamp de criação"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="solicitacao_id" TYPE="foreign" FIELDS="solicitacao_id" REFTABLE="local_solicitacoes" REFFIELDS="id"/>
+        <KEY NAME="usuario_id" TYPE="foreign" FIELDS="usuario_id" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="solicitacao_usuario_idx" UNIQUE="false" FIELDS="solicitacao_id, usuario_id"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

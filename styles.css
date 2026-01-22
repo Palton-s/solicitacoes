@@ -1,0 +1,223 @@
+/* Estilos personalizados para o plugin Solicitações */
+
+.solicitacao-details {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.solicitacao-meta {
+    background: #e9ecef;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 15px 0;
+    border-left: 4px solid #007bff;
+}
+
+.solicitacao-mensagem {
+    background: #ffffff;
+    padding: 20px;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    margin: 15px 0;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.solicitacao-actions {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f1f3f4;
+    border-radius: 5px;
+}
+
+.solicitacao-actions .btn {
+    margin: 5px 5px 5px 0;
+}
+
+
+/* Status da solicitação */
+
+.status-pendente {
+    color: #6c757d;
+    font-weight: bold;
+}
+
+.status-em_andamento {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.status-concluido {
+    color: #28a745;
+    font-weight: bold;
+}
+
+
+/* Tabela de solicitações */
+
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+
+/* Botões de ação */
+
+.btn-sm {
+    font-size: 12px;
+    padding: 4px 8px;
+}
+
+
+/* Formulário de solicitação */
+
+.solicitacao-form {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.solicitacao-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+
+/* Destaque para tipos de ação */
+
+.acao-inscricao {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.acao-remocao {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.acao-suspensao {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+
+/* Lista de usuários */
+
+.usuarios-lista {
+    font-family: monospace;
+    font-size: 13px;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* Autocomplete de cursos */
+
+.curso-autocomplete {
+    position: relative;
+}
+
+.curso-suggestions {
+    position: absolute;
+    background: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    border-radius: 0 0 4px 4px;
+}
+
+.curso-suggestions div {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s ease;
+}
+
+.curso-suggestions div:last-child {
+    border-bottom: none;
+}
+
+.curso-suggestions div:hover,
+.curso-suggestions div[data-selected] {
+    background-color: #f5f5f5;
+}
+
+.curso-suggestions div strong {
+    color: #333;
+    font-size: 14px;
+}
+
+.curso-suggestions div small {
+    color: #666;
+    font-size: 12px;
+}
+
+.curso-suggestions .no-results {
+    padding: 15px;
+    text-align: center;
+    color: #999;
+    font-style: italic;
+}
+
+
+/* Indicador de carregamento */
+
+.curso-autocomplete.loading::after {
+    content: "";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: translateY(-50%) rotate(0deg);
+    }
+    100% {
+        transform: translateY(-50%) rotate(360deg);
+    }
+}
+
+
+/* Responsive */
+
+@media (max-width: 768px) {
+    .solicitacao-details {
+        padding: 15px;
+        margin: 10px 0;
+    }
+    .btn-sm {
+        display: block;
+        margin: 2px 0;
+        width: 100%;
+    }
+    .table-responsive {
+        font-size: 12px;
+    }
+    .usuarios-lista {
+        max-width: 120px;
+    }
+    .curso-suggestions {
+        font-size: 14px;
+    }
+    .curso-suggestions div {
+        padding: 10px 8px;
+    }
+}
