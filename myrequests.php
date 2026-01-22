@@ -22,6 +22,17 @@ $PAGE->set_heading(get_string('my_requests', 'local_solicitacoes'));
 
 echo $OUTPUT->header();
 
+// Botão "Nova Solicitação" no canto superior direito
+echo html_writer::start_div('d-flex justify-content-between align-items-center mb-3');
+echo html_writer::tag('h4', get_string('my_requests', 'local_solicitacoes'), ['class' => 'mb-0']);
+$newrequesturl = new moodle_url('/local/solicitacoes/index.php');
+echo html_writer::link(
+    $newrequesturl, 
+    '+ ' . get_string('thankyou_new_request', 'local_solicitacoes'), 
+    ['class' => 'btn btn-primary']
+);
+echo html_writer::end_div();
+
 global $DB, $USER;
 
 // Buscar solicitações do usuário atual
@@ -135,7 +146,7 @@ foreach ($requests as $r) {
         'papel_display' => $papel_display,
         'created_date' => userdate($r->timecreated),
         'status_label' => $statuslabel,
-        'status_class' => $r->status, // Para colorir status
+        'status_badge_class' => $status_class, // Badge com estilo colorido
         'view_url' => (new moodle_url('/local/solicitacoes/view.php', ['id' => $r->id]))->out(false),
     ];
     

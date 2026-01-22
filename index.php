@@ -32,7 +32,12 @@ $classname = '\local_solicitacoes\form\request_form';
 $mform = new $classname();
 
 if ($mform->is_cancelled()) {
-    redirect(new moodle_url('/'));
+    // Verificar se usuário pode gerenciar solicitações
+    if (has_capability('local/solicitacoes:manage', $context)) {
+        redirect(new moodle_url('/local/solicitacoes/manage.php'));
+    } else {
+        redirect(new moodle_url('/local/solicitacoes/myrequests.php'));
+    }
 } else if ($data = $mform->get_data()) {
     \local_solicitacoes\solicitacoes_controller::process_request_submission($data);
     redirect(new moodle_url('/local/solicitacoes/thankyou.php'));
