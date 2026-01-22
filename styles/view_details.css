@@ -1,0 +1,209 @@
+/**
+ * Estilos para a página de detalhes da solicitação
+ * view.php
+ */
+
+
+/* Badges de status */
+
+.badge {
+    padding: 0.5em 1em;
+    border-radius: 0.25rem;
+}
+
+
+/* Cards com sombra suave */
+
+.card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #dee2e6;
+    transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+
+/* Cabeçalhos dos cards */
+
+.card-header {
+    font-weight: 600;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.card-header h5,
+.card-header h6 {
+    font-weight: 600;
+}
+
+
+/* Lista de usuários */
+
+.list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: 1rem 1.25rem;
+    transition: background-color 0.2s ease;
+}
+
+.list-group-item:first-child {
+    border-top: none;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+.list-group-item i.fa-user-circle {
+    vertical-align: middle;
+}
+
+
+/* Seção de observações */
+
+.card-body.bg-light {
+    background-color: #f8f9fa !important;
+    border-left: 4px solid #6c757d;
+}
+
+
+/* Ícones */
+
+.fa {
+    color: inherit;
+}
+
+
+/* Botões de ação */
+
+.btn {
+    font-weight: 500;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+
+/* Responsividade */
+
+@media (max-width: 991px) {
+    .col-lg-8,
+    .col-lg-4 {
+        margin-bottom: 1rem;
+    }
+}
+
+
+/* Melhorias de tipografia */
+
+small.text-muted {
+    font-size: 0.875rem;
+}
+
+strong {
+    font-weight: 600;
+}
+
+
+/* Espaçamento do badge no cabeçalho */
+
+.badge.mr-2 {
+    margin-right: 0.75rem !important;
+}
+
+
+/* Cores dos badges de status */
+
+.badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.badge-info {
+    background-color: #17a2b8;
+    color: #fff;
+}
+
+.badge-secondary {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+
+/* Card de ações - destaque */
+
+.card.mt-4 {
+    border: 2px solid #e9ecef;
+}
+
+.card.mt-4 .card-body {
+    padding: 1.5rem;
+}
+
+
+/* Cores dos cabeçalhos dos cards */
+
+.card-header.bg-primary {
+    background-color: #007bff !important;
+}
+
+.card-header.bg-info {
+    background-color: #17a2b8 !important;
+}
+
+.card-header.bg-secondary {
+    background-color: #6c757d !important;
+}
+
+.card-header.bg-dark {
+    background-color: #343a40 !important;
+}
+
+
+/* Animações suaves */
+
+.card,
+.btn,
+.list-group-item {
+    transition: all 0.3s ease;
+}
