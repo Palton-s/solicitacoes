@@ -7,7 +7,12 @@ $context = context_system::instance();
 
 // Verificar permissão para gerenciar solicitações
 if (!has_capability('local/solicitacoes:manage', $context)) {
-    print_error('error_nopermission_manage', 'local_solicitacoes');
+    redirect(
+        new moodle_url('/'),
+        get_string('error_nopermission_manage', 'local_solicitacoes'),
+        null,
+        \core\output\notification::NOTIFY_INFO
+    );
 }
 
 $PAGE->set_context($context);

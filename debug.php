@@ -3,7 +3,16 @@ require('../../config.php');
 require_login();
 
 $context = context_system::instance();
-require_capability('local/solicitacoes:manage', $context);
+
+// Verificar permissão para gerenciar solicitações
+if (!has_capability('local/solicitacoes:manage', $context)) {
+    redirect(
+        new moodle_url('/'),
+        get_string('error_nopermission_manage', 'local_solicitacoes'),
+        null,
+        \core\output\notification::NOTIFY_INFO
+    );
+}
 
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/solicitacoes/debug.php'));

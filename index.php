@@ -7,7 +7,12 @@ $context = context_system::instance();
 
 // Verificar permissão para criar solicitações
 if (!has_capability('local/solicitacoes:submit', $context)) {
-    print_error('error_nopermission_submit', 'local_solicitacoes');
+    redirect(
+        new moodle_url('/'),
+        get_string('error_nopermission_submit', 'local_solicitacoes'),
+        null,
+        \core\output\notification::NOTIFY_INFO
+    );
 }
 
 $PAGE->set_context($context);

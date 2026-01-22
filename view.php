@@ -12,10 +12,22 @@ $canviewall = has_capability('local/solicitacoes:viewall', $context);
 
 if (!$canmanage && !$canviewall) {
     // Se não pode ver todas, verifica se é a própria solicitação
-    require_capability('local/solicitacoes:view', $context);
+    if (!has_capability('local/solicitacoes:view', $context)) {
+        redirect(
+            new moodle_url('/'),
+            get_string('error_nopermission_viewrequest', 'local_solicitacoes'),
+            null,
+            \core\output\notification::NOTIFY_INFO
+        );
+    }
     $request = $DB->get_record('local_solicitacoes', ['id' => $id], '*', MUST_EXIST);
     if ($request->userid != $USER->id) {
-        print_error('nopermissions', 'error', '', 'ver esta solicitação');
+        redirect(
+            new moodle_url('/local/solicitacoes/myrequests.php'),
+            get_string('error_nopermission_viewrequest', 'local_solicitacoes'),
+            null,
+            \core\output\notification::NOTIFY_INFO
+        );
     }
 }
 

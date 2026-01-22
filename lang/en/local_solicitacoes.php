@@ -92,7 +92,8 @@ $string['thankyou_new_request'] = 'New Request';
 $string['thankyou_back_home']   = 'Back to Home';
 
 // Permission errors
-$string['error_nopermission_submit'] = 'You do not have permission to submit requests.';
-$string['error_nopermission_manage'] = 'You do not have permission to manage requests.';
-$string['error_nopermission_view']   = 'You do not have permission to view this request.';
+$string['error_nopermission_submit'] = 'Sorry, you do not have access to create requests. Please contact your system administrator if you need this functionality.';
+$string['error_nopermission_manage'] = 'Sorry, you do not have access to manage requests. This function is available only for administrators.';
+$string['error_nopermission_view']   = 'Sorry, you do not have access to view requests.';
+$string['error_nopermission_viewrequest'] = 'Sorry, you do not have access to view this request.';
 $string['my_requests']               = 'My Requests';

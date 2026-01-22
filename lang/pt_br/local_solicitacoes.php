@@ -93,8 +93,9 @@ $string['thankyou_info']        = 'Você receberá uma notificação quando sua 
 $string['thankyou_new_request'] = 'Nova Solicitação';
 $string['thankyou_back_home']   = 'Voltar ao Início';
 
-// Erros de permissão
-$string['error_nopermission_submit'] = 'Você não tem permissão para enviar solicitações.';
-$string['error_nopermission_manage'] = 'Você não tem permissão para gerenciar solicitações.';
-$string['error_nopermission_view']   = 'Você não tem permissão para visualizar esta solicitação.';
+// Mensagens de acesso
+$string['error_nopermission_submit'] = 'Desculpe, você não tem acesso para criar solicitações. Entre em contato com o administrador do sistema se precisar desta funcionalidade.';
+$string['error_nopermission_manage'] = 'Desculpe, você não tem acesso para gerenciar solicitações. Esta função está disponível apenas para administradores.';
+$string['error_nopermission_view']   = 'Desculpe, você não tem acesso para visualizar solicitações.';
+$string['error_nopermission_viewrequest'] = 'Desculpe, você não tem acesso para visualizar esta solicitação.';
 $string['my_requests']               = 'Minhas Solicitações';
