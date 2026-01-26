@@ -3,6 +3,8 @@ namespace local_solicitacoes;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once(__DIR__ . '/../lib.php');
+
 /**
  * Controller para gerenciar solicitações
  *

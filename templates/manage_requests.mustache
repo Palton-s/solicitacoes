@@ -4,18 +4,14 @@
     Template para gerenciamento de solicitações
 }}
 
-<div class="secondary-navigation d-print-none mb-3">
-    <nav class="moremenu navigation">
-        <ul role="tablist" class="nav more-nav nav-tabs">
-            {{#filters}}
-            <li data-key="{{label}}" class="nav-item" role="none" data-forceintomoremenu="false">
-                <a role="tab" class="nav-link {{#active}}active{{/active}}" href="{{url}}" data-text="{{label}}" {{#active}}aria-selected="true"{{/active}} {{^active}}tabindex="-1"{{/active}}>
-                    {{label}}
-                </a>
-            </li>
-            {{/filters}}
-        </ul>
-    </nav>
+<div class="mb-3">
+    <ul class="nav nav-tabs">
+        {{#filters}}
+        <li class="nav-item">
+            <a class="nav-link {{#active}}active{{/active}}" href="{{url}}">{{label}}</a>
+        </li>
+        {{/filters}}
+    </ul>
 </div>
 
 {{#has_requests}}
