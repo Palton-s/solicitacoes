@@ -45,6 +45,7 @@ window.addEventListener("load", function() {
                 searchField: "name",
                 placeholder: "Digite para buscar cursos...",
                 wrapperClass: "form-control h-auto",
+                plugins: ["remove_button"],
                 create: false,
                 render: {
                     item: function(data, escape) {

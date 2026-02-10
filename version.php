@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_solicitacoes';
-$plugin->version   = 2026020904;        // YYYYMMDDXX (data + versão do dia).
+$plugin->version   = 2026020905;        // YYYYMMDDXX (data + versão do dia).
 $plugin->requires  = 2022041900;        // Requer Moodle 4.0 ou superior.
 $plugin->maturity  = MATURITY_STABLE;   // MATURITY_ALPHA, MATURITY_BETA, MATURITY_RC ou MATURITY_STABLE.
 $plugin->release   = 'v1.0.0';          // Versão legível para humanos.
