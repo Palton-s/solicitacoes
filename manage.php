@@ -193,9 +193,19 @@ foreach ($requests as $r) {
     $solicitante_url = new moodle_url('/user/profile.php', ['id' => $r->userid]);
     $solicitante_nome = html_writer::link($solicitante_url, fullname($solicitante));
 
-    // Status formatado
+    // Status formatado com cores
     $statuskey = 'status_' . $r->status;
     $statuslabel = get_string($statuskey, 'local_solicitacoes');
+    
+    // Definir classe de badge baseada no status
+    $status_badge_classes = [
+        'pendente' => 'badge-warning',
+        'aprovado' => 'badge-success',
+        'negado' => 'badge-danger',
+        'em_andamento' => 'badge-info',
+        'concluido' => 'badge-success'
+    ];
+    $status_badge_class = isset($status_badge_classes[$r->status]) ? $status_badge_classes[$r->status] : 'badge-secondary';
 
     // Traduzir tipo de ação
     $acao_strings = [
@@ -229,6 +239,7 @@ foreach ($requests as $r) {
         'papel_display' => $papel_display,
         'created_date' => userdate($r->timecreated),
         'status_label' => $statuslabel,
+        'status_badge_class' => $status_badge_class,
         'show_approve' => ($r->status === 'pendente'),
         'show_reject' => ($r->status === 'pendente'),
         'approve_url' => (new moodle_url($baseurl, [

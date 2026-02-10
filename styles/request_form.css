@@ -118,3 +118,155 @@
     border-color: #dc3545;
     box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
 }
+
+/* Brand Color Theme - #008041 */
+
+/* Status Badges with Brand Colors */
+.badge-success {
+    background-color: #008041 !important;
+    color: #ffffff !important;
+}
+
+.badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+    color: #ffffff;
+}
+
+.badge-info {
+    background-color: #17a2b8;
+    color: #ffffff;
+}
+
+.badge-secondary {
+    background-color: #6c757d;
+    color: #ffffff;
+}
+
+.badge {
+    padding: 0.35em 0.65em;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 0.25rem;
+    display: inline-block;
+}
+
+/* CPF Validation with Brand Color */
+#cpf.is-valid {
+    border-color: #008041;
+    padding-right: calc(1.5em + .75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23008041' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(.375em + .1875rem) center;
+    background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+}
+
+#cpf-feedback.valid-feedback {
+    color: #008041;
+}
+
+#cpf:focus.is-valid {
+    border-color: #008041;
+    box-shadow: 0 0 0 0.2rem rgba(0, 128, 65, 0.25);
+}
+
+/* Primary Buttons with Brand Color */
+.btn-primary,
+.btn-brand {
+    background-color: #008041;
+    border-color: #008041;
+    color: #ffffff;
+}
+
+.btn-primary:hover,
+.btn-brand:hover {
+    background-color: #006633;
+    border-color: #006633;
+}
+
+.btn-primary:focus,
+.btn-brand:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 128, 65, 0.25);
+}
+
+.btn-primary:active,
+.btn-brand:active {
+    background-color: #005529;
+    border-color: #005529;
+}
+
+/* Alert Success with Brand Color */
+.alert-success {
+    background-color: rgba(0, 128, 65, 0.1);
+    border-color: #008041;
+    color: #004d27;
+}
+
+.alert-success .alert-link {
+    color: #003d1f;
+}
+
+/* TomSelect Focus with Brand Color */
+.tom-select .ts-control.focus {
+    border-color: #008041;
+    box-shadow: 0 0 0 2px rgba(0, 128, 65, 0.25);
+}
+
+.tom-select .ts-item {
+    background: rgba(0, 128, 65, 0.1);
+    border: 1px solid rgba(0, 128, 65, 0.3);
+}
+
+.tom-select .ts-dropdown .option.active {
+    background-color: rgba(0, 128, 65, 0.15);
+}
+
+/* Button Styles Improvements */
+.btn-success {
+    background-color: #008041;
+    border-color: #008041;
+}
+
+.btn-success:hover {
+    background-color: #006633;
+    border-color: #006633;
+}
+
+.btn-success:focus,
+.btn-success:active {
+    background-color: #005529;
+    border-color: #005529;
+    box-shadow: 0 0 0 0.2rem rgba(0, 128, 65, 0.25);
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+    color: #ffffff;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+    border-color: #138496;
+}
+
+.btn-danger:focus,
+.btn-success:focus,
+.btn-info:focus {
+    outline: 0;
+}
+
+/* Alert Info Styling */
+.alert-info {
+    background-color: rgba(23, 162, 184, 0.1);
+    border-color: #17a2b8;
+    color: #0c5460;
+}
+
+.alert-info .btn-primary {
+    margin-top: 0.5rem;
+}

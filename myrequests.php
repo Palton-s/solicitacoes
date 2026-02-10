@@ -114,8 +114,15 @@ foreach ($requests as $r) {
     $statuskey = 'status_' . $r->status;
     $statuslabel = get_string($statuskey, 'local_solicitacoes');
     
-    // Badges minimalistas sem cores
-    $status_class = 'badge badge-secondary';
+    // Definir classe de badge baseada no status
+    $status_badge_classes = [
+        'pendente' => 'badge-warning',
+        'aprovado' => 'badge-success',
+        'negado' => 'badge-danger',
+        'em_andamento' => 'badge-info',
+        'concluido' => 'badge-success'
+    ];
+    $status_class = 'badge ' . (isset($status_badge_classes[$r->status]) ? $status_badge_classes[$r->status] : 'badge-secondary');
     
     // Traduzir tipo de ação
     $acao_strings = [
