@@ -43,8 +43,10 @@ echo $OUTPUT->header();
 if (optional_param('cancel', 0, PARAM_BOOL)) {
     if (has_capability('local/solicitacoes:manage', $context)) {
         redirect(new moodle_url('/local/solicitacoes/manage.php'));
+        exit;
     } else {
         redirect(new moodle_url('/local/solicitacoes/myrequests.php'));
+        exit;
     }
 }
 
@@ -131,6 +133,7 @@ if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, P
         
         \local_solicitacoes\solicitacoes_controller::process_request_submission($data);
         redirect(new moodle_url('/local/solicitacoes/thankyou.php'));
+        exit;
     } else {
         // Mostrar erros
         foreach ($errors as $error) {

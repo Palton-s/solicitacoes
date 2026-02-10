@@ -13,6 +13,7 @@ if (!has_capability('local/solicitacoes:view', $context)) {
         null,
         \core\output\notification::NOTIFY_INFO
     );
+    exit;
 }
 
 $PAGE->set_context($context);

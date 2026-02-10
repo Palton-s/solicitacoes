@@ -19,6 +19,7 @@ if (!$canmanage && !$canviewall) {
             null,
             \core\output\notification::NOTIFY_INFO
         );
+        exit;
     }
     $request = $DB->get_record('local_solicitacoes', ['id' => $id], '*', MUST_EXIST);
     if ($request->userid != $USER->id) {
@@ -28,6 +29,7 @@ if (!$canmanage && !$canviewall) {
             null,
             \core\output\notification::NOTIFY_INFO
         );
+        exit;
     }
 }
 

@@ -14,6 +14,7 @@ if (!has_capability('local/solicitacoes:manage', $context)) {
         null,
         \core\output\notification::NOTIFY_INFO
     );
+    exit;
 }
 
 $PAGE->set_context($context);
@@ -42,6 +43,7 @@ if ($action === 'updatestatus' && $id && in_array($status, ['pendente','aprovado
             if (!$resultado['success']) {
                 \core\notification::error($resultado['message']);
                 redirect(new moodle_url('/local/solicitacoes/manage.php', ['filter' => $filter]));
+                exit; // Parar execução após redirect
             }
         }
         
@@ -50,6 +52,7 @@ if ($action === 'updatestatus' && $id && in_array($status, ['pendente','aprovado
             if (empty($motivo_negacao)) {
                 // Redirecionar para página de negação
                 redirect(new moodle_url('/local/solicitacoes/negar.php', ['id' => $id]));
+                exit; // Parar execução após redirect
             }
             $request->motivo_negacao = $motivo_negacao;
         }
@@ -66,6 +69,7 @@ if ($action === 'updatestatus' && $id && in_array($status, ['pendente','aprovado
         
         \core\notification::success(get_string('success_update', 'local_solicitacoes'));
         redirect(new moodle_url('/local/solicitacoes/manage.php', ['filter' => $filter]));
+        exit; // Parar execução após redirect de sucesso
     }
 }
 
@@ -76,6 +80,7 @@ if ($action === 'delete' && $id) {
         $DB->delete_records('local_solicitacoes', ['id' => $id]);
         \core\notification::success(get_string('success_delete', 'local_solicitacoes'));
         redirect(new moodle_url('/local/solicitacoes/manage.php', ['filter' => $filter]));
+        exit;
     }
 }
 

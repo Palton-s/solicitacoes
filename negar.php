@@ -15,6 +15,7 @@ if (!has_capability('local/solicitacoes:manage', $context)) {
         null,
         \core\output\notification::NOTIFY_INFO
     );
+    exit;
 }
 
 // Buscar solicitação
@@ -42,6 +43,7 @@ if ($request->status === 'negado') {
         null,
         \core\output\notification::NOTIFY_INFO
     );
+    exit;
 }
 
 $PAGE->set_context($context);
@@ -75,6 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             null,
             \core\output\notification::NOTIFY_SUCCESS
         );
+        exit;
     }
 }
 
