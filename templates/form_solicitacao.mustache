@@ -41,7 +41,8 @@
                            id="curso_search" 
                            class="form-control" 
                            placeholder="Digite para buscar cursos..."
-                           autocomplete="off">
+                           autocomplete="off"
+                           required>
                     <small class="form-text text-muted">
                         {{#str}}curso_nome_help, local_solicitacoes{{/str}}
                     </small>
@@ -61,7 +62,8 @@
                            id="usuarios_search" 
                            class="form-control" 
                            placeholder="Digite para buscar usuários..."
-                           autocomplete="off">
+                           autocomplete="off"
+                           required>
                     <small class="form-text text-muted">
                         {{#str}}usuarios_busca_help, local_solicitacoes{{/str}}
                     </small>
@@ -121,18 +123,3 @@
         </div>
     </form>
 </div>
-
-{{#js}}
-require(['jquery'], function($) {
-    // Controlar visibilidade do campo Papel
-    $('#tipo_acao').on('change', function() {
-        if ($(this).val() === 'inscricao') {
-            $('#papel_container').show();
-            $('#papel').attr('required', true);
-        } else {
-            $('#papel_container').hide();
-            $('#papel').removeAttr('required');
-        }
-    }).trigger('change');
-});
-{{/js}}

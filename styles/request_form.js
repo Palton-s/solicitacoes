@@ -2,6 +2,7 @@
 window.addEventListener("load", function() {
     console.log("=== Window load event ===");
     console.log("TomSelect disponível?", typeof TomSelect);
+    console.log("M.cfg disponível?", typeof M !== 'undefined' && M.cfg ? M.cfg : 'não disponível');
 
     // Aguardar 1 segundo para garantir que tudo carregou
     setTimeout(function() {
@@ -14,19 +15,28 @@ window.addEventListener("load", function() {
         }
 
         console.log("Tom Select OK, buscando campos...");
+        
+        // Debug: listar todos os inputs no formulário
+        var allInputs = document.querySelectorAll('input, select, textarea');
+        console.log("Total de campos encontrados:", allInputs.length);
+        allInputs.forEach(function(input) {
+            console.log("  Campo:", input.tagName, "id=", input.id, "name=", input.name);
+        });
 
         var cursoSelect = null;
         var usuariosSelect = null;
 
         // Inicializar Tom Select para CURSOS
-        var cursoField = document.getElementById("id_curso_search");
+        var cursoField = document.getElementById("curso_search");
         console.log("Campo curso:", cursoField);
 
         if (cursoField) {
             console.log("Campo curso encontrado, inicializando...");
 
             // Obter o caminho base do Moodle corretamente
-            var moodleRoot = M.cfg.wwwroot;
+            var moodleRoot = (typeof M !== 'undefined' && M.cfg && M.cfg.wwwroot) 
+                ? M.cfg.wwwroot 
+                : window.location.origin;
             console.log("Moodle root detectado:", moodleRoot);
 
             cursoSelect = new TomSelect(cursoField, {
@@ -76,16 +86,18 @@ window.addEventListener("load", function() {
             });
             console.log("Tom Select curso inicializado!");
         } else {
-            console.error("Campo id_curso_search não encontrado!");
+            console.error("Campo curso_search não encontrado!");
         }
 
         // Inicializar Tom Select para USUÁRIOS (múltipla seleção)
-        var usuariosField = document.getElementById("id_usuarios_search");
+        var usuariosField = document.getElementById("usuarios_search");
         if (usuariosField) {
             console.log("Campo usuarios encontrado, inicializando...");
 
             // Obter o caminho base do Moodle corretamente
-            var moodleRoot = M.cfg.wwwroot;
+            var moodleRoot = (typeof M !== 'undefined' && M.cfg && M.cfg.wwwroot) 
+                ? M.cfg.wwwroot 
+                : window.location.origin;
 
             usuariosSelect = new TomSelect(usuariosField, {
                 valueField: "id",
@@ -188,7 +200,26 @@ window.addEventListener("load", function() {
                 });
             }
         } else {
-            console.error("Campo id_usuarios_search não encontrado!");
+            console.error("Campo usuarios_search não encontrado!");
+        }
+
+        // Controlar visibilidade do campo Papel
+        var tipoAcaoField = document.getElementById("tipo_acao");
+        var papelContainer = document.getElementById("papel_container");
+        var papelField = document.getElementById("papel");
+        
+        if (tipoAcaoField && papelContainer && papelField) {
+            tipoAcaoField.addEventListener("change", function() {
+                if (this.value === "inscricao") {
+                    papelContainer.style.display = "block";
+                    papelField.setAttribute("required", "required");
+                } else {
+                    papelContainer.style.display = "none";
+                    papelField.removeAttribute("required");
+                }
+            });
+            // Disparar o evento para configurar o estado inicial
+            tipoAcaoField.dispatchEvent(new Event("change"));
         }
 
     }, 1000); // Aguardar 1 segundo
