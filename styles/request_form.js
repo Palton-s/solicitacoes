@@ -44,6 +44,7 @@ window.addEventListener("load", function() {
                 labelField: "name",
                 searchField: "name",
                 placeholder: "Digite para buscar cursos...",
+                wrapperClass: "form-control h-auto",
                 create: false,
                 load: function(query, callback) {
                     if (query.length < 2) {
@@ -104,6 +105,7 @@ window.addEventListener("load", function() {
                 labelField: "fullname",
                 searchField: ["fullname", "username", "email"],
                 placeholder: "Digite para buscar usuários...",
+                wrapperClass: "form-control h-auto",
                 plugins: ["remove_button"],
                 maxItems: null,
                 create: false,
