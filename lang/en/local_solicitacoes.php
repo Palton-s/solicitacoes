@@ -48,6 +48,7 @@ $string['searching_courses']    = 'Searching courses...';
 
 $string['acao_inscricao']       = 'Enrollment';
 $string['acao_remocao']         = 'Removal';
+$string['acao_cadastro']        = 'User Registration';
 $string['acao_suspensao']       = 'Suspension';
 
 $string['papel_student']        = 'Student';
@@ -119,3 +120,23 @@ $string['my_requests']               = 'My Requests';
 $string['error_curso_required']      = 'Please select a course.';
 $string['error_usuarios_required']   = 'Please select at least one user.';
 $string['error_papel_required']      = 'Please select a role for the enrollment.';
+
+// User registration fields
+$string['firstname']                 = 'First Name';
+$string['firstname_help']            = 'First name of the new user';
+$string['lastname']                  = 'Last Name';
+$string['lastname_help']             = 'Last name of the new user';
+$string['cpf']                       = 'CPF';
+$string['cpf_help']                  = 'CPF will be used as username. Enter numbers only.';
+$string['email_novo_usuario']        = 'Email';
+$string['email_novo_usuario_help']   = 'Email of the new user';
+$string['error_firstname_required']  = 'Please enter the first name.';
+$string['error_lastname_required']   = 'Please enter the last name.';
+$string['error_cpf_required']        = 'Please enter the CPF.';
+$string['error_cpf_invalid']         = 'Invalid CPF. Enter numbers only (11 digits).';
+$string['error_cpf_exists']          = 'CPF already registered in the system.';
+$string['error_email_novo_required'] = 'Please enter the email.';
+$string['error_email_invalid']       = 'Invalid email.';
+$string['error_email_exists']        = 'Email already registered in the system.';
+$string['novo_usuario']              = 'New user';
+$string['usuario_criado']            = 'User {$a} created successfully.';

@@ -10,12 +10,16 @@
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="ID do usuário que fez a solicitação"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Timestamp de criação"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Timestamp da última modificação"/>
-        <FIELD NAME="tipo_acao" TYPE="char" LENGTH="50" NOTNULL="true" DEFAULT="inscricao" SEQUENCE="false" COMMENT="Tipo: inscricao, remocao, suspensao"/>
+        <FIELD NAME="tipo_acao" TYPE="char" LENGTH="50" NOTNULL="true" DEFAULT="inscricao" SEQUENCE="false" COMMENT="Tipo: inscricao, remocao, suspensao, cadastro"/>
         <FIELD NAME="papel" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Papel no curso (apenas para inscrição)"/>
         <FIELD NAME="observacoes" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Observações adicionais"/>
         <FIELD NAME="status" TYPE="char" LENGTH="50" NOTNULL="true" DEFAULT="pendente" SEQUENCE="false" COMMENT="Status: pendente, aprovado, negado"/>
         <FIELD NAME="adminid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="ID do admin que atendeu"/>
         <FIELD NAME="motivo_negacao" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Motivo da negação da solicitação"/>
+        <FIELD NAME="firstname" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Primeiro nome (para cadastro de usuário)"/>
+        <FIELD NAME="lastname" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Sobrenome (para cadastro de usuário)"/>
+        <FIELD NAME="cpf" TYPE="char" LENGTH="14" NOTNULL="false" SEQUENCE="false" COMMENT="CPF (para cadastro de usuário, usado como username)"/>
+        <FIELD NAME="email" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Email (para cadastro de usuário)"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

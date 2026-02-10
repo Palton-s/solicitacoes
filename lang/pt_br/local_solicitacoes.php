@@ -49,6 +49,7 @@ $string['searching_courses']    = 'Buscando cursos...';
 $string['acao_inscricao']       = 'Inscrição';
 $string['acao_remocao']         = 'Remoção';
 $string['acao_suspensao']       = 'Suspensão';
+$string['acao_cadastro']        = 'Cadastro de Usuário';
 
 $string['papel_student']        = 'Estudante';
 $string['papel_teacher']        = 'Professor';
@@ -121,3 +122,23 @@ $string['my_requests']               = 'Minhas Solicitações';
 $string['error_curso_required']      = 'Por favor, selecione um curso.';
 $string['error_usuarios_required']   = 'Por favor, selecione pelo menos um usuário.';
 $string['error_papel_required']      = 'Por favor, selecione um papel para a inscrição.';
+
+// Campos de cadastro de usuário
+$string['firstname']                 = 'Primeiro Nome';
+$string['firstname_help']            = 'Nome do novo usuário';
+$string['lastname']                  = 'Sobrenome';
+$string['lastname_help']             = 'Sobrenome do novo usuário';
+$string['cpf']                       = 'CPF';
+$string['cpf_help']                  = 'CPF será usado como nome de usuário (username). Informe apenas números.';
+$string['email_novo_usuario']        = 'E-mail';
+$string['email_novo_usuario_help']   = 'E-mail do novo usuário';
+$string['error_firstname_required']  = 'Por favor, informe o primeiro nome.';
+$string['error_lastname_required']   = 'Por favor, informe o sobrenome.';
+$string['error_cpf_required']        = 'Por favor, informe o CPF.';
+$string['error_cpf_invalid']         = 'CPF inválido. Informe apenas números (11 dígitos).';
+$string['error_cpf_exists']          = 'CPF já cadastrado no sistema.';
+$string['error_email_novo_required'] = 'Por favor, informe o e-mail.';
+$string['error_email_invalid']       = 'E-mail inválido.';
+$string['error_email_exists']        = 'E-mail já cadastrado no sistema.';
+$string['novo_usuario']              = 'Novo usuário';
+$string['usuario_criado']            = 'Usuário {$a} criado com sucesso.';

@@ -59,17 +59,57 @@ if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, P
     $papel = optional_param('papel', '', PARAM_TEXT);
     $observacoes = optional_param('observacoes', '', PARAM_TEXT);
     
+    // Campos de cadastro de usuário
+    $firstname = optional_param('firstname', '', PARAM_TEXT);
+    $lastname = optional_param('lastname', '', PARAM_TEXT);
+    $cpf = optional_param('cpf', '', PARAM_TEXT);
+    $email_novo_usuario = optional_param('email_novo_usuario', '', PARAM_EMAIL);
+    
     // Validações
     if (empty($curso_id)) {
         $errors[] = get_string('error_curso_required', 'local_solicitacoes');
     }
     
-    if (empty($usuarios_ids)) {
-        $errors[] = get_string('error_usuarios_required', 'local_solicitacoes');
-    }
-    
-    if ($tipo_acao == 'inscricao' && empty($papel)) {
-        $errors[] = get_string('error_papel_required', 'local_solicitacoes');
+    if ($tipo_acao == 'cadastro') {
+        // Validações específicas para cadastro
+        if (empty($firstname)) {
+            $errors[] = get_string('error_firstname_required', 'local_solicitacoes');
+        }
+        
+        if (empty($lastname)) {
+            $errors[] = get_string('error_lastname_required', 'local_solicitacoes');
+        }
+        
+        if (empty($cpf)) {
+            $errors[] = get_string('error_cpf_required', 'local_solicitacoes');
+        } else {
+            // Remover caracteres não numéricos
+            $cpf = preg_replace('/[^0-9]/', '', $cpf);
+            
+            // Validar formato (11 dígitos)
+            if (strlen($cpf) != 11) {
+                $errors[] = get_string('error_cpf_invalid', 'local_solicitacoes');
+            }
+        }
+        
+        if (empty($email_novo_usuario)) {
+            $errors[] = get_string('error_email_novo_required', 'local_solicitacoes');
+        } else if (!validate_email($email_novo_usuario)) {
+            $errors[] = get_string('error_email_invalid', 'local_solicitacoes');
+        }
+        
+        if (empty($papel)) {
+            $errors[] = get_string('error_papel_required', 'local_solicitacoes');
+        }
+    } else {
+        // Validações para inscrição, remoção, suspensão
+        if (empty($usuarios_ids)) {
+            $errors[] = get_string('error_usuarios_required', 'local_solicitacoes');
+        }
+        
+        if ($tipo_acao == 'inscricao' && empty($papel)) {
+            $errors[] = get_string('error_papel_required', 'local_solicitacoes');
+        }
     }
     
     if (empty($errors)) {
@@ -80,6 +120,14 @@ if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, P
         $data->usuarios_ids_selected = $usuarios_ids;
         $data->papel = $papel;
         $data->observacoes = $observacoes;
+        
+        // Adicionar campos de cadastro se aplicável
+        if ($tipo_acao == 'cadastro') {
+            $data->firstname = $firstname;
+            $data->lastname = $lastname;
+            $data->cpf = $cpf;
+            $data->email_novo_usuario = $email_novo_usuario;
+        }
         
         \local_solicitacoes\solicitacoes_controller::process_request_submission($data);
         redirect(new moodle_url('/local/solicitacoes/thankyou.php'));
@@ -98,7 +146,8 @@ global $DB;
 $acoes = array(
     array('value' => 'inscricao', 'label' => get_string('acao_inscricao', 'local_solicitacoes')),
     array('value' => 'remocao', 'label' => get_string('acao_remocao', 'local_solicitacoes')),
-    array('value' => 'suspensao', 'label' => get_string('acao_suspensao', 'local_solicitacoes'))
+    array('value' => 'suspensao', 'label' => get_string('acao_suspensao', 'local_solicitacoes')),
+    array('value' => 'cadastro', 'label' => get_string('acao_cadastro', 'local_solicitacoes'))
 );
 
 // Buscar papéis (roles) disponíveis

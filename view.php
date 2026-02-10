@@ -68,7 +68,8 @@ echo $OUTPUT->header();
 $acao_strings = array(
     'inscricao' => get_string('acao_inscricao', 'local_solicitacoes'),
     'remocao' => get_string('acao_remocao', 'local_solicitacoes'),
-    'suspensao' => get_string('acao_suspensao', 'local_solicitacoes')
+    'suspensao' => get_string('acao_suspensao', 'local_solicitacoes'),
+    'cadastro' => get_string('acao_cadastro', 'local_solicitacoes')
 );
 $acao_label = isset($acao_strings[$request->tipo_acao]) ? $acao_strings[$request->tipo_acao] : $request->tipo_acao;
 
@@ -99,16 +100,30 @@ echo html_writer::start_div('row');
 // ===== COLUNA ESQUERDA =====
 echo html_writer::start_div('col-lg-8');
 
-// Card: Usuários Afetados
+// Card: Usuários Afetados ou Novo Usuário
 echo html_writer::start_div('card mb-3');
 echo html_writer::start_div('card-header bg-primary text-white');
-echo html_writer::tag('h5', get_string('target_users', 'local_solicitacoes'), array('class' => 'mb-0'));
+$header_title = ($request->tipo_acao == 'cadastro') 
+    ? get_string('novo_usuario', 'local_solicitacoes')
+    : get_string('target_users', 'local_solicitacoes');
+echo html_writer::tag('h5', $header_title, array('class' => 'mb-0'));
 echo html_writer::end_div();
 echo html_writer::start_div('card-body p-0');
 
 // Processar lista de usuários da tabela relacionada ou campo texto como fallback
 echo html_writer::start_tag('ul', array('class' => 'list-group list-group-flush'));
-if (!empty($usuarios)) {
+
+if ($request->tipo_acao == 'cadastro') {
+    // Exibir dados do novo usuário a ser criado
+    echo html_writer::start_tag('li', array('class' => 'list-group-item'));
+    echo html_writer::tag('i', '', array('class' => 'fa fa-user-plus mr-2 text-success', 'style' => 'font-size: 1.2rem;'));
+    echo html_writer::tag('strong', format_string($request->firstname . ' ' . $request->lastname));
+    echo html_writer::tag('br', '');
+    echo html_writer::tag('small', get_string('cpf', 'local_solicitacoes') . ': ' . $request->cpf, array('class' => 'text-muted'));
+    echo html_writer::tag('br', '');
+    echo html_writer::tag('small', get_string('email_novo_usuario', 'local_solicitacoes') . ': ' . $request->email, array('class' => 'text-muted'));
+    echo html_writer::end_tag('li');
+} else if (!empty($usuarios)) {
     foreach ($usuarios as $usuario) {
         echo html_writer::start_tag('li', array('class' => 'list-group-item'));
         echo html_writer::tag('i', '', array('class' => 'fa fa-user-circle mr-2 text-primary', 'style' => 'font-size: 1.2rem;'));
@@ -182,8 +197,8 @@ if (!empty($cursos)) {
     echo html_writer::tag('p', html_writer::tag('strong', 'Nome: ') . format_string($request->curso_nome), array('class' => 'mb-2'));
 }
 
-// Mostrar papel apenas para inscrições
-if ($request->tipo_acao == 'inscricao' && !empty($request->papel)) {
+// Mostrar papel apenas para inscrições e cadastro
+if (($request->tipo_acao == 'inscricao' || $request->tipo_acao == 'cadastro') && !empty($request->papel)) {
     $papel_strings = array(
         'student' => get_string('papel_student', 'local_solicitacoes'),
         'teacher' => get_string('papel_teacher', 'local_solicitacoes'),

@@ -92,16 +92,22 @@ foreach ($requests as $r) {
     $cursos_display = implode(', ', $links_cursos);
 
     // Processar Usuários Alvo
-    $links_usuarios = [];
-    foreach ($r->usuarios_alvo as $uid => $uname) {
-        $url = new moodle_url('/user/profile.php', ['id' => $uid]);
-        $links_usuarios[] = html_writer::link($url, fullname((object)['firstname'=>$uname, 'lastname'=>'']));
-    }
-    
-    if (count($links_usuarios) > 3) {
-        $usuarios_display = implode(", ", array_slice($links_usuarios, 0, 3)) . "... (+" . (count($links_usuarios) - 3) . ")";
+    // Para cadastro, mostrar dados do novo usuário ao invés de usuários existentes
+    if ($r->tipo_acao == 'cadastro') {
+        $usuarios_display = get_string('novo_usuario', 'local_solicitacoes') . ': ' .
+                           format_string($r->firstname . ' ' . $r->lastname) . ' (' . $r->cpf . ')';
     } else {
-        $usuarios_display = implode(", ", $links_usuarios);
+        $links_usuarios = [];
+        foreach ($r->usuarios_alvo as $uid => $uname) {
+            $url = new moodle_url('/user/profile.php', ['id' => $uid]);
+            $links_usuarios[] = html_writer::link($url, fullname((object)['firstname'=>$uname, 'lastname'=>'']));
+        }
+        
+        if (count($links_usuarios) > 3) {
+            $usuarios_display = implode(", ", array_slice($links_usuarios, 0, 3)) . "... (+" . (count($links_usuarios) - 3) . ")";
+        } else {
+            $usuarios_display = implode(", ", $links_usuarios);
+        }
     }
 
     // Status formatado com classes Bootstrap
@@ -115,13 +121,14 @@ foreach ($requests as $r) {
     $acao_strings = [
         'inscricao' => get_string('acao_inscricao', 'local_solicitacoes'),
         'remocao' => get_string('acao_remocao', 'local_solicitacoes'),
-        'suspensao' => get_string('acao_suspensao', 'local_solicitacoes')
+        'suspensao' => get_string('acao_suspensao', 'local_solicitacoes'),
+        'cadastro' => get_string('acao_cadastro', 'local_solicitacoes')
     ];
     $acao_label = isset($acao_strings[$r->tipo_acao]) ? $acao_strings[$r->tipo_acao] : $r->tipo_acao;
     
-    // Papel (apenas para inscrições)
+    // Papel (apenas para inscrições e cadastro)
     $papel_display = '';
-    if ($r->tipo_acao == 'inscricao' && !empty($r->papel)) {
+    if (($r->tipo_acao == 'inscricao' || $r->tipo_acao == 'cadastro') && !empty($r->papel)) {
         $papel_strings = [
             'student' => get_string('papel_student', 'local_solicitacoes'),
             'teacher' => get_string('papel_teacher', 'local_solicitacoes'),

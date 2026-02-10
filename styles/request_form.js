@@ -214,19 +214,76 @@ window.addEventListener("load", function() {
             console.error("Campo usuarios_search não encontrado!");
         }
 
-        // Controlar visibilidade do campo Papel
+        // Controlar visibilidade dos campos baseado no tipo de ação
         var tipoAcaoField = document.getElementById("tipo_acao");
         var papelContainer = document.getElementById("papel_container");
         var papelField = document.getElementById("papel");
+        var cursoContainer = document.getElementById("curso_container");
+        var cursoField = document.getElementById("curso_search");
+        var usuariosContainer = document.getElementById("usuarios_container");
+        var usuariosField = document.getElementById("usuarios_search");
+        var cadastroContainer = document.getElementById("cadastro_container");
+        var firstnameField = document.getElementById("firstname");
+        var lastnameField = document.getElementById("lastname");
+        var cpfField = document.getElementById("cpf");
+        var emailField = document.getElementById("email_novo_usuario");
         
-        if (tipoAcaoField && papelContainer && papelField) {
+        if (tipoAcaoField) {
             tipoAcaoField.addEventListener("change", function() {
-                if (this.value === "inscricao") {
-                    papelContainer.style.display = "block";
-                    papelField.setAttribute("required", "required");
+                var tipoAcao = this.value;
+                
+                if (tipoAcao === "cadastro") {
+                    // Mostrar campos de cadastro, curso e papel
+                    // Ocultar campo de usuários existentes
+                    if (cadastroContainer) {
+                        cadastroContainer.style.display = "flex";
+                        cadastroContainer.style.flexWrap = "wrap";
+                    }
+                    if (cursoContainer) cursoContainer.style.display = "block";
+                    if (papelContainer) papelContainer.style.display = "block";
+                    if (usuariosContainer) usuariosContainer.style.display = "none";
+                    
+                    // Ajustar required
+                    if (firstnameField) firstnameField.setAttribute("required", "required");
+                    if (lastnameField) lastnameField.setAttribute("required", "required");
+                    if (cpfField) cpfField.setAttribute("required", "required");
+                    if (emailField) emailField.setAttribute("required", "required");
+                    if (papelField) papelField.setAttribute("required", "required");
+                    if (cursoField) cursoField.setAttribute("required", "required");
+                    if (usuariosField) usuariosField.removeAttribute("required");
+                    
+                } else if (tipoAcao === "inscricao") {
+                    // Mostrar curso, usuários e papel
+                    // Ocultar campos de cadastro
+                    if (cursoContainer) cursoContainer.style.display = "block";
+                    if (usuariosContainer) usuariosContainer.style.display = "block";
+                    if (papelContainer) papelContainer.style.display = "block";
+                    if (cadastroContainer) cadastroContainer.style.display = "none";
+                    
+                    // Ajustar required
+                    if (papelField) papelField.setAttribute("required", "required");
+                    if (cursoField) cursoField.setAttribute("required", "required");
+                    if (usuariosField) usuariosField.setAttribute("required", "required");
+                    if (firstnameField) firstnameField.removeAttribute("required");
+                    if (lastnameField) lastnameField.removeAttribute("required");
+                    if (cpfField) cpfField.removeAttribute("required");
+                    if (emailField) emailField.removeAttribute("required");
+                    
                 } else {
-                    papelContainer.style.display = "none";
-                    papelField.removeAttribute("required");
+                    // remocao ou suspensao: mostrar curso e usuários, ocultar papel e cadastro
+                    if (cursoContainer) cursoContainer.style.display = "block";
+                    if (usuariosContainer) usuariosContainer.style.display = "block";
+                    if (papelContainer) papelContainer.style.display = "none";
+                    if (cadastroContainer) cadastroContainer.style.display = "none";
+                    
+                    // Ajustar required
+                    if (papelField) papelField.removeAttribute("required");
+                    if (cursoField) cursoField.setAttribute("required", "required");
+                    if (usuariosField) usuariosField.setAttribute("required", "required");
+                    if (firstnameField) firstnameField.removeAttribute("required");
+                    if (lastnameField) lastnameField.removeAttribute("required");
+                    if (cpfField) cpfField.removeAttribute("required");
+                    if (emailField) emailField.removeAttribute("required");
                 }
             });
             // Disparar o evento para configurar o estado inicial

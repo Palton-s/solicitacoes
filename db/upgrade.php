@@ -195,5 +195,32 @@ function xmldb_local_solicitacoes_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026012515, 'local', 'solicitacoes');
     }
 
+    // Upgrade para versão 2026021001 - Adicionar campos para cadastro de usuário
+    if ($oldversion < 2026021001) {
+        $table = new xmldb_table('local_solicitacoes');
+        
+        $field = new xmldb_field('firstname', XMLDB_TYPE_CHAR, '100', null, null, null, null, 'motivo_negacao');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        $field = new xmldb_field('lastname', XMLDB_TYPE_CHAR, '100', null, null, null, null, 'firstname');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        $field = new xmldb_field('cpf', XMLDB_TYPE_CHAR, '14', null, null, null, null, 'lastname');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        $field = new xmldb_field('email', XMLDB_TYPE_CHAR, '100', null, null, null, null, 'cpf');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        upgrade_plugin_savepoint(true, 2026021001, 'local', 'solicitacoes');
+    }
+
     return true;
 }

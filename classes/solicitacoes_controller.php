@@ -40,8 +40,10 @@ class solicitacoes_controller {
                 // Salvar cursos relacionados
                 self::save_related_courses($id, $data);
                 
-                // Salvar usuários relacionados
-                self::save_related_users($id, $data);
+                // Salvar usuários relacionados (não aplicável para cadastro)
+                if ($data->tipo_acao != 'cadastro') {
+                    self::save_related_users($id, $data);
+                }
                 
                 // Enviar notificação de solicitação criada
                 local_solicitacoes_notify_criada($id);
@@ -74,10 +76,18 @@ class solicitacoes_controller {
         $record->timecreated    = time();
         $record->timemodified   = time();
         $record->tipo_acao      = $data->tipo_acao;
-        $record->papel          = ($data->tipo_acao == 'inscricao' && !empty($data->papel)) ? $data->papel : '';
+        $record->papel          = (($data->tipo_acao == 'inscricao' || $data->tipo_acao == 'cadastro') && !empty($data->papel)) ? $data->papel : '';
         $record->observacoes    = !empty($data->observacoes) ? $data->observacoes : '';
         $record->status         = 'pendente';
         $record->adminid        = null;
+        
+        // Adicionar campos de cadastro de usuário se aplicável
+        if ($data->tipo_acao == 'cadastro') {
+            $record->firstname  = !empty($data->firstname) ? $data->firstname : '';
+            $record->lastname   = !empty($data->lastname) ? $data->lastname : '';
+            $record->cpf        = !empty($data->cpf) ? $data->cpf : '';
+            $record->email      = !empty($data->email_novo_usuario) ? $data->email_novo_usuario : '';
+        }
         
         return $record;
     }
@@ -290,12 +300,17 @@ class solicitacoes_controller {
             // Buscar cursos relacionados
             $cursos = self::get_related_courses($solicitacao_id);
             
-            // Buscar usuários relacionados
-            $usuarios = self::get_related_users($solicitacao_id);
-            
             if (empty($cursos)) {
                 return ['success' => false, 'message' => 'Nenhum curso encontrado para esta solicitação.'];
             }
+            
+            // Para cadastro, não precisa buscar usuários existentes
+            if ($solicitacao->tipo_acao == 'cadastro') {
+                return self::create_and_enrol_user($solicitacao, $cursos);
+            }
+            
+            // Buscar usuários relacionados (para outros tipos de ação)
+            $usuarios = self::get_related_users($solicitacao_id);
             
             if (empty($usuarios)) {
                 return ['success' => false, 'message' => 'Nenhum usuário encontrado para esta solicitação.'];
@@ -493,6 +508,85 @@ class solicitacoes_controller {
             'success' => true,
             'message' => "Usuários suspensos com sucesso! Total: $success_count"
         ];
+    }
+
+    /**
+     * Cria um novo usuário e o inscreve nos cursos especificados
+     * 
+     * @param \stdClass $solicitacao Objeto da solicitação com dados do novo usuário
+     * @param array $cursos Array de cursos para inscrever o usuário
+     * @return array Array com 'success' e 'message'
+     */
+    private static function create_and_enrol_user($solicitacao, $cursos) {
+        global $DB, $CFG;
+        require_once($CFG->dirroot . '/user/lib.php');
+        
+        try {
+            // Validar se CPF (username) já existe
+            if ($DB->record_exists('user', ['username' => $solicitacao->cpf])) {
+                return [
+                    'success' => false,
+                    'message' => get_string('error_cpf_exists', 'local_solicitacoes')
+                ];
+            }
+            
+            // Validar se email já existe
+            if ($DB->record_exists('user', ['email' => $solicitacao->email])) {
+                return [
+                    'success' => false,
+                    'message' => get_string('error_email_exists', 'local_solicitacoes')
+                ];
+            }
+            
+            // Criar objeto do novo usuário
+            $newuser = new \stdClass();
+            $newuser->username      = $solicitacao->cpf;
+            $newuser->firstname     = $solicitacao->firstname;
+            $newuser->lastname      = $solicitacao->lastname;
+            $newuser->email         = $solicitacao->email;
+            $newuser->auth          = 'manual';
+            $newuser->confirmed     = 1;
+            $newuser->mnethostid    = $CFG->mnet_localhost_id;
+            $newuser->password      = hash_internal_user_password(generate_password());
+            
+            // Criar usuário
+            $newuserid = user_create_user($newuser, true, false);
+            
+            if (!$newuserid) {
+                return [
+                    'success' => false,
+                    'message' => 'Erro ao criar usuário no sistema.'
+                ];
+            }
+            
+            // Criar array com o novo usuário para o método de inscrição
+            $usuario = $DB->get_record('user', ['id' => $newuserid]);
+            $usuarios = [$usuario];
+            
+            // Inscrever o usuário nos cursos com o papel especificado
+            $enrol_result = self::enrol_users($cursos, $usuarios, $solicitacao->papel);
+            
+            if ($enrol_result['success']) {
+                $username = $newuser->firstname . ' ' . $newuser->lastname;
+                return [
+                    'success' => true,
+                    'message' => get_string('usuario_criado', 'local_solicitacoes', $username) . ' ' . $enrol_result['message']
+                ];
+            } else {
+                // Usuário foi criado mas houve erro na inscrição
+                return [
+                    'success' => false,
+                    'message' => "Usuário criado, mas houve erro na inscrição: " . $enrol_result['message']
+                ];
+            }
+            
+        } catch (\Exception $e) {
+            error_log("Erro ao criar e inscrever usuário: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Erro ao criar usuário: ' . $e->getMessage()
+            ];
+        }
     }
 }
 

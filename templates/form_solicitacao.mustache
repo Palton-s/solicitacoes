@@ -29,7 +29,7 @@
             </div>
         </div>
 
-        <div class="row mb-3">
+        <div class="row mb-3" id="curso_container">
             <div class="col-md-12">
                 <div class="form-group">
                     <label for="curso_search" class="form-label">
@@ -49,7 +49,7 @@
             </div>
         </div>
 
-        <div class="row mb-3">
+        <div class="row mb-3" id="usuarios_container">
             <div class="col-md-12">
                 <div class="form-group">
                     <label for="usuarios_search" class="form-label">
@@ -64,6 +64,79 @@
                            required>
                     <small class="form-text text-muted">
                         {{#str}}usuarios_busca_help, local_solicitacoes{{/str}}
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3" id="cadastro_container" style="display: none;">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="firstname" class="form-label">
+                        {{#str}}firstname, local_solicitacoes{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" 
+                           name="firstname" 
+                           id="firstname" 
+                           class="form-control"
+                           placeholder="Primeiro nome..."
+                           autocomplete="off">
+                    <small class="form-text text-muted">
+                        {{#str}}firstname_help, local_solicitacoes{{/str}}
+                    </small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="lastname" class="form-label">
+                        {{#str}}lastname, local_solicitacoes{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" 
+                           name="lastname" 
+                           id="lastname" 
+                           class="form-control"
+                           placeholder="Sobrenome..."
+                           autocomplete="off">
+                    <small class="form-text text-muted">
+                        {{#str}}lastname_help, local_solicitacoes{{/str}}
+                    </small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="cpf" class="form-label">
+                        {{#str}}cpf, local_solicitacoes{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" 
+                           name="cpf" 
+                           id="cpf" 
+                           class="form-control"
+                           placeholder="00000000000"
+                           pattern="[0-9]{11}"
+                           maxlength="11"
+                           autocomplete="off">
+                    <small class="form-text text-muted">
+                        {{#str}}cpf_help, local_solicitacoes{{/str}}
+                    </small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="email_novo_usuario" class="form-label">
+                        {{#str}}email_novo_usuario, local_solicitacoes{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <input type="email" 
+                           name="email_novo_usuario" 
+                           id="email_novo_usuario" 
+                           class="form-control"
+                           placeholder="email@exemplo.com"
+                           autocomplete="off">
+                    <small class="form-text text-muted">
+                        {{#str}}email_novo_usuario_help, local_solicitacoes{{/str}}
                     </small>
                 </div>
             </div>
