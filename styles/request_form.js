@@ -46,6 +46,11 @@ window.addEventListener("load", function() {
                 placeholder: "Digite para buscar cursos...",
                 wrapperClass: "form-control h-auto",
                 create: false,
+                render: {
+                    item: function(data, escape) {
+                        return '<div class="alert alert-success m-1 p-2">' + escape(data.name) + '</div>';
+                    }
+                },
                 load: function(query, callback) {
                     if (query.length < 2) {
                         callback();
@@ -141,6 +146,9 @@ window.addEventListener("load", function() {
                         });
                 },
                 render: {
+                    item: function(data, escape) {
+                        return '<div class="alert alert-success m-1 p-2">' + escape(data.fullname) + '</div>';
+                    },
                     option: function(data, escape) {
                         return "<div><strong>" + escape(data.fullname) + "</strong><br>" +
                             "<small>" + escape(data.username) + " - " + escape(data.email) + "</small></div>";
