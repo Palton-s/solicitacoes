@@ -114,3 +114,8 @@ $string['notification_negada_subject'] = 'Request Denied';
 $string['notification_negada_body'] = 'Your {$a->tipo_acao} request for the course "{$a->curso}" has been denied.\n\nReason: {$a->motivo}';
 
 $string['my_requests']               = 'My Requests';
+
+// Validation error messages
+$string['error_curso_required']      = 'Please select a course.';
+$string['error_usuarios_required']   = 'Please select at least one user.';
+$string['error_papel_required']      = 'Please select a role for the enrollment.';

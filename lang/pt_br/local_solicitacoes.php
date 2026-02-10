@@ -34,6 +34,8 @@ $string['request_form_title']   = 'Solicitação de Gerenciamento de Curso';
 $string['tipo_acao']            = 'Tipo de Ação';
 $string['curso_nome']           = 'Nome do Curso';
 $string['curso_nome_help']      = 'Digite o nome do curso e selecione da lista de sugestões';
+$string['usuarios_busca']       = 'Buscar Usuários';
+$string['usuarios_busca_help']  = 'Digite o nome ou e-mail do usuário e selecione da lista de sugestões';
 $string['usuarios_nomes']       = 'Nomes dos Usuários';
 $string['usuarios_nomes_help']  = 'Digite um nome por linha. Use o nome completo ou nome de usuário conforme aparece no Moodle.';
 $string['papel']                = 'Papel no Curso';
@@ -114,3 +116,8 @@ $string['notification_negada_subject'] = 'Solicitação Negada';
 $string['notification_negada_body'] = 'Sua solicitação de {$a->tipo_acao} para o curso "{$a->curso}" foi negada.\n\nMotivo: {$a->motivo}';
 
 $string['my_requests']               = 'Minhas Solicitações';
+
+// Mensagens de erro de validação
+$string['error_curso_required']      = 'Por favor, selecione um curso.';
+$string['error_usuarios_required']   = 'Por favor, selecione pelo menos um usuário.';
+$string['error_papel_required']      = 'Por favor, selecione um papel para a inscrição.';
