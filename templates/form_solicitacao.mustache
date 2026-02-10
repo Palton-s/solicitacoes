@@ -20,7 +20,7 @@
                         {{#str}}tipo_acao, local_solicitacoes{{/str}}
                         <span class="text-danger">*</span>
                     </label>
-                    <select name="tipo_acao" id="tipo_acao" class="form-select" required>
+                    <select name="tipo_acao" id="tipo_acao" class="form-select form-control" required>
                         {{#acoes}}
                             <option value="{{value}}">{{label}}</option>
                         {{/acoes}}
@@ -76,7 +76,7 @@
                         {{#str}}papel, local_solicitacoes{{/str}}
                         <span class="text-danger">*</span>
                     </label>
-                    <select name="papel" id="papel" class="form-select">
+                    <select name="papel" id="papel" class="form-select form-control">
                         <option value="">Selecione...</option>
                         {{#papeis}}
                             <option value="{{value}}">{{label}}</option>
