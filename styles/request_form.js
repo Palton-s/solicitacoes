@@ -290,5 +290,158 @@ window.addEventListener("load", function() {
             tipoAcaoField.dispatchEvent(new Event("change"));
         }
 
+        // Validação e Formatação de CPF em tempo real
+        if (cpfField) {
+            // Criar elemento para mensagem de feedback
+            var feedbackDiv = document.createElement("div");
+            feedbackDiv.id = "cpf-feedback";
+            feedbackDiv.className = "invalid-feedback";
+            feedbackDiv.style.display = "block";
+            cpfField.parentNode.appendChild(feedbackDiv);
+
+            // Função para validar CPF usando algoritmo oficial
+            function validarCPF(cpf) {
+                // Remove caracteres não numéricos
+                cpf = cpf.replace(/[^\d]/g, '');
+                
+                // Verifica se tem 11 dígitos
+                if (cpf.length !== 11) return false;
+                
+                // Verifica se todos os dígitos são iguais
+                if (/^(\d)\1{10}$/.test(cpf)) return false;
+                
+                // Valida primeiro dígito verificador
+                var soma = 0;
+                for (var i = 0; i < 9; i++) {
+                    soma += parseInt(cpf.charAt(i)) * (10 - i);
+                }
+                var resto = 11 - (soma % 11);
+                var digito1 = (resto === 10 || resto === 11) ? 0 : resto;
+                
+                if (digito1 !== parseInt(cpf.charAt(9))) return false;
+                
+                // Valida segundo dígito verificador
+                soma = 0;
+                for (var i = 0; i < 10; i++) {
+                    soma += parseInt(cpf.charAt(i)) * (11 - i);
+                }
+                resto = 11 - (soma % 11);
+                var digito2 = (resto === 10 || resto === 11) ? 0 : resto;
+                
+                if (digito2 !== parseInt(cpf.charAt(10))) return false;
+                
+                return true;
+            }
+
+            // Função para formatar CPF (000.000.000-00)
+            function formatarCPF(valor) {
+                // Remove tudo que não é número
+                valor = valor.replace(/\D/g, '');
+                
+                // Limita a 11 dígitos
+                valor = valor.substring(0, 11);
+                
+                // Aplica formatação
+                if (valor.length > 9) {
+                    valor = valor.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+                } else if (valor.length > 6) {
+                    valor = valor.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+                } else if (valor.length > 3) {
+                    valor = valor.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+                }
+                
+                return valor;
+            }
+
+            // Event listener para formatação durante digitação
+            cpfField.addEventListener("input", function(e) {
+                var cursorPos = this.selectionStart;
+                var valorAnterior = this.value;
+                
+                // Formatar o valor
+                this.value = formatarCPF(this.value);
+                
+                // Ajustar posição do cursor após formatação
+                if (this.value.length < valorAnterior.length) {
+                    // Se deletou, mantém posição
+                    this.setSelectionRange(cursorPos, cursorPos);
+                }
+            });
+
+            // Event listener para validação ao sair do campo
+            cpfField.addEventListener("blur", function() {
+                var cpfLimpo = this.value.replace(/\D/g, '');
+                
+                if (cpfLimpo.length === 0) {
+                    // Campo vazio - remover feedback
+                    cpfField.classList.remove("is-valid", "is-invalid");
+                    feedbackDiv.textContent = "";
+                    return;
+                }
+                
+                if (validarCPF(cpfLimpo)) {
+                    // CPF válido
+                    cpfField.classList.remove("is-invalid");
+                    cpfField.classList.add("is-valid");
+                    feedbackDiv.className = "valid-feedback";
+                    feedbackDiv.style.display = "block";
+                    feedbackDiv.textContent = "✓ CPF válido";
+                } else {
+                    // CPF inválido
+                    cpfField.classList.remove("is-valid");
+                    cpfField.classList.add("is-invalid");
+                    feedbackDiv.className = "invalid-feedback";
+                    feedbackDiv.style.display = "block";
+                    
+                    if (cpfLimpo.length < 11) {
+                        feedbackDiv.textContent = "CPF incompleto. Digite os 11 dígitos.";
+                    } else {
+                        feedbackDiv.textContent = "CPF inválido. Verifique os números digitados.";
+                    }
+                }
+            });
+
+            // Validação ao focar (para casos de formulário preenchido)
+            cpfField.addEventListener("focus", function() {
+                if (this.value.length > 0) {
+                    // Garantir que está formatado
+                    this.value = formatarCPF(this.value);
+                }
+            });
+
+            // Validação no submit do formulário
+            var form = cpfField.closest("form");
+            if (form) {
+                form.addEventListener("submit", function(e) {
+                    var tipoAcao = document.getElementById("tipo_acao");
+                    if (tipoAcao && tipoAcao.value === "cadastro") {
+                        var cpfLimpo = cpfField.value.replace(/\D/g, '');
+                        
+                        if (cpfLimpo.length === 0) {
+                            e.preventDefault();
+                            cpfField.classList.add("is-invalid");
+                            feedbackDiv.className = "invalid-feedback";
+                            feedbackDiv.style.display = "block";
+                            feedbackDiv.textContent = "Por favor, informe o CPF.";
+                            cpfField.focus();
+                            return false;
+                        }
+                        
+                        if (!validarCPF(cpfLimpo)) {
+                            e.preventDefault();
+                            cpfField.classList.add("is-invalid");
+                            feedbackDiv.className = "invalid-feedback";
+                            feedbackDiv.style.display = "block";
+                            feedbackDiv.textContent = "CPF inválido. Corrija antes de enviar.";
+                            cpfField.focus();
+                            return false;
+                        }
+                    }
+                });
+            }
+
+            console.log("Validação de CPF configurada com sucesso!");
+        }
+
     }, 1000); // Aguardar 1 segundo
 });
