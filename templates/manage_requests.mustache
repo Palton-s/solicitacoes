@@ -16,50 +16,60 @@
     </nav>
 </div>
 
-{{#has_requests}}
-<div class="table-responsive">
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>{{#str}}user, local_solicitacoes{{/str}}</th>
-                <th>{{#str}}action_type, local_solicitacoes{{/str}}</th>
-                <th>{{#str}}course, local_solicitacoes{{/str}}</th>
-                <th>{{#str}}target_users, local_solicitacoes{{/str}}</th>
-                <th>{{#str}}role, local_solicitacoes{{/str}}</th>
-                <th>{{#str}}created_at, local_solicitacoes{{/str}}</th>
-                <th>{{#str}}status, local_solicitacoes{{/str}}</th>
-                <th>{{#str}}actions, local_solicitacoes{{/str}}</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{#requests}}
-            <tr>
-                <td>{{{solicitante_link}}}</td>
-                <td>{{acao_label}}</td>
-                <td>{{{cursos_display}}}</td>
-                <td>{{{usuarios_display}}}</td>
-                <td>{{papel_display}}</td>
-                <td>{{created_date}}</td>
-                <td>
-                    <span class="badge {{status_badge_class}}">{{status_label}}</span>
-                </td>
-                <td>
-                    {{#show_approve}}
-                    <a href="{{approve_url}}" class="btn btn-sm btn-success">{{#str}}approve, local_solicitacoes{{/str}}</a>
-                    {{/show_approve}}
-                    {{#show_reject}}
-                    <a href="{{reject_url}}" class="btn btn-sm btn-danger">{{#str}}deny, local_solicitacoes{{/str}}</a>
-                    {{/show_reject}}
-                    <a href="{{view_url}}" class="btn btn-sm btn-info">{{#str}}view, local_solicitacoes{{/str}}</a>
-                    <a href="{{delete_url}}" class="btn btn-sm btn-danger" onclick="return confirm('{{confirm_delete_msg}}');">{{#str}}delete, local_solicitacoes{{/str}}</a>
-                </td>
-            </tr>
-            {{/requests}}
-        </tbody>
-    </table>
-</div>
-{{/has_requests}}
+<div id="page-content">
 
-{{^has_requests}}
-<p>{{#str}}no_requests, local_solicitacoes{{/str}}</p>
-{{/has_requests}}
+    <div id="region-main-box">
+        <section id="region-main">
+
+            {{#has_requests}}
+
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>{{#str}}user, local_solicitacoes{{/str}}</th>
+                            <th>{{#str}}action_type, local_solicitacoes{{/str}}</th>
+                            <th>{{#str}}course, local_solicitacoes{{/str}}</th>
+                            <th>{{#str}}target_users, local_solicitacoes{{/str}}</th>
+                            <th>{{#str}}role, local_solicitacoes{{/str}}</th>
+                            <th>{{#str}}created_at, local_solicitacoes{{/str}}</th>
+                            <th>{{#str}}status, local_solicitacoes{{/str}}</th>
+                            <th>{{#str}}actions, local_solicitacoes{{/str}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#requests}}
+                        <tr>
+                            <td>{{{solicitante_link}}}</td>
+                            <td>{{acao_label}}</td>
+                            <td>{{{cursos_display}}}</td>
+                            <td>{{{usuarios_display}}}</td>
+                            <td>{{papel_display}}</td>
+                            <td>{{created_date}}</td>
+                            <td>
+                                <span class="badge {{status_badge_class}}">{{status_label}}</span>
+                            </td>
+                            <td>
+                                {{#show_approve}}
+                                <a href="{{approve_url}}" class="btn btn-sm btn-success">{{#str}}approve, local_solicitacoes{{/str}}</a>
+                                {{/show_approve}}
+                                {{#show_reject}}
+                                <a href="{{reject_url}}" class="btn btn-sm btn-danger">{{#str}}deny, local_solicitacoes{{/str}}</a>
+                                {{/show_reject}}
+                                <a href="{{view_url}}" class="btn btn-sm btn-info">{{#str}}view, local_solicitacoes{{/str}}</a>
+                                <a href="{{delete_url}}" class="btn btn-sm btn-danger" onclick="return confirm('{{confirm_delete_msg}}');">{{#str}}delete, local_solicitacoes{{/str}}</a>
+                            </td>
+                        </tr>
+                        {{/requests}}
+                    </tbody>
+                </table>
+            </div>
+            {{/has_requests}}
+
+            {{^has_requests}}
+            <p>{{#str}}no_requests, local_solicitacoes{{/str}}</p>
+            {{/has_requests}}
+
+        </section>
+    </div>
+</div>
