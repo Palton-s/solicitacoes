@@ -24,6 +24,17 @@
     border-bottom: 1px solid #eee;
 }
 
+/* Estilização do wrapper do TomSelect */
+.ts-wrapper.form-control {
+    padding: 0 !important;
+    border-radius: 3px !important;
+}
+
+#region-main{
+    padding: 20px;
+}
+
+
 .tom-select .ts-dropdown .option:last-child {
     border-bottom: none;
 }
