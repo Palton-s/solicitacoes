@@ -17,11 +17,11 @@ try {
     $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
     
     // Debug - log dos parâmetros
-    error_log("Search Courses - Query: '$query', Limit: $limit");
+    error_log("Buscar Cursos - Query: '$query', Limit: $limit");
     
     // Validar parâmetros
     if (empty($query) || strlen($query) < 2) {
-        error_log("Search Courses - Query muito curta: '$query'");
+        error_log("Buscar Cursos - Query muito curta: '$query'");
         echo json_encode(array('debug' => 'Query muito curta'));
         exit;
     }
@@ -46,19 +46,19 @@ try {
     
     // Verificar se $DB está disponível
     if (!isset($DB)) {
-        error_log("Search Courses - \$DB não está disponível");
+        error_log("Buscar Cursos - \$DB não está disponível");
         echo json_encode(array('error' => 'Database não disponível'));
         exit;
     }
     
     try {
-        error_log("Search Courses - SQL: $sql");
-        error_log("Search Courses - Params: " . print_r($params, true));
+        error_log("Buscar Cursos - SQL: $sql");
+        error_log("Buscar Cursos - Params: " . print_r($params, true));
         
         // Executar consulta no banco com limite
         $courses = $DB->get_records_sql($sql, $params, 0, $limit);
         
-        error_log("Search Courses - Cursos encontrados: " . count($courses));
+        error_log("Buscar Cursos - Cursos encontrados: " . count($courses));
         
         $results = array();
         foreach ($courses as $course) {
@@ -75,7 +75,7 @@ try {
             );
         }
         
-        error_log("Search Courses - Resultados processados: " . count($results));
+        error_log("Buscar Cursos - Resultados processados: " . count($results));
         
     } catch (Exception $dbError) {
         error_log("Erro na consulta de cursos: " . $dbError->getMessage());
@@ -88,7 +88,7 @@ try {
     
 } catch (Exception $e) {
     // Log do erro e retorno de erro genérico
-    error_log("Erro no search_courses.php: " . $e->getMessage());
+    error_log("Erro no buscar-cursos.php: " . $e->getMessage());
     header('HTTP/1.0 500 Internal Server Error');
     header('Content-Type: application/json');
     echo json_encode(array('error' => 'Erro interno'));

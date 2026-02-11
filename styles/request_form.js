@@ -58,7 +58,7 @@ window.addEventListener("load", function() {
                         return;
                     }
 
-                    var url = moodleRoot + "/local/solicitacoes/ajax/search_courses.php?query=" + encodeURIComponent(query) + "&limit=20";
+                    var url = moodleRoot + "/local/solicitacoes/ajax/buscar-cursos.php?query=" + encodeURIComponent(query) + "&limit=20";
                     console.log("Buscando cursos:", url);
 
                     fetch(url)
@@ -121,7 +121,7 @@ window.addEventListener("load", function() {
                         return;
                     }
 
-                    var url = moodleRoot + "/local/solicitacoes/ajax/search_users.php?query=" + encodeURIComponent(query) + "&limit=20";
+                    var url = moodleRoot + "/local/solicitacoes/ajax/buscar-usuarios.php?query=" + encodeURIComponent(query) + "&limit=20";
                     console.log("Buscando usuários:", url);
 
                     fetch(url)

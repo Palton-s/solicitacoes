@@ -17,11 +17,11 @@ try {
     $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
     
     // Debug - log dos parâmetros
-    error_log("Search Users - Query: '$query', Limit: $limit");
+    error_log("Buscar Usuários - Query: '$query', Limit: $limit");
     
     // Validar parâmetros
     if (empty($query) || strlen($query) < 2) {
-        error_log("Search Users - Query muito curta: '$query'");
+        error_log("Buscar Usuários - Query muito curta: '$query'");
         echo json_encode(array('debug' => 'Query muito curta'));
         exit;
     }
@@ -34,7 +34,7 @@ try {
     
     // Verificar se $DB está disponível
     if (!isset($DB)) {
-        error_log("Search Users - \$DB não está disponível");
+        error_log("Buscar Usuários - \$DB não está disponível");
         echo json_encode(array('error' => 'Database não disponível'));
         exit;
     }
@@ -53,14 +53,14 @@ try {
 
     $params = array($searchterm, $searchterm, $searchterm, $searchterm, 0, 1, 1);
     
-    error_log("Search Users - SQL: $sql");
-    error_log("Search Users - Params: " . print_r($params, true));
+    error_log("Buscar Usuários - SQL: $sql");
+    error_log("Buscar Usuários - Params: " . print_r($params, true));
     
     try {
         // Executar consulta no banco com limite
         $users = $DB->get_records_sql($sql, $params, 0, $limit);
         
-        error_log("Search Users - Usuários encontrados: " . count($users));
+        error_log("Buscar Usuários - Usuários encontrados: " . count($users));
         
         $results = array();
         foreach ($users as $user) {
@@ -85,7 +85,7 @@ try {
             );
         }
         
-        error_log("Search Users - Resultados processados: " . count($results));
+        error_log("Buscar Usuários - Resultados processados: " . count($results));
         
     } catch (Exception $dbError) {
         error_log("Erro na consulta de usuários: " . $dbError->getMessage());
@@ -98,7 +98,7 @@ try {
     
 } catch (Exception $e) {
     // Log do erro e retorno de erro genérico
-    error_log("Erro no search_users.php: " . $e->getMessage());
+    error_log("Erro no buscar-usuarios.php: " . $e->getMessage());
     header('HTTP/1.0 500 Internal Server Error');
     header('Content-Type: application/json');
     echo json_encode(array('error' => 'Erro interno'));

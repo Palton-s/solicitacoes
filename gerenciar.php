@@ -18,7 +18,7 @@ if (!has_capability('local/solicitacoes:manage', $context)) {
 }
 
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/local/solicitacoes/manage.php'));
+$PAGE->set_url(new moodle_url('/local/solicitacoes/gerenciar.php'));
 $PAGE->set_title(get_string('list_title', 'local_solicitacoes'));
 $PAGE->set_heading(get_string('list_title', 'local_solicitacoes'));
 
@@ -42,7 +42,7 @@ if ($action === 'updatestatus' && $id && in_array($status, ['pendente','aprovado
             $resultado = \local_solicitacoes\solicitacoes_controller::execute_request_action($id);
             if (!$resultado['success']) {
                 \core\notification::error($resultado['message']);
-                redirect(new moodle_url('/local/solicitacoes/manage.php', ['filter' => $filter]));
+                redirect(new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]));
                 exit; // Parar execução após redirect
             }
         }
@@ -51,7 +51,7 @@ if ($action === 'updatestatus' && $id && in_array($status, ['pendente','aprovado
         if ($status === 'negado') {
             if (empty($motivo_negacao)) {
                 // Redirecionar para página de negação
-                redirect(new moodle_url('/local/solicitacoes/negar.php', ['id' => $id]));
+                redirect(new moodle_url('/local/solicitacoes/negar-solicitacao.php', ['id' => $id]));
                 exit; // Parar execução após redirect
             }
             $request->motivo_negacao = $motivo_negacao;
@@ -90,7 +90,7 @@ $filter_options = ['pendente' => 'Pendentes', 'aprovado' => 'Aprovadas', 'negado
 foreach ($filter_options as $key => $label) {
     $filter_tabs[] = [
         'label' => $label,
-        'url' => (new moodle_url('/local/solicitacoes/manage.php', ['filter' => $key]))->out(false),
+        'url' => (new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $key]))->out(false),
         'active' => ($filter === $key)
     ];
 }
@@ -234,7 +234,7 @@ foreach ($requests as $r) {
     }
 
     // Preparar dados para o template
-    $baseurl = new moodle_url('/local/solicitacoes/manage.php', ['filter' => $filter]);
+    $baseurl = new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]);
     
     $request_data = [
         'solicitante_link' => $solicitante_nome,
@@ -253,10 +253,10 @@ foreach ($requests as $r) {
             'status' => 'aprovado',
             'sesskey' => sesskey(),
         ]))->out(false),
-        'reject_url' => (new moodle_url('/local/solicitacoes/negar.php', [
+        'reject_url' => (new moodle_url('/local/solicitacoes/negar-solicitacao.php', [
             'id' => $r->id,
         ]))->out(false),
-        'view_url' => (new moodle_url('/local/solicitacoes/view.php', ['id' => $r->id]))->out(false),
+        'view_url' => (new moodle_url('/local/solicitacoes/detalhes.php', ['id' => $r->id]))->out(false),
         'delete_url' => (new moodle_url($baseurl, [
             'action' => 'delete',
             'id' => $r->id,

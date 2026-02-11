@@ -24,7 +24,7 @@ if (!$canmanage && !$canviewall) {
     $request = $DB->get_record('local_solicitacoes', ['id' => $id], '*', MUST_EXIST);
     if ($request->userid != $USER->id) {
         redirect(
-            new moodle_url('/local/solicitacoes/myrequests.php'),
+            new moodle_url('/local/solicitacoes/minhas-solicitacoes.php'),
             get_string('error_nopermission_viewrequest', 'local_solicitacoes'),
             null,
             \core\output\notification::NOTIFY_INFO
@@ -34,7 +34,7 @@ if (!$canmanage && !$canviewall) {
 }
 
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/local/solicitacoes/view.php'), array('id' => $id));
+$PAGE->set_url(new moodle_url('/local/solicitacoes/detalhes.php'), array('id' => $id));
 $PAGE->set_title(get_string('details', 'local_solicitacoes'));
 $PAGE->set_heading(get_string('details', 'local_solicitacoes'));
 
@@ -268,7 +268,7 @@ if ($canmanage) {
 
     // Botão Negar - só mostrar se não estiver negado (redireciona para página de negação)
     if ($request->status !== 'negado') {
-        $url_negar = new moodle_url('/local/solicitacoes/negar.php', array('id' => $request->id));
+        $url_negar = new moodle_url('/local/solicitacoes/negar-solicitacao.php', array('id' => $request->id));
         $buttons[] = html_writer::link($url_negar, get_string('deny', 'local_solicitacoes'), 
             array('class' => 'btn btn-secondary mr-2'));
     }
@@ -289,7 +289,7 @@ if ($canmanage) {
 
 // Link para voltar
 echo html_writer::start_tag('div', array('class' => 'mt-3'));
-$backurl = $canmanage ? new moodle_url('/local/solicitacoes/manage.php') : new moodle_url('/local/solicitacoes/myrequests.php');
+$backurl = $canmanage ? new moodle_url('/local/solicitacoes/gerenciar.php') : new moodle_url('/local/solicitacoes/minhas-solicitacoes.php');
 echo html_writer::link($backurl, '← ' . get_string('back_to_list', 'local_solicitacoes'), array('class' => 'btn btn-outline-primary'));
 echo html_writer::end_tag('div');
 

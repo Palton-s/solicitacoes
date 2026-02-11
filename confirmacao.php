@@ -10,7 +10,7 @@ $canview = has_capability('local/solicitacoes:view', $context);
 $canmanage = has_capability('local/solicitacoes:manage', $context);
 
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/local/solicitacoes/thankyou.php'));
+$PAGE->set_url(new moodle_url('/local/solicitacoes/confirmacao.php'));
 $PAGE->set_title(get_string('thankyou_title', 'local_solicitacoes'));
 $PAGE->set_heading(get_string('thankyou_title', 'local_solicitacoes'));
 
@@ -33,7 +33,7 @@ echo html_writer::start_div('mt-3');
 
 // Botão "Minhas Solicitações" - apenas para usuários que podem visualizar mas não gerenciar
 if ($canview && !$canmanage) {
-    $myrequestsurl = new moodle_url('/local/solicitacoes/myrequests.php');
+    $myrequestsurl = new moodle_url('/local/solicitacoes/minhas-solicitacoes.php');
     echo html_writer::link(
         $myrequestsurl, 
         get_string('my_requests', 'local_solicitacoes'), 
@@ -41,7 +41,7 @@ if ($canview && !$canmanage) {
     );
 }
 
-$newrequesturl = new moodle_url('/local/solicitacoes/index.php');
+$newrequesturl = new moodle_url('/local/solicitacoes/nova-solicitacao.php');
 echo html_writer::link(
     $newrequesturl, 
     get_string('thankyou_new_request', 'local_solicitacoes'), 

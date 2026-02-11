@@ -121,7 +121,7 @@ function local_solicitacoes_extend_navigation(global_navigation $navigation) {
         if (local_solicitacoes_can_submit($context)) {
             $node->add(
                 get_string('request_form_title', 'local_solicitacoes'),
-                new moodle_url('/local/solicitacoes/index.php'),
+                new moodle_url('/local/solicitacoes/nova-solicitacao.php'),
                 navigation_node::TYPE_CUSTOM
             );
         }
@@ -130,7 +130,7 @@ function local_solicitacoes_extend_navigation(global_navigation $navigation) {
         if (has_capability('local/solicitacoes:view', $context)) {
             $node->add(
                 get_string('my_requests', 'local_solicitacoes'),
-                new moodle_url('/local/solicitacoes/myrequests.php'),
+                new moodle_url('/local/solicitacoes/minhas-solicitacoes.php'),
                 navigation_node::TYPE_CUSTOM
             );
         }
@@ -139,7 +139,7 @@ function local_solicitacoes_extend_navigation(global_navigation $navigation) {
         if (local_solicitacoes_can_manage($context)) {
             $node->add(
                 get_string('list_title', 'local_solicitacoes'),
-                new moodle_url('/local/solicitacoes/manage.php'),
+                new moodle_url('/local/solicitacoes/gerenciar.php'),
                 navigation_node::TYPE_CUSTOM
             );
         }

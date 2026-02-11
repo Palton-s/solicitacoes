@@ -17,7 +17,7 @@ if (!has_capability('local/solicitacoes:view', $context)) {
 }
 
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/local/solicitacoes/myrequests.php'));
+$PAGE->set_url(new moodle_url('/local/solicitacoes/minhas-solicitacoes.php'));
 $PAGE->set_title(get_string('my_requests', 'local_solicitacoes'));
 $PAGE->set_heading(get_string('my_requests', 'local_solicitacoes'));
 
@@ -26,7 +26,7 @@ echo $OUTPUT->header();
 // Botão "Nova Solicitação" no canto superior direito
 echo html_writer::start_div('d-flex justify-content-between align-items-center mb-3');
 echo html_writer::tag('h4', get_string('my_requests', 'local_solicitacoes'), ['class' => 'mb-0']);
-$newrequesturl = new moodle_url('/local/solicitacoes/index.php');
+$newrequesturl = new moodle_url('/local/solicitacoes/nova-solicitacao.php');
 echo html_writer::link(
     $newrequesturl, 
     '+ ' . get_string('thankyou_new_request', 'local_solicitacoes'), 
@@ -155,7 +155,7 @@ foreach ($requests as $r) {
         'created_date' => userdate($r->timecreated),
         'status_label' => $statuslabel,
         'status_badge_class' => $status_class, // Badge com estilo colorido
-        'view_url' => (new moodle_url('/local/solicitacoes/view.php', ['id' => $r->id]))->out(false),
+        'view_url' => (new moodle_url('/local/solicitacoes/detalhes.php', ['id' => $r->id]))->out(false),
     ];
     
     $template_data['requests'][] = $request_data;

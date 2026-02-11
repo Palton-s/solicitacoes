@@ -38,7 +38,7 @@ $usuarios = $DB->get_records_sql($sql_usuarios, array('id' => $id));
 // Verificar se já está negada
 if ($request->status === 'negado') {
     redirect(
-        new moodle_url('/local/solicitacoes/manage.php'),
+        new moodle_url('/local/solicitacoes/gerenciar.php'),
         'Esta solicitação já foi negada.',
         null,
         \core\output\notification::NOTIFY_INFO
@@ -47,7 +47,7 @@ if ($request->status === 'negado') {
 }
 
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/local/solicitacoes/negar.php', array('id' => $id)));
+$PAGE->set_url(new moodle_url('/local/solicitacoes/negar-solicitacao.php', array('id' => $id)));
 $PAGE->set_title('Negar Solicitação');
 $PAGE->set_heading('Negar Solicitação');
 
@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         local_solicitacoes_notify_negada($id);
         
         redirect(
-            new moodle_url('/local/solicitacoes/manage.php'),
+            new moodle_url('/local/solicitacoes/gerenciar.php'),
             'Solicitação negada com sucesso.',
             null,
             \core\output\notification::NOTIFY_SUCCESS
@@ -152,7 +152,7 @@ echo html_writer::end_div();
 echo html_writer::start_div('form-group mt-4');
 echo html_writer::tag('button', 'Confirmar Negação', array('type' => 'submit', 'class' => 'btn btn-secondary btn-lg mr-2'));
 
-$cancel_url = new moodle_url('/local/solicitacoes/view.php', array('id' => $id));
+$cancel_url = new moodle_url('/local/solicitacoes/detalhes.php', array('id' => $id));
 echo html_writer::link($cancel_url, 'Cancelar', array('class' => 'btn btn-secondary btn-lg'));
 echo html_writer::end_div();
 

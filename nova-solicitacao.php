@@ -16,7 +16,7 @@ if (!has_capability('local/solicitacoes:submit', $context)) {
 }
 
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/local/solicitacoes/index.php'));
+$PAGE->set_url(new moodle_url('/local/solicitacoes/nova-solicitacao.php'));
 $PAGE->set_title(get_string('request_form_title', 'local_solicitacoes'));
 $PAGE->set_heading(get_string('request_form_title', 'local_solicitacoes'));
 
@@ -42,10 +42,10 @@ echo $OUTPUT->header();
 // Processar cancelamento
 if (optional_param('cancel', 0, PARAM_BOOL)) {
     if (has_capability('local/solicitacoes:manage', $context)) {
-        redirect(new moodle_url('/local/solicitacoes/manage.php'));
+        redirect(new moodle_url('/local/solicitacoes/gerenciar.php'));
         exit;
     } else {
-        redirect(new moodle_url('/local/solicitacoes/myrequests.php'));
+        redirect(new moodle_url('/local/solicitacoes/minhas-solicitacoes.php'));
         exit;
     }
 }
@@ -132,7 +132,7 @@ if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, P
         }
         
         \local_solicitacoes\solicitacoes_controller::process_request_submission($data);
-        redirect(new moodle_url('/local/solicitacoes/thankyou.php'));
+        redirect(new moodle_url('/local/solicitacoes/confirmacao.php'));
         exit;
     } else {
         // Mostrar erros
@@ -174,12 +174,12 @@ foreach ($roles as $role) {
 
 // URL de cancelamento
 $cancel_url = has_capability('local/solicitacoes:manage', $context) 
-    ? new moodle_url('/local/solicitacoes/manage.php')
-    : new moodle_url('/local/solicitacoes/myrequests.php');
+    ? new moodle_url('/local/solicitacoes/gerenciar.php')
+    : new moodle_url('/local/solicitacoes/minhas-solicitacoes.php');
 
 // Dados para o template
 $template_data = array(
-    'action_url' => (new moodle_url('/local/solicitacoes/index.php'))->out(false),
+    'action_url' => (new moodle_url('/local/solicitacoes/nova-solicitacao.php'))->out(false),
     'sesskey' => sesskey(),
     'acoes' => $acoes,
     'papeis' => $papeis,

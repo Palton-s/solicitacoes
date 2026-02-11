@@ -1,5 +1,23 @@
 # Plugin Moodle: Solicitações de Gerenciamento de Curso
 
+## Versão 1.2.1 - Rotas em Português
+
+**🎉 Todas as rotas estão em português para melhor compreensão!**
+
+### Rotas Principais
+- ✅ `nova-solicitacao.php` - Criar nova solicitação
+- ✅ `minhas-solicitacoes.php` - Ver próprias solicitações
+- ✅ `gerenciar.php` - Gerenciar solicitações (admin)
+- ✅ `detalhes.php` - Ver detalhes de solicitação
+- ✅ `negar-solicitacao.php` - Negar solicitação (admin)
+- ✅ `confirmacao.php` - Página de confirmação
+
+### Rotas AJAX
+- ✅ `ajax/buscar-cursos.php` - Buscar cursos (autocomplete)
+- ✅ `ajax/buscar-usuarios.php` - Buscar usuários (autocomplete)
+
+---
+
 ## Descrição
 
 O plugin "Solicitações de Gerenciamento de Curso" é um sistema integrado ao Moodle que permite aos usuários solicitar inscrições, remoções ou suspensões de usuários em cursos, com aprovação dos administradores.
@@ -22,25 +40,49 @@ O plugin "Solicitações de Gerenciamento de Curso" é um sistema integrado ao M
 ## Estrutura de Arquivos
 
 ```
-plugin_moodle_a2/
+local/solicitacoes/
+├── ajax/
+│   ├── buscar-cursos.php       # AJAX: buscar cursos
+│   ├── buscar-usuarios.php     # AJAX: buscar usuários
+│   ├── test_db.php             # Teste de BD (dev)
+│   └── test_simple.php         # Teste simples (dev)
 ├── classes/
+│   ├── solicitacoes_controller.php  # Controlador principal
 │   └── form/
-│       └── request_form.php    # Classe do formulário
+│       └── request_form.php    # Form API (backup)
 ├── db/
 │   ├── access.php          # Definições de capacidades
 │   ├── install.php         # Script de instalação
-│   └── install.xml         # Estrutura do banco de dados
+│   ├── install.xml         # Estrutura do banco de dados
+│   ├── upgrade.php         # Scripts de atualização
+│   └── messages.php        # Definições de mensagens
 ├── lang/
 │   ├── en/
 │   │   └── local_solicitacoes.php    # Strings em inglês
 │   └── pt_br/
 │       └── local_solicitacoes.php    # Strings em português
-├── index.php              # Formulário para usuários
-├── manage.php             # Interface administrativa
-├── settings.php           # Configurações do admin
-├── styles.css             # Estilos personalizados
-├── version.php            # Informações da versão
-└── README.md              # Este arquivo
+├── styles/
+│   ├── request_form.css    # Estilos do formulário
+│   ├── request_form.js     # JavaScript do formulário
+│   ├── tomselect_custom.css
+│   └── view_details.css
+├── templates/
+│   ├── form_solicitacao.mustache     # Template do formulário
+│   ├── manage_requests.mustache      # Template de gerenciamento
+│   └── my_requests.mustache          # Template de minhas solicitações
+├── nova-solicitacao.php    # ✅ Criar nova solicitação
+├── minhas-solicitacoes.php # ✅ Ver próprias solicitações
+├── gerenciar.php           # ✅ Gerenciar solicitações - admin
+├── detalhes.php            # ✅ Ver detalhes
+├── negar-solicitacao.php   # ✅ Negar solicitação
+├── confirmacao.php         # ✅ Página de confirmação
+├── clear_cache.php         # Limpar cache (dev)
+├── debug.php               # Debug (dev)
+├── lib.php                 # Funções da biblioteca
+├── settings.php            # Configurações do admin
+├── version.php             # Informações da versão (v1.2.1)
+├── README.md               # Este arquivo
+└── CHANGELOG.md            # Histórico de mudanças
 ```
 
 ## Capacidades
