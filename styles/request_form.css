@@ -56,6 +56,10 @@
     margin: 2px;
 }
 
+.form-control{
+    padding: 0px;
+    border-radius: 4px;
+}
 
 /* Melhoria na apresentação das opções */
 
