@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_solicitacoes';
-$plugin->version   = 2026021109;        // YYYYMMDDXX - v1.2.1: Arquivos deprecated removidos.
+$plugin->version   = 2026021110;        // YYYYMMDDXX - v1.2.1: Arquivos deprecated removidos.
 $plugin->requires  = 2022041900;        // Requer Moodle 4.0 ou superior.
 $plugin->maturity  = MATURITY_STABLE;   // MATURITY_ALPHA, MATURITY_BETA, MATURITY_RC ou MATURITY_STABLE.
 $plugin->release   = 'v1.2.1';

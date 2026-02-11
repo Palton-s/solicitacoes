@@ -57,6 +57,7 @@ $string['papel_editingteacher'] = 'Editing Teacher';
 $string['papel_manager']        = 'Manager';
 
 $string['list_title']           = 'Course Management Requests';
+$string['access_all_requests']  = 'Access all requests';
 $string['status_pendente']      = 'Pending';
 $string['status_aprovado']      = 'Approved';
 $string['status_negado']        = 'Denied';

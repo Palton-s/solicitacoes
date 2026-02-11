@@ -23,17 +23,6 @@ $PAGE->set_heading(get_string('my_requests', 'local_solicitacoes'));
 
 echo $OUTPUT->header();
 
-// Botão "Nova Solicitação" no canto superior direito
-echo html_writer::start_div('d-flex justify-content-between align-items-center mb-3');
-echo html_writer::tag('h4', get_string('my_requests', 'local_solicitacoes'), ['class' => 'mb-0']);
-$newrequesturl = new moodle_url('/local/solicitacoes/nova-solicitacao.php');
-echo html_writer::link(
-    $newrequesturl, 
-    '+ ' . get_string('thankyou_new_request', 'local_solicitacoes'), 
-    ['class' => 'btn btn-primary']
-);
-echo html_writer::end_div();
-
 global $DB, $USER;
 
 // Buscar solicitações do usuário atual
@@ -75,6 +64,7 @@ $template_data = [
     'has_requests' => !empty($requests),
     'requests' => [],
     'can_manage' => has_capability('local/solicitacoes:manage', $context),
+    'new_request_url' => (new moodle_url('/local/solicitacoes/nova-solicitacao.php'))->out(false),
 ];
 
 if (!$requests) {

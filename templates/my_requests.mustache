@@ -9,10 +9,17 @@
     <div id="region-main-box">
         <section id="region-main" class="p-4" style="background-color: transparent;">
 
+            <div class="d-flex justify-content-between align-items-center m-4">
+                <h4 class="mb-0">{{#str}}my_requests, local_solicitacoes{{/str}}</h4>
+                <a class="btn btn-primary" href="{{new_request_url}}">
+                    + {{#str}}thankyou_new_request, local_solicitacoes{{/str}}
+                </a>
+            </div>
+
             {{#can_manage}}
-            <div class="alert alert-info">
+            <div class="m-2">
                 <a href="{{config.wwwroot}}/local/solicitacoes/gerenciar.php" class="btn btn-primary">
-                    {{#str}}list_title, local_solicitacoes{{/str}}
+                    {{#str}}access_all_requests, local_solicitacoes{{/str}}
                 </a>
             </div>
             {{/can_manage}}
