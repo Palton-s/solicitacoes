@@ -59,6 +59,7 @@
 .form-control{
     padding: 0px;
     border-radius: 4px;
+    width: -webkit-fill-available !important;
 }
 
 /* Melhoria na apresentação das opções */

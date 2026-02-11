@@ -4,7 +4,7 @@
     Template para formulário de solicitação
 }}
 
-<div class="local-solicitacoes-form-container">
+<div class="local-solicitacoes-form-container" class="p-4">
     <form id="request_form" method="post" action="{{action_url}}" class="mform">
         <input type="hidden" name="sesskey" value="{{sesskey}}">
         <input type="hidden" name="submitbutton" value="1">
@@ -14,7 +14,7 @@
         <input type="hidden" name="usuarios_nomes" id="usuarios_nomes" value="">
 
         <div class="row mb-3">
-            <div class="col-md-12">
+            <div class="col-md-6">
                 <div class="form-group">
                     <label for="tipo_acao" class="form-label">
                         {{#str}}tipo_acao, local_solicitacoes{{/str}}
@@ -25,6 +25,23 @@
                             <option value="{{value}}">{{label}}</option>
                         {{/acoes}}
                     </select>
+                </div>
+            </div>
+            <div class="col-md-6" id="papel_container">
+                <div class="form-group">
+                    <label for="papel" class="form-label">
+                        {{#str}}papel, local_solicitacoes{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <select name="papel" id="papel" class="form-select form-control">
+                        <option value="">Selecione...</option>
+                        {{#papeis}}
+                            <option value="{{value}}">{{label}}</option>
+                        {{/papeis}}
+                    </select>
+                    <small class="form-text text-muted">
+                        {{#str}}papel_help, local_solicitacoes{{/str}}
+                    </small>
                 </div>
             </div>
         </div>
@@ -140,25 +157,7 @@
             </div>
         </div>
 
-        <div class="row mb-3" id="papel_container">
-            <div class="col-md-12">
-                <div class="form-group">
-                    <label for="papel" class="form-label">
-                        {{#str}}papel, local_solicitacoes{{/str}}
-                        <span class="text-danger">*</span>
-                    </label>
-                    <select name="papel" id="papel" class="form-select form-control">
-                        <option value="">Selecione...</option>
-                        {{#papeis}}
-                            <option value="{{value}}">{{label}}</option>
-                        {{/papeis}}
-                    </select>
-                    <small class="form-text text-muted">
-                        {{#str}}papel_help, local_solicitacoes{{/str}}
-                    </small>
-                </div>
-            </div>
-        </div>
+        
 
         <div class="row mb-3">
             <div class="col-md-12">
