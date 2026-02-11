@@ -56,6 +56,12 @@
     margin: 2px;
 }
 
+.ts-dropdown {
+    top: unset !important;
+    left: unset !important;
+    width: unset !important;
+}
+
 .form-control{
     padding: 0px;
     border-radius: 4px;
