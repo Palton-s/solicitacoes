@@ -37,7 +37,7 @@ if ($canview && !$canmanage) {
     echo html_writer::link(
         $myrequestsurl, 
         get_string('my_requests', 'local_solicitacoes'), 
-        ['class' => 'btn btn-secondary mr-2']
+        ['class' => 'btn mr-2']
     );
 }
 
@@ -45,14 +45,14 @@ $newrequesturl = new moodle_url('/local/solicitacoes/nova-solicitacao.php');
 echo html_writer::link(
     $newrequesturl, 
     get_string('thankyou_new_request', 'local_solicitacoes'), 
-    ['class' => 'btn btn-secondary mr-2']
+    ['class' => 'btn btn-primary mr-2']
 );
 
 $homeurl = new moodle_url('/');
 echo html_writer::link(
     $homeurl, 
     get_string('thankyou_back_home', 'local_solicitacoes'), 
-    ['class' => 'btn btn-secondary']
+    ['class' => 'btn']
 );
 echo html_writer::end_div();
 

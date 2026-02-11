@@ -19,7 +19,7 @@
 <div id="page-content">
 
     <div id="region-main-box">
-        <section id="region-main">
+        <section id="region-main" class="p-4">
 
             {{#has_requests}}
 
@@ -51,13 +51,13 @@
                             </td>
                             <td>
                                 {{#show_approve}}
-                                <a href="{{approve_url}}" class="btn btn-sm btn-success">{{#str}}approve, local_solicitacoes{{/str}}</a>
+                                <a href="{{approve_url}}" class="btn btn-sm btn-primary">{{#str}}approve, local_solicitacoes{{/str}}</a>
                                 {{/show_approve}}
                                 {{#show_reject}}
-                                <a href="{{reject_url}}" class="btn btn-sm btn-danger">{{#str}}deny, local_solicitacoes{{/str}}</a>
+                                <a href="{{reject_url}}" class="btn btn-sm">{{#str}}deny, local_solicitacoes{{/str}}</a>
                                 {{/show_reject}}
-                                <a href="{{view_url}}" class="btn btn-sm btn-info">{{#str}}view, local_solicitacoes{{/str}}</a>
-                                <a href="{{delete_url}}" class="btn btn-sm btn-danger" onclick="return confirm('{{confirm_delete_msg}}');">{{#str}}delete, local_solicitacoes{{/str}}</a>
+                                <a href="{{view_url}}" class="btn btn-sm">{{#str}}view, local_solicitacoes{{/str}}</a>
+                                <a href="{{delete_url}}" class="btn btn-sm" onclick="return confirm('{{confirm_delete_msg}}');">{{#str}}delete, local_solicitacoes{{/str}}</a>
                             </td>
                         </tr>
                         {{/requests}}

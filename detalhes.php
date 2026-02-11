@@ -263,14 +263,14 @@ if ($canmanage) {
             'sesskey' => sesskey()
         ));
         $buttons[] = html_writer::link($url_aprovar, get_string('approve', 'local_solicitacoes'), 
-            array('class' => 'btn btn-secondary mr-2'));
+            array('class' => 'btn btn-primary mr-2'));
     }
 
     // Botão Negar - só mostrar se não estiver negado (redireciona para página de negação)
     if ($request->status !== 'negado') {
         $url_negar = new moodle_url('/local/solicitacoes/negar-solicitacao.php', array('id' => $request->id));
         $buttons[] = html_writer::link($url_negar, get_string('deny', 'local_solicitacoes'), 
-            array('class' => 'btn btn-secondary mr-2'));
+            array('class' => 'btn mr-2'));
     }
 
     // Botão Excluir - sempre mostrar
@@ -280,7 +280,7 @@ if ($canmanage) {
         'sesskey' => sesskey()
     ));
     $buttons[] = html_writer::link($url_delete, get_string('delete', 'local_solicitacoes'), 
-        array('class' => 'btn btn-secondary mr-2', 'onclick' => 'return confirm("' . get_string('confirm_delete', 'local_solicitacoes') . '");'));
+        array('class' => 'btn mr-2', 'onclick' => 'return confirm("' . get_string('confirm_delete', 'local_solicitacoes') . '");'));
 
     echo implode(' ', $buttons);
     echo html_writer::end_div();

@@ -247,39 +247,22 @@
     background-color: rgba(0, 128, 65, 0.15);
 }
 
-/* Button Styles Improvements */
-.btn-success {
-    background-color: #008041;
-    border-color: #008041;
+/* Button Styles - Simplified */
+.btn {
+    border: 1px solid #dee2e6;
+    background-color: #f8f9fa;
+    color: #212529;
 }
 
-.btn-success:hover {
-    background-color: #006633;
-    border-color: #006633;
+.btn:hover {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
 }
 
-.btn-success:focus,
-.btn-success:active {
-    background-color: #005529;
-    border-color: #005529;
-    box-shadow: 0 0 0 0.2rem rgba(0, 128, 65, 0.25);
-}
-
-.btn-info {
-    background-color: #17a2b8;
-    border-color: #17a2b8;
-    color: #ffffff;
-}
-
-.btn-info:hover {
-    background-color: #138496;
-    border-color: #138496;
-}
-
-.btn-danger:focus,
-.btn-success:focus,
-.btn-info:focus {
+.btn:focus,
+.btn:active {
     outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 128, 65, 0.1);
 }
 
 /* Alert Info Styling */

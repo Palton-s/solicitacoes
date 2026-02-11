@@ -150,10 +150,10 @@ echo html_writer::tag('small', 'Este motivo será visível para o solicitante.',
 echo html_writer::end_div();
 
 echo html_writer::start_div('form-group mt-4');
-echo html_writer::tag('button', 'Confirmar Negação', array('type' => 'submit', 'class' => 'btn btn-secondary btn-lg mr-2'));
+echo html_writer::tag('button', 'Confirmar Negação', array('type' => 'submit', 'class' => 'btn btn-primary btn-lg mr-2'));
 
 $cancel_url = new moodle_url('/local/solicitacoes/detalhes.php', array('id' => $id));
-echo html_writer::link($cancel_url, 'Cancelar', array('class' => 'btn btn-secondary btn-lg'));
+echo html_writer::link($cancel_url, 'Cancelar', array('class' => 'btn btn-lg'));
 echo html_writer::end_div();
 
 echo html_writer::end_tag('form');

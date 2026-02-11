@@ -30,7 +30,7 @@ $newrequesturl = new moodle_url('/local/solicitacoes/nova-solicitacao.php');
 echo html_writer::link(
     $newrequesturl, 
     '+ ' . get_string('thankyou_new_request', 'local_solicitacoes'), 
-    ['class' => 'btn btn-secondary']
+    ['class' => 'btn btn-primary']
 );
 echo html_writer::end_div();
 
