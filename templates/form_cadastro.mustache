@@ -184,8 +184,86 @@ require(['jquery'], function($) {
                     });
                 },
                 onChange: function(value) {
-                    $('#curso_id_selected').val(value);
+                    console.log('TomSelect Curso - onChange triggered, value:', value);
+                    $('#curso_id_selected').val(value || '');
+                    console.log('TomSelect Curso - Hidden field updated:', $('#curso_id_selected').val());
                 }
+            });
+            
+            // Listener para o campo papel
+            $('#papel').on('change', function() {
+                console.log('Campo Papel - onChange triggered, value:', $(this).val());
+            });
+            
+            // Validação antes de submeter
+            $('#form_cadastro').on('submit', function(e) {
+                console.log('=== FORM CADASTRO SUBMIT TRIGGERED ===');
+                var cursoId = $('#curso_id_selected').val();
+                var papel = $('#papel').val();
+                var firstname = $('#firstname').val();
+                var lastname = $('#lastname').val();
+                var cpf = $('#cpf').val();
+                var email = $('#email_novo_usuario').val();
+                var sesskey = $('input[name="sesskey"]').val();
+                var submitbutton = $('input[name="submitbutton"]').val();
+                
+                console.log('Curso ID:', cursoId, 'Empty:', !cursoId);
+                console.log('Papel:', papel, 'Empty:', !papel);
+                console.log('Firstname:', firstname, 'Empty:', !firstname);
+                console.log('Lastname:', lastname, 'Empty:', !lastname);
+                console.log('CPF:', cpf, 'Empty:', !cpf);
+                console.log('Email:', email, 'Empty:', !email);
+                console.log('Sesskey:', sesskey);
+                console.log('Submitbutton:', submitbutton);
+                
+                var formData = $(this).serializeArray();
+                console.log('=== FORM DATA COMPLETO ===');
+                console.table(formData);
+                
+                if (!cursoId || cursoId === '') {
+                    e.preventDefault();
+                    console.error('ERRO: Curso não selecionado');
+                    alert('Por favor, selecione um curso.');
+                    return false;
+                }
+                
+                if (!papel || papel === '') {
+                    e.preventDefault();
+                    console.error('ERRO: Papel não selecionado');
+                    alert('Por favor, selecione um papel.');
+                    return false;
+                }
+                
+                if (!firstname || firstname.trim() === '') {
+                    e.preventDefault();
+                    console.error('ERRO: Nome não preenchido');
+                    alert('Por favor, informe o primeiro nome.');
+                    return false;
+                }
+                
+                if (!lastname || lastname.trim() === '') {
+                    e.preventDefault();
+                    console.error('ERRO: Sobrenome não preenchido');
+                    alert('Por favor, informe o sobrenome.');
+                    return false;
+                }
+                
+                if (!cpf || cpf.trim() === '') {
+                    e.preventDefault();
+                    console.error('ERRO: CPF não preenchido');
+                    alert('Por favor, informe o CPF.');
+                    return false;
+                }
+                
+                if (!email || email.trim() === '') {
+                    e.preventDefault();
+                    console.error('ERRO: Email não preenchido');
+                    alert('Por favor, informe o email.');
+                    return false;
+                }
+                
+                console.log('=== VALIDACAO OK, SUBMETENDO PARA: ' + $(this).attr('action') + ' ===');
+                return true;
             });
         }
         

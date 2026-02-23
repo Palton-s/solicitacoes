@@ -40,98 +40,26 @@ $PAGE->requires->js_init_code("
 
 echo $OUTPUT->header();
 
-// Processar cancelamento
-if (optional_param('cancel', 0, PARAM_BOOL)) {
-    redirect(new moodle_url('/local/solicitacoes/selecionar-acao.php'));
-    exit;
-}
-
-// Capturar submitbutton uma única vez
-$submitbutton = optional_param('submitbutton', '', PARAM_TEXT);
-
-// Processar submissão do formulário
-if (data_submitted() && confirm_sesskey() && $submitbutton) {
-    global $USER, $DB;
-    
-    $errors = [];
-    
-    // Coletar dados do formulário
-    $curso_id = optional_param('curso_id_selected', 0, PARAM_INT);
-    $papel = optional_param('papel', '', PARAM_ALPHANUMEXT);
-    $firstname = optional_param('firstname', '', PARAM_TEXT);
-    $lastname = optional_param('lastname', '', PARAM_TEXT);
-    $cpf = optional_param('cpf', '', PARAM_TEXT);
-    $email_novo_usuario = optional_param('email_novo_usuario', '', PARAM_EMAIL);
-    $observacoes = optional_param('observacoes', '', PARAM_TEXT);
-    
-    // Debug log
-    error_log("Cadastro - Dados recebidos - curso: $curso_id, papel: $papel, nome: $firstname $lastname, cpf: $cpf, email: $email_novo_usuario");
-    
-    // Validações
-    if (empty($curso_id) || $curso_id <= 0) {
-        $errors[] = get_string('error_curso_required', 'local_solicitacoes');
-    }
-    
-    // Validar papel - verificar se existe no Moodle
-    if (empty($papel)) {
-        $errors[] = get_string('error_papel_required', 'local_solicitacoes');
-    } else {
-        $role_check = $DB->get_record('role', ['shortname' => $papel]);
-        if (!$role_check) {
-            $errors[] = get_string('error_papel_invalid', 'local_solicitacoes');
-        }
-    }
-    
-    if (empty(trim($firstname))) {
-        $errors[] = get_string('error_firstname_required', 'local_solicitacoes');
-    }
-    
-    if (empty(trim($lastname))) {
-        $errors[] = get_string('error_lastname_required', 'local_solicitacoes');
-    }
-    
-    if (empty(trim($cpf))) {
-        $errors[] = get_string('error_cpf_required', 'local_solicitacoes');
-    }
-    
-    if (empty(trim($email_novo_usuario))) {
-        $errors[] = get_string('error_email_required', 'local_solicitacoes');
-    }
-    
-    // Se não houver erros, processar
-    if (empty($errors)) {
-        $data = new \stdClass();
-        $data->tipo_acao = 'cadastro';
-        $data->curso_id_selected = $curso_id;
-        $data->papel = $papel;
-        $data->firstname = trim($firstname);
-        $data->lastname = trim($lastname);
-        $data->cpf = trim($cpf);
-        $data->email_novo_usuario = trim($email_novo_usuario);
-        $data->observacoes = $observacoes;
-        
-        $success = \local_solicitacoes\solicitacoes_controller::process_request_submission($data);
-        if ($success) {
-            redirect(new moodle_url('/local/solicitacoes/confirmacao.php'),
-                     get_string('success_submit', 'local_solicitacoes'), null, \core\output\notification::NOTIFY_SUCCESS);
-        } else {
-            redirect(new moodle_url('/local/solicitacoes/solicitar-cadastro.php'),
-                     get_string('error_submit', 'local_solicitacoes'), null, \core\output\notification::NOTIFY_ERROR);
-        }
-        exit;
-    } else {
-        // Mostrar erros
-        foreach ($errors as $error) {
-            echo $OUTPUT->notification($error, \core\output\notification::NOTIFY_ERROR);
-        }
+// Buscar papéis disponíveis no Moodle
+$systemcontext = context_system::instance();
+$all_roles = role_get_names($systemcontext, ROLENAME_ALIAS, false);
+$roles_array = [];
+foreach ($all_roles as $roleid => $rolename) {
+    $role = $DB->get_record('role', ['id' => $roleid], 'shortname, name');
+    if ($role) {
+        $roles_array[] = [
+            'shortname' => $role->shortname,
+            'localname' => role_get_name($role)
+        ];
     }
 }
 
 // Preparar dados para o template
 $template_data = [
-    'action_url' => (new moodle_url('/local/solicitacoes/solicitar-cadastro.php'))->out(false),
+    'action_url' => (new moodle_url('/local/solicitacoes/processar-cadastro.php'))->out(false),
     'sesskey' => sesskey(),
-    'cancel_url' => (new moodle_url('/local/solicitacoes/selecionar-acao.php'))->out(false)
+    'cancel_url' => (new moodle_url('/local/solicitacoes/selecionar-acao.php'))->out(false),
+    'roles' => $roles_array
 ];
 
 echo $OUTPUT->render_from_template('local_solicitacoes/form_cadastro', $template_data);

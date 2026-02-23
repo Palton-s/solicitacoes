@@ -156,8 +156,72 @@ require(['jquery'], function($) {
                     });
                 },
                 onChange: function(value) {
-                    $('#unidade_academica_id').val(value);
+                    console.log('TomSelect Unidade - onChange triggered, value:', value);
+                    $('#unidade_academica_id').val(value || '');
+                    console.log('TomSelect Unidade - Hidden field updated:', $('#unidade_academica_id').val());
                 }
+            });
+            
+            // Validação antes de submeter
+            $('#form_criar_curso').on('submit', function(e) {
+                console.log('=== FORM CRIAR CURSO SUBMIT TRIGGERED ===');
+                var codigoSigaa = $('#codigo_sigaa').val();
+                var courseShortname = $('#course_shortname').val();
+                var unidadeId = $('#unidade_academica_id').val();
+                var anoSemestre = $('#ano_semestre').val();
+                var razoesCriacao = $('#razoes_criacao').val();
+                var sesskey = $('input[name="sesskey"]').val();
+                var submitbutton = $('input[name="submitbutton"]').val();
+                
+                console.log('Codigo SIGAA:', codigoSigaa, 'Empty:', !codigoSigaa);
+                console.log('Course Shortname:', courseShortname, 'Empty:', !courseShortname);
+                console.log('Unidade ID:', unidadeId, 'Empty:', !unidadeId);
+                console.log('Ano/Semestre:', anoSemestre, 'Empty:', !anoSemestre);
+                console.log('Razoes Criacao:', razoesCriacao ? razoesCriacao.substring(0, 50) + '...' : '[vazio]');
+                console.log('Sesskey:', sesskey);
+                console.log('Submitbutton:', submitbutton);
+                
+                var formData = $(this).serializeArray();
+                console.log('=== FORM DATA COMPLETO ===');
+                console.table(formData);
+                
+                if (!codigoSigaa || codigoSigaa.trim() === '') {
+                    e.preventDefault();
+                    console.error('ERRO: Código SIGAA não preenchido');
+                    alert('Por favor, informe o código SIGAA.');
+                    return false;
+                }
+                
+                if (!courseShortname || courseShortname.trim() === '') {
+                    e.preventDefault();
+                    console.error('ERRO: Nome curto não preenchido');
+                    alert('Por favor, informe o nome curto do curso.');
+                    return false;
+                }
+                
+                if (!unidadeId || unidadeId === '') {
+                    e.preventDefault();
+                    console.error('ERRO: Unidade acadêmica não selecionada');
+                    alert('Por favor, selecione a unidade acadêmica.');
+                    return false;
+                }
+                
+                if (!anoSemestre || anoSemestre.trim() === '') {
+                    e.preventDefault();
+                    console.error('ERRO: Ano/Semestre não preenchido');
+                    alert('Por favor, informe o ano/semestre.');
+                    return false;
+                }
+                
+                if (!razoesCriacao || razoesCriacao.trim() === '') {
+                    e.preventDefault();
+                    console.error('ERRO: Razões da criação não preenchidas');
+                    alert('Por favor, informe as razões para criação do curso.');
+                    return false;
+                }
+                
+                console.log('=== VALIDACAO OK, SUBMETENDO PARA: ' + $(this).attr('action') + ' ===');
+                return true;
             });
         }
     });

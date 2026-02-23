@@ -109,7 +109,9 @@ require(['jquery'], function($) {
                     });
                 },
                 onChange: function(value) {
-                    $('#curso_id_selected').val(value);
+                    console.log('TomSelect Curso - onChange triggered, value:', value);
+                    $('#curso_id_selected').val(value || '');
+                    console.log('TomSelect Curso - Hidden field updated:', $('#curso_id_selected').val());
                 }
             });
             
@@ -141,8 +143,56 @@ require(['jquery'], function($) {
                     });
                 },
                 onChange: function(value) {
-                    $('#usuarios_ids_selected').val(value.join(','));
+                    var selectedIds = Array.isArray(value) ? value.join(',') : '';
+                    console.log('TomSelect Usuários - onChange triggered, value:', value);
+                    console.log('TomSelect Usuários - selectedIds string:', selectedIds);
+                    $('#usuarios_ids_selected').val(selectedIds);
+                    console.log('TomSelect Usuários - Hidden field updated:', $('#usuarios_ids_selected').val());
                 }
+            });
+            
+            // Validação antes de submeter
+            $('#form_suspensao').on('submit', function(e) {
+                console.log('=== FORM SUSPENSAO SUBMIT TRIGGERED ===');
+                var cursoId = $('#curso_id_selected').val();
+                var usuariosIds = $('#usuarios_ids_selected').val();
+                var observacoes = $('#observacoes').val();
+                var sesskey = $('input[name="sesskey"]').val();
+                var submitbutton = $('input[name="submitbutton"]').val();
+                
+                console.log('Curso ID:', cursoId, 'Type:', typeof cursoId, 'Empty:', !cursoId);
+                console.log('Usuarios IDs:', usuariosIds, 'Type:', typeof usuariosIds, 'Empty:', !usuariosIds);
+                console.log('Observacoes:', observacoes ? observacoes.substring(0, 50) + '...' : '[vazio]');
+                console.log('Sesskey:', sesskey);
+                console.log('Submitbutton:', submitbutton);
+                
+                var formData = $(this).serializeArray();
+                console.log('=== FORM DATA COMPLETO ===');
+                console.table(formData);
+                
+                if (!cursoId || cursoId === '') {
+                    e.preventDefault();
+                    console.error('ERRO: Curso não selecionado');
+                    alert('Por favor, selecione um curso.');
+                    return false;
+                }
+                
+                if (!usuariosIds || usuariosIds === '') {
+                    e.preventDefault();
+                    console.error('ERRO: Usuários não selecionados');
+                    alert('Por favor, selecione pelo menos um usuário.');
+                    return false;
+                }
+                
+                if (!observacoes || observacoes.trim() === '') {
+                    e.preventDefault();
+                    console.error('ERRO: Motivo não preenchido');
+                    alert('Por favor, informe o motivo da suspensão.');
+                    return false;
+                }
+                
+                console.log('=== VALIDACAO OK, SUBMETENDO PARA: ' + $(this).attr('action') + ' ===');
+                return true;
             });
         }
     });
