@@ -81,6 +81,7 @@ $string['actions']              = 'Actions';
 $string['view']                 = 'View';
 $string['update_status']        = 'Update status';
 $string['success_submit']       = 'Your request has been sent successfully.';
+$string['error_submit']         = 'Error submitting request. Please try again.';
 $string['success_update']       = 'Status updated.';
 $string['details']              = 'Request Details';
 $string['back_to_list']         = 'Back to list';

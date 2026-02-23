@@ -175,8 +175,14 @@ if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, P
             $data->razoes_criacao = $razoes_criacao;
         }
         
-        \local_solicitacoes\solicitacoes_controller::process_request_submission($data);
-        redirect(new moodle_url('/local/solicitacoes/confirmacao.php'));
+        $success = \local_solicitacoes\solicitacoes_controller::process_request_submission($data);
+        if ($success) {
+            redirect(new moodle_url('/local/solicitacoes/confirmacao.php'),
+                     get_string('success_submit', 'local_solicitacoes'), null, \core\output\notification::NOTIFY_SUCCESS);
+        } else {
+            redirect(new moodle_url('/local/solicitacoes/nova-solicitacao.php'),
+                     get_string('error_submit', 'local_solicitacoes'), null, \core\output\notification::NOTIFY_ERROR);
+        }
         exit;
     } else {
         // Mostrar erros

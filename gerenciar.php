@@ -41,9 +41,8 @@ if ($action === 'updatestatus' && $id && in_array($status, ['pendente','aprovado
         if ($status === 'aprovado') {
             $resultado = \local_solicitacoes\solicitacoes_controller::execute_request_action($id);
             if (!$resultado['success']) {
-                \core\notification::error($resultado['message']);
-                redirect(new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]));
-                exit; // Parar execução após redirect
+                redirect(new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]), 
+                         $resultado['message'], null, \core\output\notification::NOTIFY_ERROR);
             }
         }
         
@@ -67,9 +66,8 @@ if ($action === 'updatestatus' && $id && in_array($status, ['pendente','aprovado
             local_solicitacoes_notify_aprovada($id);
         }
         
-        \core\notification::success(get_string('success_update', 'local_solicitacoes'));
-        redirect(new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]));
-        exit; // Parar execução após redirect de sucesso
+        redirect(new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]),
+                 get_string('success_update', 'local_solicitacoes'), null, \core\output\notification::NOTIFY_SUCCESS);
     }
 }
 
@@ -78,9 +76,8 @@ if ($action === 'delete' && $id) {
     require_sesskey();
     if ($DB->record_exists('local_solicitacoes', ['id' => $id])) {
         $DB->delete_records('local_solicitacoes', ['id' => $id]);
-        \core\notification::success(get_string('success_delete', 'local_solicitacoes'));
-        redirect(new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]));
-        exit;
+        redirect(new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]),
+                 get_string('success_delete', 'local_solicitacoes'), null, \core\output\notification::NOTIFY_SUCCESS);
     }
 }
 

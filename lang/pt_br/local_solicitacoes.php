@@ -83,6 +83,7 @@ $string['actions']              = 'Ações';
 $string['view']                 = 'Ver';
 $string['update_status']        = 'Atualizar status';
 $string['success_submit']       = 'Sua solicitação foi enviada com sucesso.';
+$string['error_submit']         = 'Erro ao enviar solicitação. Tente novamente.';
 $string['success_update']       = 'Status atualizado.';
 $string['details']              = 'Detalhes da Solicitação';
 $string['back_to_list']         = 'Voltar para lista';

@@ -50,16 +50,13 @@ class solicitacoes_controller {
                 // Enviar notificação de solicitação criada
                 local_solicitacoes_notify_criada($id);
                 
-                echo $OUTPUT->notification(get_string('success_submit', 'local_solicitacoes'), 'success');
                 return true;
             } else {
-                echo $OUTPUT->notification('Erro ao salvar solicitação', 'error');
                 return false;
             }
             
         } catch (\Exception $e) {
             error_log("Erro ao processar formulário: " . $e->getMessage());
-            echo $OUTPUT->notification('Erro ao processar dados: ' . $e->getMessage(), 'error');
             return false;
         }
     }
