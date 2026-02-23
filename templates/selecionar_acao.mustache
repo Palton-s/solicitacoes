@@ -1,0 +1,27 @@
+{{!
+    Template para página de seleção de ações
+}}
+
+<div class="action-selection-container">
+    <div class="action-selection-header text-center mb-4">
+        <p class="lead">{{subtitle}}</p>
+    </div>
+
+    <div class="action-grid">
+        {{#actions}}
+        <a href="{{url}}" class="action-card {{class}}">
+            <div class="action-card-icon">
+                <i class="{{icon}}"></i>
+            </div>
+            <h3 class="action-card-title">{{title}}</h3>
+            <p class="action-card-desc">{{description}}</p>
+        </a>
+        {{/actions}}
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{{minhas_solicitacoes_url}}" class="btn btn-secondary">
+            <i class="fas fa-list"></i> {{#str}}my_requests, local_solicitacoes{{/str}}
+        </a>
+    </div>
+</div>

@@ -1,0 +1,165 @@
+{{!
+    Template para formulário específico de criação de curso
+}}
+
+<div class="local-solicitacoes-form-container">
+    <div class="alert alert-info" role="alert">
+        {{{aviso_sigaa}}}
+    </div>
+
+    <form id="form_criar_curso" method="post" action="{{action_url}}" class="mform">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="submitbutton" value="1">
+        <input type="hidden" name="unidade_academica_id" id="unidade_academica_id" value="">
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="codigo_sigaa" class="form-label">
+                        {{#str}}codigo_sigaa, local_solicitacoes{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" 
+                           name="codigo_sigaa" 
+                           id="codigo_sigaa" 
+                           class="form-control" 
+                           required 
+                           placeholder="Ex: NUT0028 - Turma 01">
+                    <small class="form-text text-muted">
+                        {{#str}}codigo_sigaa_help, local_solicitacoes{{/str}}
+                    </small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="course_shortname" class="form-label">
+                        {{#str}}course_shortname, local_solicitacoes{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" 
+                           name="course_shortname" 
+                           id="course_shortname" 
+                           class="form-control" 
+                           required 
+                           placeholder="Ex: NUT0028-01-2026.1">
+                    <small class="form-text text-muted">
+                        {{#str}}course_shortname_help, local_solicitacoes{{/str}}
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="ano_semestre" class="form-label">
+                        {{#str}}ano_semestre, local_solicitacoes{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" 
+                           name="ano_semestre" 
+                           id="ano_semestre" 
+                           class="form-control" 
+                           required 
+                           placeholder="Ex: 2026.1">
+                    <small class="form-text text-muted">
+                        {{#str}}ano_semestre_help, local_solicitacoes{{/str}}
+                    </small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="unidade_academica" class="form-label">
+                        {{#str}}unidade_academica, local_solicitacoes{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <select name="unidade_academica" 
+                            id="unidade_academica" 
+                            class="form-control" 
+                            required>
+                        <option value="">{{#str}}searching_categories, local_solicitacoes{{/str}}</option>
+                    </select>
+                    <small class="form-text text-muted">
+                        {{#str}}unidade_academica_help, local_solicitacoes{{/str}}
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="form-group">
+                    <label for="course_summary" class="form-label">
+                        {{#str}}course_summary, local_solicitacoes{{/str}}
+                    </label>
+                    <textarea name="course_summary" 
+                              id="course_summary" 
+                              class="form-control" 
+                              rows="4" 
+                              placeholder="{{#str}}course_summary_help, local_solicitacoes{{/str}}"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="form-group">
+                    <label for="razoes_criacao" class="form-label">
+                        {{#str}}razoes_criacao, local_solicitacoes{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <textarea name="razoes_criacao" 
+                              id="razoes_criacao" 
+                              class="form-control" 
+                              rows="6" 
+                              required 
+                              placeholder="{{#str}}razoes_criacao_help, local_solicitacoes{{/str}}"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group mt-4">
+            <button type="submit" name="submitbutton" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i> {{#str}}request_submit, local_solicitacoes{{/str}}
+            </button>
+            <a href="{{cancel_url}}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> {{#str}}cancel{{/str}}
+            </a>
+        </div>
+    </form>
+</div>
+
+{{#js}}
+require(['jquery'], function($) {
+    // Inicializar Tom Select para unidade acadêmica quando disponível
+    $(document).ready(function() {
+        if (typeof TomSelect !== 'undefined') {
+            var unidadeSelect = new TomSelect('#unidade_academica', {
+                valueField: 'id',
+                labelField: 'name',
+                searchField: 'name',
+                placeholder: '{{#str}}select_category, local_solicitacoes{{/str}}',
+                load: function(query, callback) {
+                    if (!query.length) return callback();
+                    
+                    $.ajax({
+                        url: M.cfg.wwwroot + '/local/solicitacoes/ajax/buscar-categorias.php',
+                        type: 'GET',
+                        dataType: 'json',
+                        data: { q: query },
+                        success: function(data) {
+                            callback(data);
+                        },
+                        error: function() {
+                            callback();
+                        }
+                    });
+                },
+                onChange: function(value) {
+                    $('#unidade_academica_id').val(value);
+                }
+            });
+        }
+    });
+});
+{{/js}}

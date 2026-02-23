@@ -1,0 +1,133 @@
+/* Action Selection Grid Styles */
+
+.action-selection-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.action-selection-header {
+    margin-bottom: 2rem;
+}
+
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.action-card {
+    background: #fff;
+    border: 2px solid #dee2e6;
+    border-radius: 12px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.action-card:hover {
+    border-color: #0f6cbf;
+    box-shadow: 0 4px 12px rgba(15, 108, 191, 0.2);
+    transform: translateY(-4px);
+    text-decoration: none;
+    color: inherit;
+}
+
+.action-card:focus {
+    outline: 2px solid #0f6cbf;
+    outline-offset: 2px;
+}
+
+.action-card-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #0f6cbf;
+    transition: transform 0.3s ease;
+}
+
+.action-card:hover .action-card-icon {
+    transform: scale(1.1);
+}
+
+.action-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #212529;
+}
+
+.action-card-desc {
+    font-size: 0.95rem;
+    color: #6c757d;
+    line-height: 1.5;
+    margin-bottom: 0;
+}
+
+
+/* Specific action color variants */
+
+.action-teacher .action-card-icon {
+    color: #0069d9;
+}
+
+.action-student .action-card-icon {
+    color: #28a745;
+}
+
+.action-remove .action-card-icon {
+    color: #dc3545;
+}
+
+.action-suspend .action-card-icon {
+    color: #ffc107;
+}
+
+.action-register .action-card-icon {
+    color: #17a2b8;
+}
+
+.action-course .action-card-icon {
+    color: #6f42c1;
+}
+
+
+/* Responsive adjustments */
+
+@media (max-width: 768px) {
+    .action-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    .action-card {
+        padding: 1.5rem 1rem;
+    }
+    .action-card-icon {
+        font-size: 2.5rem;
+    }
+    .action-card-title {
+        font-size: 1.1rem;
+    }
+}
+
+
+/* Dark mode support (if Moodle theme supports it) */
+
+@media (prefers-color-scheme: dark) {
+    .action-card {
+        background: #2d3748;
+        border-color: #4a5568;
+        color: #e2e8f0;
+    }
+    .action-card-title {
+        color: #f7fafc;
+    }
+    .action-card-desc {
+        color: #cbd5e0;
+    }
+}

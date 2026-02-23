@@ -41,7 +41,7 @@ if ($canview && !$canmanage) {
     );
 }
 
-$newrequesturl = new moodle_url('/local/solicitacoes/nova-solicitacao.php');
+$newrequesturl = new moodle_url('/local/solicitacoes/selecionar-acao.php');
 echo html_writer::link(
     $newrequesturl, 
     get_string('thankyou_new_request', 'local_solicitacoes'), 

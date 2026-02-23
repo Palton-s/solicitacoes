@@ -64,7 +64,7 @@ $template_data = [
     'has_requests' => !empty($requests),
     'requests' => [],
     'can_manage' => has_capability('local/solicitacoes:manage', $context),
-    'new_request_url' => (new moodle_url('/local/solicitacoes/nova-solicitacao.php'))->out(false),
+    'new_request_url' => (new moodle_url('/local/solicitacoes/selecionar-acao.php'))->out(false),
 ];
 
 if (!$requests) {

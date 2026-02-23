@@ -170,3 +170,28 @@ $string['course_created_success']    = 'Curso "{$a}" criado com sucesso!';
 $string['no_categories_found']       = 'Nenhuma categoria encontrada';
 $string['searching_categories']      = 'Buscando categorias...';
 $string['select_year_semester']      = '× SELECIONE ANO/SEMESTRE E UNIDADE ACADÊМICA';
+
+// Página de seleção de ações
+$string['selecionar_acao_titulo']    = 'O que você deseja fazer?';
+$string['selecionar_acao_subtitulo'] = 'Escolha o tipo de solicitação que deseja enviar';
+
+// Botões de ação
+$string['btn_vincular_professor_titulo'] = 'Vincular Professor';
+$string['btn_vincular_professor_desc']   = 'Adicionar professores a uma disciplina';
+$string['btn_vincular_aluno_titulo']     = 'Vincular Aluno';
+$string['btn_vincular_aluno_desc']       = 'Inscrever alunos em uma disciplina';
+$string['btn_remover_usuario_titulo']    = 'Remover Usuário';
+$string['btn_remover_usuario_desc']      = 'Remover usuários de uma disciplina';
+$string['btn_suspender_usuario_titulo']  = 'Suspender Usuário';
+$string['btn_suspender_usuario_desc']    = 'Suspender temporariamente acesso de usuários';
+$string['btn_cadastrar_usuario_titulo']  = 'Cadastrar Novo Usuário';
+$string['btn_cadastrar_usuario_desc']    = 'Criar novo usuário e vincular a disciplina';
+$string['btn_criar_curso_titulo']        = 'Criar Disciplina';
+$string['btn_criar_curso_desc']          = 'Solicitar criação de nova disciplina';
+
+// Títulos dos formulários específicos
+$string['form_inscricao_titulo']     = 'Solicitar Inscrição de Usuários';
+$string['form_remocao_titulo']       = 'Solicitar Remoção de Usuários';
+$string['form_suspensao_titulo']     = 'Solicitar Suspensão de Usuários';
+$string['form_cadastro_titulo']      = 'Solicitar Cadastro de Novo Usuário';
+$string['form_criar_curso_titulo']   = 'Solicitar Criação de Disciplina';
