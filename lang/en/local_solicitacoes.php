@@ -40,6 +40,9 @@ $string['usuarios_nomes']       = 'Selected Users';
 $string['usuarios_nomes_help']  = 'List of users selected for this request.';
 $string['papel']                = 'Course Role';
 $string['papel_help']           = 'Select the role users should have in the course (for enrollments only).';
+$string['papel_label']          = 'Course Role';
+$string['papel_help_dinamico']  = 'Select the role users will have in the course';
+$string['select_role']          = 'Select a role...';
 $string['observacoes']          = 'Comments';
 $string['observacoes_help']     = 'Additional information about the request (optional).';
 $string['request_submit']       = 'Submit Request';
@@ -122,6 +125,7 @@ $string['my_requests']               = 'My Requests';
 $string['error_curso_required']      = 'Please select a course.';
 $string['error_usuarios_required']   = 'Please select at least one user.';
 $string['error_papel_required']      = 'Please select a role for the enrollment.';
+$string['error_papel_invalid']       = 'The selected role is invalid.';
 
 // User registration fields
 $string['firstname']                 = 'First Name';
@@ -176,10 +180,8 @@ $string['selecionar_acao_titulo']    = 'What would you like to do?';
 $string['selecionar_acao_subtitulo'] = 'Choose the type of request you want to submit';
 
 // Action buttons
-$string['btn_vincular_professor_titulo'] = 'Add Teacher';
-$string['btn_vincular_professor_desc']   = 'Add teachers to a course';
-$string['btn_vincular_aluno_titulo']     = 'Enroll Student';
-$string['btn_vincular_aluno_desc']       = 'Enroll students in a course';
+$string['btn_inscrever_usuario_titulo']  = 'Enroll User';
+$string['btn_inscrever_usuario_desc']    = 'Enroll users in courses with any role';
 $string['btn_remover_usuario_titulo']    = 'Remove User';
 $string['btn_remover_usuario_desc']      = 'Remove users from a course';
 $string['btn_suspender_usuario_titulo']  = 'Suspend User';
@@ -191,6 +193,7 @@ $string['btn_criar_curso_desc']          = 'Request creation of a new course';
 
 // Specific form titles
 $string['form_inscricao_titulo']     = 'Request User Enrollment';
+$string['form_inscricao_descricao']  = 'You are requesting user enrollment in a course. Select the appropriate role for the users.';
 $string['form_remocao_titulo']       = 'Request User Removal';
 $string['form_suspensao_titulo']     = 'Request User Suspension';
 $string['form_cadastro_titulo']      = 'Request New User Registration';

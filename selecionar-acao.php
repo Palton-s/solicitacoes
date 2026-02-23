@@ -28,18 +28,11 @@ echo $OUTPUT->header();
 // Preparar dados para o template
 $actions = [
     [
-        'icon' => 'fas fa-chalkboard-teacher',
-        'title' => get_string('btn_vincular_professor_titulo', 'local_solicitacoes'),
-        'description' => get_string('btn_vincular_professor_desc', 'local_solicitacoes'),
-        'url' => (new moodle_url('/local/solicitacoes/solicitar-inscricao.php', ['papel' => 'teacher']))->out(false),
-        'class' => 'action-teacher'
-    ],
-    [
-        'icon' => 'fas fa-user-graduate',
-        'title' => get_string('btn_vincular_aluno_titulo', 'local_solicitacoes'),
-        'description' => get_string('btn_vincular_aluno_desc', 'local_solicitacoes'),
-        'url' => (new moodle_url('/local/solicitacoes/solicitar-inscricao.php', ['papel' => 'student']))->out(false),
-        'class' => 'action-student'
+        'icon' => 'fas fa-user-plus',
+        'title' => get_string('btn_inscrever_usuario_titulo', 'local_solicitacoes'),
+        'description' => get_string('btn_inscrever_usuario_desc', 'local_solicitacoes'),
+        'url' => (new moodle_url('/local/solicitacoes/solicitar-inscricao.php'))->out(false),
+        'class' => 'action-enrol'
     ],
     [
         'icon' => 'fas fa-user-times',
@@ -56,7 +49,7 @@ $actions = [
         'class' => 'action-suspend'
     ],
     [
-        'icon' => 'fas fa-user-plus',
+        'icon' => 'fas fa-user-check',
         'title' => get_string('btn_cadastrar_usuario_titulo', 'local_solicitacoes'),
         'description' => get_string('btn_cadastrar_usuario_desc', 'local_solicitacoes'),
         'url' => (new moodle_url('/local/solicitacoes/solicitar-cadastro.php'))->out(false),

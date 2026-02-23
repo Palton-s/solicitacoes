@@ -25,6 +25,17 @@ echo $OUTPUT->header();
 
 global $DB, $USER;
 
+// Buscar papéis disponíveis para exibição
+$systemcontext = context_system::instance();
+$all_roles = role_get_names($systemcontext, ROLENAME_ALIAS, false);
+$roles_lookup = [];
+foreach ($all_roles as $roleid => $rolename) {
+    $role = $DB->get_record('role', ['id' => $roleid], 'shortname');
+    if ($role) {
+        $roles_lookup[$role->shortname] = $rolename;
+    }
+}
+
 // Buscar solicitações do usuário atual
 $sql = "SELECT s.*, 
                c.id AS cid, c.fullname AS cname,
@@ -127,13 +138,7 @@ foreach ($requests as $r) {
     // Papel (apenas para inscrições e cadastro)
     $papel_display = '';
     if (($r->tipo_acao == 'inscricao' || $r->tipo_acao == 'cadastro') && !empty($r->papel)) {
-        $papel_strings = [
-            'student' => get_string('papel_student', 'local_solicitacoes'),
-            'teacher' => get_string('papel_teacher', 'local_solicitacoes'),
-            'editingteacher' => get_string('papel_editingteacher', 'local_solicitacoes'),
-            'manager' => get_string('papel_manager', 'local_solicitacoes')
-        ];
-        $papel_display = isset($papel_strings[$r->papel]) ? $papel_strings[$r->papel] : $r->papel;
+        $papel_display = isset($roles_lookup[$r->papel]) ? $roles_lookup[$r->papel] : $r->papel;
     }
 
     // Preparar dados para o template

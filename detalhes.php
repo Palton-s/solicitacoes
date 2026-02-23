@@ -42,6 +42,17 @@ $PAGE->set_heading(get_string('details', 'local_solicitacoes'));
 $PAGE->requires->css(new moodle_url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css'));
 $PAGE->requires->css(new moodle_url('/local/solicitacoes/styles/view_details.css'));
 
+// Buscar papéis disponíveis para exibição
+$systemcontext = context_system::instance();
+$all_roles = role_get_names($systemcontext, ROLENAME_ALIAS, false);
+$roles_lookup = [];
+foreach ($all_roles as $roleid => $rolename) {
+    $role = $DB->get_record('role', ['id' => $roleid], 'shortname');
+    if ($role) {
+        $roles_lookup[$role->shortname] = $rolename;
+    }
+}
+
 // Buscar solicitação com dados do usuário
 $sql = "SELECT r.*, u.firstname, u.lastname, u.email
         FROM {local_solicitacoes} r 
@@ -244,13 +255,7 @@ if (!empty($cursos)) {
 
 // Mostrar papel apenas para inscrições e cadastro
 if (($request->tipo_acao == 'inscricao' || $request->tipo_acao == 'cadastro') && !empty($request->papel)) {
-    $papel_strings = array(
-        'student' => get_string('papel_student', 'local_solicitacoes'),
-        'teacher' => get_string('papel_teacher', 'local_solicitacoes'),
-        'editingteacher' => get_string('papel_editingteacher', 'local_solicitacoes'),
-        'manager' => get_string('papel_manager', 'local_solicitacoes')
-    );
-    $papel_label = isset($papel_strings[$request->papel]) ? $papel_strings[$request->papel] : $request->papel;
+    $papel_label = isset($roles_lookup[$request->papel]) ? $roles_lookup[$request->papel] : $request->papel;
     echo html_writer::tag('p', html_writer::tag('strong', get_string('role', 'local_solicitacoes') . ': ') . $papel_label, array('class' => 'mb-0'));
 }
 echo html_writer::end_div();

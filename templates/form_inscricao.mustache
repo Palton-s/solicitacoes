@@ -3,17 +3,9 @@
 }}
 
 <div class="local-solicitacoes-form-container">
-    {{#is_teacher}}
     <div class="alert alert-info" role="alert">
-        <i class="fas fa-info-circle"></i> Você está solicitando vinculação de <strong>{{papel_label}}</strong> a uma disciplina.
+        <i class="fas fa-info-circle"></i> {{#str}}form_inscricao_descricao, local_solicitacoes{{/str}}
     </div>
-    {{/is_teacher}}
-    
-    {{^is_teacher}}
-    <div class="alert alert-info" role="alert">
-        <i class="fas fa-info-circle"></i> Você está solicitando inscrição de <strong>{{papel_label}}</strong> em uma disciplina.
-    </div>
-    {{/is_teacher}}
 
     <form id="form_inscricao" method="post" action="{{action_url}}" class="mform">
         <input type="hidden" name="sesskey" value="{{sesskey}}">
@@ -36,6 +28,26 @@
                     </select>
                     <small class="form-text text-muted">
                         {{#str}}curso_nome_help, local_solicitacoes{{/str}}
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="form-group">
+                    <label for="papel" class="form-label">
+                        {{#str}}papel_label, local_solicitacoes{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <select name="papel" id="papel" class="form-control" required>
+                        <option value="">{{#str}}select_role, local_solicitacoes{{/str}}</option>
+                        {{#roles}}
+                        <option value="{{shortname}}">{{localname}}</option>
+                        {{/roles}}
+                    </select>
+                    <small class="form-text text-muted">
+                        {{#str}}papel_help_dinamico, local_solicitacoes{{/str}}
                     </small>
                 </div>
             </div>

@@ -40,6 +40,9 @@ $string['usuarios_nomes']       = 'Nomes dos Usuários';
 $string['usuarios_nomes_help']  = 'Digite um nome por linha. Use o nome completo ou nome de usuário conforme aparece no Moodle.';
 $string['papel']                = 'Papel no Curso';
 $string['papel_help']           = 'Selecione o papel que os usuários devem ter no curso (apenas para inscrições).';
+$string['papel_label']          = 'Papel no Curso';
+$string['papel_help_dinamico']  = 'Selecione o papel que os usuários terão no curso';
+$string['select_role']          = 'Selecione um papel...';
 $string['observacoes']          = 'Observações';
 $string['observacoes_help']     = 'Informações adicionais sobre a solicitação (opcional).';
 $string['request_submit']       = 'Enviar Solicitação';
@@ -124,6 +127,7 @@ $string['my_requests']               = 'Minhas Solicitações';
 $string['error_curso_required']      = 'Por favor, selecione um curso.';
 $string['error_usuarios_required']   = 'Por favor, selecione pelo menos um usuário.';
 $string['error_papel_required']      = 'Por favor, selecione um papel para a inscrição.';
+$string['error_papel_invalid']       = 'O papel selecionado é inválido.';
 
 // Campos de cadastro de usuário
 $string['firstname']                 = 'Primeiro Nome';
@@ -178,10 +182,8 @@ $string['selecionar_acao_titulo']    = 'O que você deseja fazer?';
 $string['selecionar_acao_subtitulo'] = 'Escolha o tipo de solicitação que deseja enviar';
 
 // Botões de ação
-$string['btn_vincular_professor_titulo'] = 'Vincular Professor';
-$string['btn_vincular_professor_desc']   = 'Adicionar professores a uma disciplina';
-$string['btn_vincular_aluno_titulo']     = 'Vincular Aluno';
-$string['btn_vincular_aluno_desc']       = 'Inscrever alunos em uma disciplina';
+$string['btn_inscrever_usuario_titulo']  = 'Inscrever Usuário';
+$string['btn_inscrever_usuario_desc']    = 'Inscrever usuários em disciplinas com qualquer papel';
 $string['btn_remover_usuario_titulo']    = 'Remover Usuário';
 $string['btn_remover_usuario_desc']      = 'Remover usuários de uma disciplina';
 $string['btn_suspender_usuario_titulo']  = 'Suspender Usuário';
@@ -192,7 +194,8 @@ $string['btn_criar_curso_titulo']        = 'Criar Disciplina';
 $string['btn_criar_curso_desc']          = 'Solicitar criação de nova disciplina';
 
 // Títulos dos formulários específicos
-$string['form_inscricao_titulo']     = 'Solicitar Inscrição de Usuários';
+$string['form_inscricao_titulo']     = 'Solicitar Inscrição de Usuário';
+$string['form_inscricao_descricao']  = 'Você está solicitando inscrição de usuários em uma disciplina. Selecione o papel apropriado para os usuários.';
 $string['form_remocao_titulo']       = 'Solicitar Remoção de Usuários';
 $string['form_suspensao_titulo']     = 'Solicitar Suspensão de Usuários';
 $string['form_cadastro_titulo']      = 'Solicitar Cadastro de Novo Usuário';

@@ -16,14 +16,22 @@ if (!has_capability('local/solicitacoes:submit', $context)) {
     );
 }
 
-// Obter papel do GET (teacher ou student)
-$papel = required_param('papel', PARAM_ALPHA);
-if (!in_array($papel, ['teacher', 'student'])) {
-    redirect(new moodle_url('/local/solicitacoes/selecionar-acao.php'));
+// Buscar papéis disponíveis no Moodle
+$systemcontext = context_system::instance();
+$roles = get_assignable_roles($systemcontext, ROLENAME_ALIAS, false);
+$roles_array = [];
+foreach ($roles as $roleid => $rolename) {
+    $role = $DB->get_record('role', ['id' => $roleid], 'shortname, name');
+    if ($role) {
+        $roles_array[] = [
+            'shortname' => $role->shortname,
+            'localname' => $rolename
+        ];
+    }
 }
 
 $PAGE->set_context($context);
-$PAGE->set_url(new moodle_url('/local/solicitacoes/solicitar-inscricao.php', ['papel' => $papel]));
+$PAGE->set_url(new moodle_url('/local/solicitacoes/solicitar-inscricao.php'));
 $PAGE->set_title(get_string('form_inscricao_titulo', 'local_solicitacoes'));
 $PAGE->set_heading(get_string('form_inscricao_titulo', 'local_solicitacoes'));
 
@@ -61,6 +69,7 @@ if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, P
     // Coletar dados do formulário
     $curso_id = required_param('curso_id_selected', PARAM_INT);
     $usuarios_ids = required_param('usuarios_ids_selected', PARAM_TEXT);
+    $papel = required_param('papel', PARAM_ALPHANUMEXT);
     $observacoes = optional_param('observacoes', '', PARAM_TEXT);
     
     // Validações
@@ -70,6 +79,16 @@ if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, P
     
     if (empty(trim($usuarios_ids))) {
         $errors[] = get_string('error_usuarios_required', 'local_solicitacoes');
+    }
+    
+    // Validar papel
+    if (empty($papel)) {
+        $errors[] = get_string('error_papel_required', 'local_solicitacoes');
+    } else {
+        $role_check = $DB->get_record('role', ['shortname' => $papel]);
+        if (!$role_check) {
+            $errors[] = get_string('error_papel_invalid', 'local_solicitacoes');
+        }
     }
     
     // Se não houver erros, processar
@@ -86,7 +105,7 @@ if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, P
             redirect(new moodle_url('/local/solicitacoes/confirmacao.php'),
                      get_string('success_submit', 'local_solicitacoes'), null, \core\output\notification::NOTIFY_SUCCESS);
         } else {
-            redirect(new moodle_url('/local/solicitacoes/solicitar-inscricao.php', ['papel' => $papel]),
+            redirect(new moodle_url('/local/solicitacoes/solicitar-inscricao.php'),
                      get_string('error_submit', 'local_solicitacoes'), null, \core\output\notification::NOTIFY_ERROR);
         }
         exit;
@@ -99,14 +118,11 @@ if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, P
 }
 
 // Preparar dados para o template
-$papel_label = get_string('papel_' . $papel, 'local_solicitacoes');
 $template_data = [
-    'action_url' => (new moodle_url('/local/solicitacoes/solicitar-inscricao.php', ['papel' => $papel]))->out(false),
+    'action_url' => (new moodle_url('/local/solicitacoes/solicitar-inscricao.php'))->out(false),
     'sesskey' => sesskey(),
     'cancel_url' => (new moodle_url('/local/solicitacoes/selecionar-acao.php'))->out(false),
-    'papel' => $papel,
-    'papel_label' => $papel_label,
-    'is_teacher' => ($papel === 'teacher')
+    'roles' => $roles_array
 ];
 
 echo $OUTPUT->render_from_template('local_solicitacoes/form_inscricao', $template_data);

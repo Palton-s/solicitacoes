@@ -66,8 +66,14 @@ if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, P
         $errors[] = get_string('error_curso_required', 'local_solicitacoes');
     }
     
-    if (!in_array($papel, ['teacher', 'student'])) {
+    // Validar papel - verificar se existe no Moodle
+    if (empty($papel)) {
         $errors[] = get_string('error_papel_required', 'local_solicitacoes');
+    } else {
+        $role_check = $DB->get_record('role', ['shortname' => $papel]);
+        if (!$role_check) {
+            $errors[] = get_string('error_papel_invalid', 'local_solicitacoes');
+        }
     }
     
     if (empty(trim($firstname))) {
