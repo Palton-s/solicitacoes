@@ -18,9 +18,9 @@ if (!has_capability('local/solicitacoes:submit', $context)) {
 
 // Buscar papéis disponíveis no Moodle
 $systemcontext = context_system::instance();
-$roles = get_assignable_roles($systemcontext, ROLENAME_ALIAS, false);
+$all_roles = role_get_names($systemcontext, ROLENAME_ALIAS, false);
 $roles_array = [];
-foreach ($roles as $roleid => $rolename) {
+foreach ($all_roles as $roleid => $rolename) {
     $role = $DB->get_record('role', ['id' => $roleid], 'shortname, name');
     if ($role) {
         $roles_array[] = [
