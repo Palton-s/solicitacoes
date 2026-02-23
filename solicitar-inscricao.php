@@ -63,11 +63,11 @@ if (optional_param('cancel', 0, PARAM_BOOL)) {
 // Debug: verificar se chegou aqui
 error_log("Inscrição - Debug: Após cancelamento check");
 error_log("Inscrição - Debug: data_submitted=" . (data_submitted() ? 'true' : 'false'));
-error_log("Inscrição - Debug: confirm_sesskey=" . (confirm_sesskey() ? 'true' : 'false'));
 error_log("Inscrição - Debug: submitbutton=" . optional_param('submitbutton', '', PARAM_TEXT));
 
 // Processar submissão do formulário
 if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, PARAM_TEXT)) {
+    error_log("Inscrição - Debug: confirm_sesskey passou!");
     global $USER, $DB;
     
     error_log("Inscrição - Debug: ENTROU no bloco de submissão!");
