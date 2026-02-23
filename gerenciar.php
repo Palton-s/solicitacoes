@@ -33,7 +33,7 @@ $roles_lookup = [];
 foreach ($all_roles as $roleid => $rolename) {
     $role = $DB->get_record('role', ['id' => $roleid], 'shortname');
     if ($role) {
-        $roles_lookup[$role->shortname] = $rolename;
+        $roles_lookup[$role->shortname] = role_get_name($role);
     }
 }
 
