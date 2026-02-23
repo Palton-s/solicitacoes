@@ -654,6 +654,9 @@ class solicitacoes_controller {
                 ];
             }
             
+            // Criar 6 tópicos por padrão (além da seção 0 geral)
+            course_create_sections_if_missing($createdcourse, range(0, 6));
+            
             // Salvar relação do curso criado com a solicitação
             $curso_record = new \stdClass();
             $curso_record->solicitacao_id = $solicitacao->id;
