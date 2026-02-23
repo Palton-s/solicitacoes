@@ -137,9 +137,11 @@ $string['error_lastname_required']   = 'Please enter the last name.';
 $string['error_cpf_required']        = 'Please enter the CPF.';
 $string['error_cpf_invalid']         = 'Invalid CPF. Enter numbers only (11 digits).';
 $string['error_cpf_exists']          = 'CPF already registered in the system.';
+$string['error_email_required']      = 'Please enter the email.';
 $string['error_email_novo_required'] = 'Please enter the email.';
 $string['error_email_invalid']       = 'Invalid email.';
 $string['error_email_exists']        = 'Email already registered in the system.';
+$string['error_motivo_required']     = 'Please provide the reason for the request.';
 $string['novo_usuario']              = 'New user';
 $string['usuario_criado']            = 'User {$a} created successfully.';
 

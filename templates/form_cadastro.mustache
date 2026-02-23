@@ -1,0 +1,204 @@
+{{!
+    Template para formulário específico de cadastro de novo usuário
+}}
+
+<div class="local-solicitacoes-form-container">
+    <div class="alert alert-info" role="alert">
+        <i class="fas fa-info-circle"></i> Preencha os dados do novo usuário que deseja cadastrar e vincular a uma disciplina.
+    </div>
+
+    <form id="form_cadastro" method="post" action="{{action_url}}" class="mform">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="submitbutton" value="1">
+        <input type="hidden" name="curso_id_selected" id="curso_id_selected" value="">
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="form-group">
+                    <label for="curso_nome" class="form-label">
+                        {{#str}}curso_nome, local_solicitacoes{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <select name="curso_nome" 
+                            id="curso_nome" 
+                            class="form-control" 
+                            required>
+                        <option value="">{{#str}}searching_courses, local_solicitacoes{{/str}}</option>
+                    </select>
+                    <small class="form-text text-muted">
+                        {{#str}}curso_nome_help, local_solicitacoes{{/str}}
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="form-group">
+                    <label class="form-label">
+                        {{#str}}papel, local_solicitacoes{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" 
+                                   type="radio" 
+                                   name="papel" 
+                                   id="papel_teacher" 
+                                   value="teacher" 
+                                   required>
+                            <label class="form-check-label" for="papel_teacher">
+                                {{#str}}papel_teacher, local_solicitacoes{{/str}}
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" 
+                                   type="radio" 
+                                   name="papel" 
+                                   id="papel_student" 
+                                   value="student" 
+                                   required>
+                            <label class="form-check-label" for="papel_student">
+                                {{#str}}papel_student, local_solicitacoes{{/str}}
+                            </label>
+                        </div>
+                    </div>
+                    <small class="form-text text-muted">
+                        {{#str}}papel_help, local_solicitacoes{{/str}}
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="firstname" class="form-label">
+                        {{#str}}firstname{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" 
+                           name="firstname" 
+                           id="firstname" 
+                           class="form-control" 
+                           required>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="lastname" class="form-label">
+                        {{#str}}lastname{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" 
+                           name="lastname" 
+                           id="lastname" 
+                           class="form-control" 
+                           required>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="cpf" class="form-label">
+                        CPF
+                        <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" 
+                           name="cpf" 
+                           id="cpf" 
+                           class="form-control" 
+                           pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" 
+                           placeholder="000.000.000-00"
+                           required>
+                    <small class="form-text text-muted">Formato: 000.000.000-00</small>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="email_novo_usuario" class="form-label">
+                        {{#str}}email{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <input type="email" 
+                           name="email_novo_usuario" 
+                           id="email_novo_usuario" 
+                           class="form-control" 
+                           required>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="form-group">
+                    <label for="observacoes" class="form-label">
+                        {{#str}}observacoes, local_solicitacoes{{/str}}
+                    </label>
+                    <textarea name="observacoes" 
+                              id="observacoes" 
+                              class="form-control" 
+                              rows="4" 
+                              placeholder="{{#str}}observacoes_help, local_solicitacoes{{/str}}"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group mt-4">
+            <button type="submit" name="submitbutton" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i> {{#str}}request_submit, local_solicitacoes{{/str}}
+            </button>
+            <a href="{{cancel_url}}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> {{#str}}cancel{{/str}}
+            </a>
+        </div>
+    </form>
+</div>
+
+{{#js}}
+require(['jquery'], function($) {
+    $(document).ready(function() {
+        if (typeof TomSelect !== 'undefined') {
+            // Tom Select para cursos
+            var cursoSelect = new TomSelect('#curso_nome', {
+                valueField: 'id',
+                labelField: 'fullname',
+                searchField: 'fullname',
+                placeholder: '{{#str}}curso_nome_help, local_solicitacoes{{/str}}',
+                load: function(query, callback) {
+                    if (!query.length) return callback();
+                    
+                    $.ajax({
+                        url: M.cfg.wwwroot + '/local/solicitacoes/ajax/buscar-cursos.php',
+                        type: 'GET',
+                        dataType: 'json',
+                        data: { q: query },
+                        success: function(data) {
+                            callback(data);
+                        },
+                        error: function() {
+                            callback();
+                        }
+                    });
+                },
+                onChange: function(value) {
+                    $('#curso_id_selected').val(value);
+                }
+            });
+        }
+        
+        // Máscara para CPF
+        $('#cpf').on('input', function() {
+            var value = $(this).val().replace(/\D/g, '');
+            if (value.length <= 11) {
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                $(this).val(value);
+            }
+        });
+    });
+});
+{{/js}}

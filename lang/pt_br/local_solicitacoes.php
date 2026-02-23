@@ -139,9 +139,11 @@ $string['error_lastname_required']   = 'Por favor, informe o sobrenome.';
 $string['error_cpf_required']        = 'Por favor, informe o CPF.';
 $string['error_cpf_invalid']         = 'CPF inválido. Informe apenas números (11 dígitos).';
 $string['error_cpf_exists']          = 'CPF já cadastrado no sistema.';
+$string['error_email_required']      = 'Por favor, informe o e-mail.';
 $string['error_email_novo_required'] = 'Por favor, informe o e-mail.';
 $string['error_email_invalid']       = 'E-mail inválido.';
 $string['error_email_exists']        = 'E-mail já cadastrado no sistema.';
+$string['error_motivo_required']     = 'Por favor, informe o motivo da solicitação.';
 $string['novo_usuario']              = 'Novo usuário';
 $string['usuario_criado']            = 'Usuário {$a} criado com sucesso.';
 
