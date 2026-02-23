@@ -17,5 +17,5 @@ purge_all_caches();
 echo "✅ Cache limpo com sucesso!<br>";
 echo "As strings de idioma foram recarregadas.<br>";
 echo "<br>";
-echo "<a href='view.php?id=1'>Voltar para visualização</a><br>";
-echo "<a href='manage.php'>Voltar para gerenciamento</a>";
+echo "<a href='detalhes.php?id=1'>Voltar para visualização</a><br>";
+echo "<a href='gerenciar.php'>Voltar para gerenciamento</a>";

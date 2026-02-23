@@ -143,7 +143,7 @@ local/solicitacoes/
 7. Clique em "Enviar Solicitação"
 
 ### Para Administradores
-1. Acesse `/local/solicitacoes/manage.php` ou pelo menu de administração
+1. Acesse `/local/solicitacoes/gerenciar.php` ou pelo menu de administração
 2. Visualize todas as solicitações com detalhes organizados
 3. Clique em "Ver" para detalhes completos de cada solicitação
 4. Altere o status conforme o andamento (Pendente → Em andamento → Concluído)

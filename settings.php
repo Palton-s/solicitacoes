@@ -7,7 +7,7 @@ if ($hassiteconfig) {
         new admin_externalpage(
             'local_solicitacoes_manage',
             get_string('list_title', 'local_solicitacoes'),
-            new moodle_url('/local/solicitacoes/manage.php'),
+            new moodle_url('/local/solicitacoes/gerenciar.php'),
             'local/solicitacoes:manage'
         )
     );

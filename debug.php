@@ -81,6 +81,6 @@ try {
 }
 
 echo '<hr>';
-echo '<p><a href="' . new moodle_url('/local/solicitacoes/index.php') . '">← Voltar ao formulário</a></p>';
+echo '<p><a href="' . new moodle_url('/local/solicitacoes/nova-solicitacao.php') . '">← Voltar ao formulário</a></p>';
 
 echo $OUTPUT->footer();

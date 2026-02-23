@@ -7,28 +7,28 @@
 - Permite ao usuário visualizar apenas suas próprias solicitações
 - **Padrão**: Todos os usuários autenticados (user)
 - **Risco**: Nenhum
-- **Páginas**: `myrequests.php`, `view.php` (próprias)
+- **Páginas**: `minhas-solicitacoes.php`, `detalhes.php` (próprias)
 
 ### 2. `local/solicitacoes:viewall`
 **Ver todas as solicitações**
 - Permite visualizar solicitações de todos os usuários
 - **Padrão**: Professores Editores e Gerentes
 - **Risco**: RISK_PERSONAL (acesso a dados pessoais)
-- **Páginas**: `manage.php` (visualização), `view.php` (todas)
+- **Páginas**: `gerenciar.php` (visualização), `detalhes.php` (todas)
 
 ### 3. `local/solicitacoes:submit`
 **Criar/enviar solicitações**
 - Permite criar novas solicitações de gerenciamento de curso
 - **Padrão**: Professores Editores e Gerentes
 - **Risco**: RISK_SPAM
-- **Páginas**: `index.php` (formulário)
+- **Páginas**: `nova-solicitacao.php` (formulário)
 
 ### 4. `local/solicitacoes:manage`
 **Gerenciar solicitações**
 - Permite aprovar, negar e excluir solicitações
 - **Padrão**: Apenas Gerentes (manager)
 - **Risco**: RISK_CONFIG | RISK_DATALOSS
-- **Páginas**: `manage.php` (gerenciamento completo)
+- **Páginas**: `gerenciar.php` (gerenciamento completo)
 
 ---
 

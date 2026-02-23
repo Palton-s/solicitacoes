@@ -295,7 +295,7 @@ if ($canmanage) {
     echo html_writer::end_div();
     echo html_writer::start_div('card-body');
     
-    $baseurl = new moodle_url('/local/solicitacoes/manage.php');
+    $baseurl = new moodle_url('/local/solicitacoes/gerenciar.php');
     $buttons = array();
 
     // Botão Aprovar - só mostrar se não estiver aprovado

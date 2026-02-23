@@ -1,7 +1,7 @@
 <?php
 // ESTE ARQUIVO NÃO ESTÁ MAIS SENDO UTILIZADO
 // O formulário agora é renderizado via template Mustache: templates/form_solicitacao.mustache
-// Processamento feito diretamente em: index.php
+// Processamento feito diretamente em: nova-solicitacao.php
 // Este arquivo foi mantido apenas como referência/backup
 
 namespace local_solicitacoes\form;

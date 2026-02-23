@@ -68,7 +68,7 @@ if ($action === 'updatestatus' && $id && in_array($status, ['pendente','aprovado
         }
         
         \core\notification::success(get_string('success_update', 'local_solicitacoes'));
-        redirect(new moodle_url('/local/solicitacoes/manage.php', ['filter' => $filter]));
+        redirect(new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]));
         exit; // Parar execução após redirect de sucesso
     }
 }
@@ -79,7 +79,7 @@ if ($action === 'delete' && $id) {
     if ($DB->record_exists('local_solicitacoes', ['id' => $id])) {
         $DB->delete_records('local_solicitacoes', ['id' => $id]);
         \core\notification::success(get_string('success_delete', 'local_solicitacoes'));
-        redirect(new moodle_url('/local/solicitacoes/manage.php', ['filter' => $filter]));
+        redirect(new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]));
         exit;
     }
 }

@@ -187,7 +187,7 @@ function local_solicitacoes_notify_criada($solicitacao_id) {
     $message->fullmessagehtml = '';
     $message->smallmessage = get_string('notification_criada_subject', 'local_solicitacoes');
     $message->notification = 1;
-    $message->contexturl = new moodle_url('/local/solicitacoes/view.php', ['id' => $solicitacao_id]);
+    $message->contexturl = new moodle_url('/local/solicitacoes/detalhes.php', ['id' => $solicitacao_id]);
     $message->contexturlname = get_string('details', 'local_solicitacoes');
     
     return message_send($message);
@@ -234,7 +234,7 @@ function local_solicitacoes_notify_aprovada($solicitacao_id) {
     $message->fullmessagehtml = '';
     $message->smallmessage = get_string('notification_aprovada_subject', 'local_solicitacoes');
     $message->notification = 1;
-    $message->contexturl = new moodle_url('/local/solicitacoes/view.php', ['id' => $solicitacao_id]);
+    $message->contexturl = new moodle_url('/local/solicitacoes/detalhes.php', ['id' => $solicitacao_id]);
     $message->contexturlname = get_string('details', 'local_solicitacoes');
     
     return message_send($message);
@@ -282,7 +282,7 @@ function local_solicitacoes_notify_negada($solicitacao_id) {
     $message->fullmessagehtml = '';
     $message->smallmessage = get_string('notification_negada_subject', 'local_solicitacoes');
     $message->notification = 1;
-    $message->contexturl = new moodle_url('/local/solicitacoes/view.php', ['id' => $solicitacao_id]);
+    $message->contexturl = new moodle_url('/local/solicitacoes/detalhes.php', ['id' => $solicitacao_id]);
     $message->contexturlname = get_string('details', 'local_solicitacoes');
     
     return message_send($message);
