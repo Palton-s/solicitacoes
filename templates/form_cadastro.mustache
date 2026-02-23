@@ -35,36 +35,18 @@
         <div class="row mb-3">
             <div class="col-12">
                 <div class="form-group">
-                    <label class="form-label">
-                        {{#str}}papel, local_solicitacoes{{/str}}
+                    <label for="papel" class="form-label">
+                        {{#str}}papel_label, local_solicitacoes{{/str}}
                         <span class="text-danger">*</span>
                     </label>
-                    <div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" 
-                                   type="radio" 
-                                   name="papel" 
-                                   id="papel_teacher" 
-                                   value="teacher" 
-                                   required>
-                            <label class="form-check-label" for="papel_teacher">
-                                {{#str}}papel_teacher, local_solicitacoes{{/str}}
-                            </label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" 
-                                   type="radio" 
-                                   name="papel" 
-                                   id="papel_student" 
-                                   value="student" 
-                                   required>
-                            <label class="form-check-label" for="papel_student">
-                                {{#str}}papel_student, local_solicitacoes{{/str}}
-                            </label>
-                        </div>
-                    </div>
+                    <select name="papel" id="papel" class="form-control" required>
+                        <option value="">{{#str}}select_role, local_solicitacoes{{/str}}</option>
+                        {{#roles}}
+                        <option value="{{shortname}}">{{localname}}</option>
+                        {{/roles}}
+                    </select>
                     <small class="form-text text-muted">
-                        {{#str}}papel_help, local_solicitacoes{{/str}}
+                        {{#str}}papel_help_dinamico, local_solicitacoes{{/str}}
                     </small>
                 </div>
             </div>

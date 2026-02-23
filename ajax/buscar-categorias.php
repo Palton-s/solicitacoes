@@ -21,8 +21,8 @@ try {
     
     // Validar parâmetros
     if (empty($query) || strlen($query) < 2) {
-        error_log("Buscar Categorias - Query muito curta: '$query'");
-        echo json_encode(array('debug' => 'Query muito curta'));
+        error_log("Buscar Categorias - Query vazia: '$query'");
+        echo json_encode(array('debug' => 'Query vazia'));
         exit;
     }
     
