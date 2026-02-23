@@ -25,8 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_solicitacoes';
-$plugin->version   = 2026021110;        // YYYYMMDDXX - v1.2.1: Arquivos deprecated removidos.
+$plugin->version   = 2026022302;        // YYYYMMDDXX - v1.3.0: Adiciona funcionalidade de criação de curso.
 $plugin->requires  = 2022041900;        // Requer Moodle 4.0 ou superior.
 $plugin->maturity  = MATURITY_STABLE;   // MATURITY_ALPHA, MATURITY_BETA, MATURITY_RC ou MATURITY_STABLE.
-$plugin->release   = 'v1.2.1';
-$plugin->release   = 'v1.1.0';          // Versão legível para humanos.
+$plugin->release   = 'v1.3.0';          // Versão legível para humanos.

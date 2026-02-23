@@ -67,12 +67,46 @@ if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, P
     $cpf = optional_param('cpf', '', PARAM_TEXT);
     $email_novo_usuario = optional_param('email_novo_usuario', '', PARAM_EMAIL);
     
+    // Campos de criação de curso
+    $codigo_sigaa = optional_param('codigo_sigaa', '', PARAM_TEXT);
+    $course_shortname = optional_param('course_shortname', '', PARAM_TEXT);
+    $course_summary = optional_param('course_summary', '', PARAM_RAW);
+    $unidade_academica_id = optional_param('unidade_academica_id', 0, PARAM_INT);
+    $ano_semestre = optional_param('ano_semestre', '', PARAM_TEXT);
+    $razoes_criacao = optional_param('razoes_criacao', '', PARAM_TEXT);
+    
     // Validações
-    if (empty($curso_id)) {
+    if ($tipo_acao != 'criar_curso' && empty($curso_id)) {
         $errors[] = get_string('error_curso_required', 'local_solicitacoes');
     }
     
-    if ($tipo_acao == 'cadastro') {
+    if ($tipo_acao == 'criar_curso') {
+        // Validações específicas para criação de curso
+        if (empty($codigo_sigaa)) {
+            $errors[] = get_string('error_codigo_sigaa_required', 'local_solicitacoes');
+        }
+        
+        if (empty($course_shortname)) {
+            $errors[] = get_string('error_course_shortname_required', 'local_solicitacoes');
+        } else {
+            // Verificar se já existe um curso com este shortname
+            if ($DB->record_exists('course', array('shortname' => $course_shortname))) {
+                $errors[] = get_string('error_course_shortname_duplicate', 'local_solicitacoes');
+            }
+        }
+        
+        if (empty($unidade_academica_id)) {
+            $errors[] = get_string('error_unidade_required', 'local_solicitacoes');
+        }
+        
+        if (empty($ano_semestre)) {
+            $errors[] = get_string('error_ano_semestre_required', 'local_solicitacoes');
+        }
+        
+        if (empty($razoes_criacao)) {
+            $errors[] = get_string('error_razoes_criacao_required', 'local_solicitacoes');
+        }
+    } else if ($tipo_acao == 'cadastro') {
         // Validações específicas para cadastro
         if (empty($firstname)) {
             $errors[] = get_string('error_firstname_required', 'local_solicitacoes');
@@ -131,6 +165,16 @@ if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, P
             $data->email_novo_usuario = $email_novo_usuario;
         }
         
+        // Adicionar campos de criação de curso se aplicável
+        if ($tipo_acao == 'criar_curso') {
+            $data->codigo_sigaa = $codigo_sigaa;
+            $data->course_shortname = $course_shortname;
+            $data->course_summary = $course_summary;
+            $data->unidade_academica_id = $unidade_academica_id;
+            $data->ano_semestre = $ano_semestre;
+            $data->razoes_criacao = $razoes_criacao;
+        }
+        
         \local_solicitacoes\solicitacoes_controller::process_request_submission($data);
         redirect(new moodle_url('/local/solicitacoes/confirmacao.php'));
         exit;
@@ -150,7 +194,8 @@ $acoes = array(
     array('value' => 'inscricao', 'label' => get_string('acao_inscricao', 'local_solicitacoes')),
     array('value' => 'remocao', 'label' => get_string('acao_remocao', 'local_solicitacoes')),
     array('value' => 'suspensao', 'label' => get_string('acao_suspensao', 'local_solicitacoes')),
-    array('value' => 'cadastro', 'label' => get_string('acao_cadastro', 'local_solicitacoes'))
+    array('value' => 'cadastro', 'label' => get_string('acao_cadastro', 'local_solicitacoes')),
+    array('value' => 'criar_curso', 'label' => get_string('acao_criar_curso', 'local_solicitacoes'))
 );
 
 // Buscar papéis (roles) disponíveis
@@ -183,7 +228,8 @@ $template_data = array(
     'sesskey' => sesskey(),
     'acoes' => $acoes,
     'papeis' => $papeis,
-    'cancel_url' => $cancel_url->out(false)
+    'cancel_url' => $cancel_url->out(false),
+    'aviso_criar_curso' => get_string('aviso_criar_curso', 'local_solicitacoes')
 );
 
 // Renderizar template

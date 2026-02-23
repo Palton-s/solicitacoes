@@ -222,5 +222,42 @@ function xmldb_local_solicitacoes_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026021001, 'local', 'solicitacoes');
     }
 
+    // Upgrade para versão 2026022301 - Adicionar campos para criação de curso
+    if ($oldversion < 2026022301) {
+        $table = new xmldb_table('local_solicitacoes');
+        
+        $field = new xmldb_field('codigo_sigaa', XMLDB_TYPE_TEXT, null, null, null, null, null, 'email');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        $field = new xmldb_field('course_shortname', XMLDB_TYPE_CHAR, '100', null, null, null, null, 'codigo_sigaa');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        $field = new xmldb_field('course_summary', XMLDB_TYPE_TEXT, null, null, null, null, null, 'course_shortname');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        $field = new xmldb_field('unidade_academica_id', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'course_summary');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        $field = new xmldb_field('ano_semestre', XMLDB_TYPE_CHAR, '20', null, null, null, null, 'unidade_academica_id');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        $field = new xmldb_field('razoes_criacao', XMLDB_TYPE_TEXT, null, null, null, null, null, 'ano_semestre');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        upgrade_plugin_savepoint(true, 2026022301, 'local', 'solicitacoes');
+    }
+
     return true;
 }

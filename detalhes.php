@@ -71,7 +71,8 @@ $acao_strings = array(
     'inscricao' => get_string('acao_inscricao', 'local_solicitacoes'),
     'remocao' => get_string('acao_remocao', 'local_solicitacoes'),
     'suspensao' => get_string('acao_suspensao', 'local_solicitacoes'),
-    'cadastro' => get_string('acao_cadastro', 'local_solicitacoes')
+    'cadastro' => get_string('acao_cadastro', 'local_solicitacoes'),
+    'criar_curso' => get_string('acao_criar_curso', 'local_solicitacoes')
 );
 $acao_label = isset($acao_strings[$request->tipo_acao]) ? $acao_strings[$request->tipo_acao] : $request->tipo_acao;
 
@@ -89,7 +90,10 @@ $badge_info = isset($status_badges[$request->status]) ? $status_badges[$request-
 echo html_writer::start_div('mb-4');
 echo html_writer::start_div('d-flex justify-content-between align-items-start flex-wrap');
 echo html_writer::start_div('');
-echo html_writer::tag('h3', $acao_label . ' - ' . format_string($request->curso_nome), array('class' => 'mb-2'));
+$header_title = ($request->tipo_acao == 'criar_curso') 
+    ? $acao_label . ' - ' . format_string($request->course_shortname)
+    : $acao_label . ' - ' . format_string($request->curso_nome);
+echo html_writer::tag('h3', $header_title, array('class' => 'mb-2'));
 echo html_writer::tag('span', $badge_info['label'], array('class' => 'badge ' . $badge_info['class'] . ' mr-2', 'style' => 'font-size: 1rem;'));
 echo html_writer::tag('small', userdate($request->timecreated, get_string('strftimedatetime', 'langconfig')), array('class' => 'text-muted'));
 echo html_writer::end_div();
@@ -102,7 +106,44 @@ echo html_writer::start_div('row');
 // ===== COLUNA ESQUERDA =====
 echo html_writer::start_div('col-lg-8');
 
-// Card: Usuários Afetados ou Novo Usuário
+if ($request->tipo_acao == 'criar_curso') {
+    // Card: Detalhes do Curso a ser Criado
+    echo html_writer::start_div('card mb-3');
+    echo html_writer::start_div('card-header bg-primary text-white');
+    echo html_writer::tag('h5', get_string('acao_criar_curso', 'local_solicitacoes'), array('class' => 'mb-0'));
+    echo html_writer::end_div();
+    echo html_writer::start_div('card-body');
+    
+    echo html_writer::tag('p', html_writer::tag('strong', get_string('codigo_sigaa', 'local_solicitacoes') . ': ') . format_string($request->codigo_sigaa), array('class' => 'mb-2'));
+    echo html_writer::tag('p', html_writer::tag('strong', get_string('course_shortname', 'local_solicitacoes') . ': ') . format_string($request->course_shortname), array('class' => 'mb-2'));
+    
+    if (!empty($request->unidade_academica_id)) {
+        $categoria = $DB->get_record('course_categories', array('id' => $request->unidade_academica_id));
+        if ($categoria) {
+            echo html_writer::tag('p', html_writer::tag('strong', get_string('unidade_academica', 'local_solicitacoes') . ': ') . format_string($categoria->name), array('class' => 'mb-2'));
+        }
+    }
+    
+    echo html_writer::tag('p', html_writer::tag('strong', get_string('ano_semestre', 'local_solicitacoes') . ': ') . format_string($request->ano_semestre), array('class' => 'mb-2'));
+    
+    if (!empty($request->course_summary)) {
+        echo html_writer::start_div('mt-3');
+        echo html_writer::tag('strong', get_string('course_summary', 'local_solicitacoes') . ':');
+        echo html_writer::tag('div', format_text($request->course_summary, FORMAT_HTML), array('class' => 'mt-2 p-2 bg-light rounded'));
+        echo html_writer::end_div();
+    }
+    
+    if (!empty($request->razoes_criacao)) {
+        echo html_writer::start_div('mt-3');
+        echo html_writer::tag('strong', get_string('razoes_criacao', 'local_solicitacoes') . ':');
+        echo html_writer::tag('div', nl2br(format_text($request->razoes_criacao)), array('class' => 'mt-2 p-2 bg-light rounded', 'style' => 'white-space: pre-wrap;'));
+        echo html_writer::end_div();
+    }
+    
+    echo html_writer::end_div();
+    echo html_writer::end_div();
+} else {
+    // Card: Usuários Afetados ou Novo Usuário
 echo html_writer::start_div('card mb-3');
 echo html_writer::start_div('card-header bg-primary text-white');
 $header_title = ($request->tipo_acao == 'cadastro') 
@@ -150,6 +191,7 @@ if ($request->tipo_acao == 'cadastro') {
 echo html_writer::end_tag('ul');
 echo html_writer::end_div();
 echo html_writer::end_div();
+} // fim if criar_curso
 
 // Card: Observações
 if (!empty($request->observacoes)) {
@@ -180,12 +222,13 @@ echo html_writer::end_div(); // fim coluna esquerda
 // ===== COLUNA DIREITA =====
 echo html_writer::start_div('col-lg-4');
 
-// Card: Dados do Curso
-echo html_writer::start_div('card mb-3');
-echo html_writer::start_div('card-header');
-echo html_writer::tag('h6', get_string('course', 'local_solicitacoes'), array('class' => 'mb-0'));
-echo html_writer::end_div();
-echo html_writer::start_div('card-body');
+// Card: Dados do Curso (exceto para criar_curso)
+if ($request->tipo_acao != 'criar_curso') {
+    echo html_writer::start_div('card mb-3');
+    echo html_writer::start_div('card-header');
+    echo html_writer::tag('h6', get_string('course', 'local_solicitacoes'), array('class' => 'mb-0'));
+    echo html_writer::end_div();
+    echo html_writer::start_div('card-body');
 
 // Exibir cursos da tabela relacionada ou campo texto como fallback
 if (!empty($cursos)) {
@@ -212,6 +255,7 @@ if (($request->tipo_acao == 'inscricao' || $request->tipo_acao == 'cadastro') &&
 }
 echo html_writer::end_div();
 echo html_writer::end_div();
+} // fim if criar_curso
 
 // Card: Solicitante
 echo html_writer::start_div('card mb-3');

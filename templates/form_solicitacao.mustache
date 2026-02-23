@@ -12,6 +12,7 @@
         <input type="hidden" name="curso_id_selected" id="curso_id_selected" value="">
         <input type="hidden" name="usuarios_ids_selected" id="usuarios_ids_selected" value="">
         <input type="hidden" name="usuarios_nomes" id="usuarios_nomes" value="">
+        <input type="hidden" name="unidade_academica_id" id="unidade_academica_id" value="">
 
         <div class="row mb-3">
             <div class="col-md-6">
@@ -157,7 +158,119 @@
             </div>
         </div>
 
-        
+        <div class="row mb-3" id="criar_curso_container" style="display: none;">
+            <div class="col-md-12">
+                <div class="alert alert-warning" role="alert">
+                    {{{aviso_criar_curso}}}
+                </div>
+            </div>
+            
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="codigo_sigaa" class="form-label">
+                        {{#str}}codigo_sigaa, local_solicitacoes{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" 
+                           name="codigo_sigaa" 
+                           id="codigo_sigaa" 
+                           class="form-control"
+                           placeholder="Ex.: NUT0028 - Turma 01"
+                           autocomplete="off">
+                    <small class="form-text text-muted">
+                        {{#str}}codigo_sigaa_help, local_solicitacoes{{/str}}
+                    </small>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="course_shortname" class="form-label">
+                        {{#str}}course_shortname, local_solicitacoes{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" 
+                           name="course_shortname" 
+                           id="course_shortname" 
+                           class="form-control"
+                           placeholder="Apelido_2026.1"
+                           autocomplete="off">
+                    <small class="form-text text-muted">
+                        {{#str}}course_shortname_help, local_solicitacoes{{/str}}
+                    </small>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="ano_semestre" class="form-label">
+                        {{#str}}ano_semestre, local_solicitacoes{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" 
+                           name="ano_semestre" 
+                           id="ano_semestre" 
+                           class="form-control"
+                           placeholder="2026.1"
+                           autocomplete="off">
+                    <small class="form-text text-muted">
+                        {{#str}}ano_semestre_help, local_solicitacoes{{/str}}
+                    </small>
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="unidade_academica_search" class="form-label">
+                        {{#str}}unidade_academica, local_solicitacoes{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" 
+                           name="unidade_academica_search" 
+                           id="unidade_academica_search" 
+                           placeholder="Digite para buscar unidade acadêmica..."
+                           autocomplete="off">
+                    <small class="form-text text-muted">
+                        {{#str}}unidade_academica_help, local_solicitacoes{{/str}}
+                    </small>
+                    <div class="mt-2">
+                        <span class="badge bg-secondary">{{#str}}select_year_semester, local_solicitacoes{{/str}}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="course_summary" class="form-label">
+                        {{#str}}course_summary, local_solicitacoes{{/str}}
+                    </label>
+                    <textarea name="course_summary" 
+                              id="course_summary" 
+                              class="form-control" 
+                              rows="5"></textarea>
+                    <small class="form-text text-muted">
+                        {{#str}}course_summary_help, local_solicitacoes{{/str}}
+                    </small>
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label for="razoes_criacao" class="form-label">
+                        {{#str}}razoes_criacao, local_solicitacoes{{/str}}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <textarea name="razoes_criacao" 
+                              id="razoes_criacao" 
+                              class="form-control" 
+                              rows="6"
+                              placeholder="Professor favor informe: 1- Justificativa; 2- Matrícula/UnB; 3- Código da disciplina no SIGAA ou MatriculaWeb (pós-graduação); 4- Grau de Ensino (Graduação, Mestrado/Doutorado); 5-Data da solicitação (dd/mm/aaaa)"></textarea>
+                    <small class="form-text text-muted">
+                        {{#str}}razoes_criacao_help, local_solicitacoes{{/str}}
+                    </small>
+                </div>
+            </div>
+        </div>
 
         <div class="row mb-3">
             <div class="col-md-12">

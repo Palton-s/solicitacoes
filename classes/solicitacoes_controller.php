@@ -37,11 +37,13 @@ class solicitacoes_controller {
             $id = $DB->insert_record('local_solicitacoes', $record);
             
             if ($id) {
-                // Salvar cursos relacionados
-                self::save_related_courses($id, $data);
+                // Salvar cursos relacionados (apenas para tipos de ação que não são criação de curso)
+                if ($data->tipo_acao != 'criar_curso') {
+                    self::save_related_courses($id, $data);
+                }
                 
-                // Salvar usuários relacionados (não aplicável para cadastro)
-                if ($data->tipo_acao != 'cadastro') {
+                // Salvar usuários relacionados (não aplicável para cadastro e criação de curso)
+                if ($data->tipo_acao != 'cadastro' && $data->tipo_acao != 'criar_curso') {
                     self::save_related_users($id, $data);
                 }
                 
@@ -87,6 +89,16 @@ class solicitacoes_controller {
             $record->lastname   = !empty($data->lastname) ? $data->lastname : '';
             $record->cpf        = !empty($data->cpf) ? $data->cpf : '';
             $record->email      = !empty($data->email_novo_usuario) ? $data->email_novo_usuario : '';
+        }
+        
+        // Adicionar campos de criação de curso se aplicável
+        if ($data->tipo_acao == 'criar_curso') {
+            $record->codigo_sigaa           = !empty($data->codigo_sigaa) ? $data->codigo_sigaa : '';
+            $record->course_shortname       = !empty($data->course_shortname) ? $data->course_shortname : '';
+            $record->course_summary         = !empty($data->course_summary) ? $data->course_summary : '';
+            $record->unidade_academica_id   = !empty($data->unidade_academica_id) ? (int)$data->unidade_academica_id : 0;
+            $record->ano_semestre           = !empty($data->ano_semestre) ? $data->ano_semestre : '';
+            $record->razoes_criacao         = !empty($data->razoes_criacao) ? $data->razoes_criacao : '';
         }
         
         return $record;
@@ -309,6 +321,11 @@ class solicitacoes_controller {
                 return self::create_and_enrol_user($solicitacao, $cursos);
             }
             
+            // Para criação de curso, não precisa de cursos ou usuários relacionados
+            if ($solicitacao->tipo_acao == 'criar_curso') {
+                return self::create_course($solicitacao);
+            }
+            
             // Buscar usuários relacionados (para outros tipos de ação)
             $usuarios = self::get_related_users($solicitacao_id);
             
@@ -326,6 +343,9 @@ class solicitacoes_controller {
                     
                 case 'suspensao':
                     return self::suspend_users($cursos, $usuarios);
+                    
+                case 'criar_curso':
+                    return self::create_course($solicitacao);
                     
                 default:
                     return ['success' => false, 'message' => 'Tipo de ação desconhecido: ' . $solicitacao->tipo_acao];
@@ -588,5 +608,92 @@ class solicitacoes_controller {
             ];
         }
     }
-}
 
+    /**
+     * Cria um novo curso no Moodle baseado na solicitação
+     * 
+     * @param \stdClass $solicitacao Objeto da solicitação com dados do curso
+     * @return array Array com 'success' e 'message'
+     */
+    private static function create_course($solicitacao) {
+        global $DB, $CFG;
+        require_once($CFG->dirroot . '/course/lib.php');
+        
+        try {
+            // Validar se shortname já existe
+            if ($DB->record_exists('course', ['shortname' => $solicitacao->course_shortname])) {
+                return [
+                    'success' => false,
+                    'message' => get_string('error_course_shortname_duplicate', 'local_solicitacoes')
+                ];
+            }
+            
+            // Validar se a categoria existe
+            if (!$DB->record_exists('course_categories', ['id' => $solicitacao->unidade_academica_id])) {
+                return [
+                    'success' => false,
+                    'message' => 'Categoria/Unidade acadêmica não encontrada.'
+                ];
+            }
+            
+            // Criar objeto do novo curso
+            $newcourse = new \stdClass();
+            $newcourse->fullname        = $solicitacao->codigo_sigaa; // Nome completo será o código SIGAA
+            $newcourse->shortname       = $solicitacao->course_shortname;
+            $newcourse->summary         = !empty($solicitacao->course_summary) ? $solicitacao->course_summary : '';
+            $newcourse->summaryformat   = FORMAT_HTML;
+            $newcourse->category        = $solicitacao->unidade_academica_id;
+            $newcourse->format          = 'topics'; // Formato de tópicos por padrão
+            $newcourse->visible         = 0; // Oculto inicialmente
+            $newcourse->startdate       = time();
+            $newcourse->enddate         = 0;
+            $newcourse->showgrades      = 1;
+            $newcourse->enablecompletion = 1;
+            
+            // Criar o curso usando a API do Moodle
+            $createdcourse = create_course($newcourse);
+            
+            if (!$createdcourse) {
+                return [
+                    'success' => false,
+                    'message' => 'Erro ao criar curso no sistema.'
+                ];
+            }
+            
+            // Salvar relação do curso criado com a solicitação
+            $curso_record = new \stdClass();
+            $curso_record->solicitacao_id = $solicitacao->id;
+            $curso_record->curso_id = $createdcourse->id;
+            $curso_record->timecreated = time();
+            $DB->insert_record('local_curso_solicitacoes', $curso_record);
+            
+            // Inscrever o solicitante como professor editor
+            $context = \context_course::instance($createdcourse->id);
+            $role = $DB->get_record('role', ['shortname' => 'editingteacher'], '*', MUST_EXIST);
+            
+            // Obter instância de inscrição manual
+            $enrol_instance = $DB->get_record('enrol', [
+                'courseid' => $createdcourse->id,
+                'enrol' => 'manual'
+            ]);
+            
+            if ($enrol_instance) {
+                $enrol_plugin = enrol_get_plugin('manual');
+                $enrol_plugin->enrol_user($enrol_instance, $solicitacao->userid, $role->id, time());
+                error_log("Usuário {$solicitacao->userid} inscrito como editingteacher no curso {$createdcourse->id}");
+            }
+            
+            return [
+                'success' => true,
+                'message' => get_string('course_created_success', 'local_solicitacoes', $createdcourse->fullname)
+            ];
+            
+        } catch (\Exception $e) {
+            error_log("Erro ao criar curso: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Erro ao criar curso: ' . $e->getMessage()
+            ];
+        }
+    }
+}

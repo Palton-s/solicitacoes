@@ -20,6 +20,12 @@
         <FIELD NAME="lastname" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Sobrenome (para cadastro de usuário)"/>
         <FIELD NAME="cpf" TYPE="char" LENGTH="14" NOTNULL="false" SEQUENCE="false" COMMENT="CPF (para cadastro de usuário, usado como username)"/>
         <FIELD NAME="email" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Email (para cadastro de usuário)"/>
+        <FIELD NAME="codigo_sigaa" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Código SIGAA - Turma (para criação de curso)"/>
+        <FIELD NAME="course_shortname" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Nome curto da disciplina (para criação de curso)"/>
+        <FIELD NAME="course_summary" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Descrição/sumário da disciplina (para criação de curso)"/>
+        <FIELD NAME="unidade_academica_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="ID da categoria/unidade acadêmica (para criação de curso)"/>
+        <FIELD NAME="ano_semestre" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="Ano/Semestre (para criação de curso)"/>
+        <FIELD NAME="razoes_criacao" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Razões para criar a disciplina (para criação de curso)"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

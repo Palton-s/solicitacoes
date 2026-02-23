@@ -15,7 +15,7 @@ window.addEventListener("load", function() {
         }
 
         console.log("Tom Select OK, buscando campos...");
-        
+
         // Debug: listar todos os inputs no formulário
         var allInputs = document.querySelectorAll('input, select, textarea');
         console.log("Total de campos encontrados:", allInputs.length);
@@ -34,9 +34,9 @@ window.addEventListener("load", function() {
             console.log("Campo curso encontrado, inicializando...");
 
             // Obter o caminho base do Moodle corretamente
-            var moodleRoot = (typeof M !== 'undefined' && M.cfg && M.cfg.wwwroot) 
-                ? M.cfg.wwwroot 
-                : window.location.origin;
+            var moodleRoot = (typeof M !== 'undefined' && M.cfg && M.cfg.wwwroot) ?
+                M.cfg.wwwroot :
+                window.location.origin;
             console.log("Moodle root detectado:", moodleRoot);
 
             cursoSelect = new TomSelect(cursoField, {
@@ -102,9 +102,9 @@ window.addEventListener("load", function() {
             console.log("Campo usuarios encontrado, inicializando...");
 
             // Obter o caminho base do Moodle corretamente
-            var moodleRoot = (typeof M !== 'undefined' && M.cfg && M.cfg.wwwroot) 
-                ? M.cfg.wwwroot 
-                : window.location.origin;
+            var moodleRoot = (typeof M !== 'undefined' && M.cfg && M.cfg.wwwroot) ?
+                M.cfg.wwwroot :
+                window.location.origin;
 
             usuariosSelect = new TomSelect(usuariosField, {
                 valueField: "id",
@@ -202,6 +202,16 @@ window.addEventListener("load", function() {
                         }
                     }
 
+                    if (unidadeSelect) {
+                        var unidadeValue = unidadeSelect.getValue();
+                        console.log("Unidade acadêmica no submit:", unidadeValue);
+                        var unidadeHidden = document.querySelector("input[name=unidade_academica_id]");
+                        if (unidadeHidden) {
+                            unidadeHidden.value = unidadeValue;
+                            console.log("Campo unidade_academica_id no submit:", unidadeHidden.value);
+                        }
+                    }
+
                     // Log de todos os campos ocultos
                     console.log("Todos os campos ocultos:");
                     var allHidden = form.querySelectorAll("input[type=hidden]");
@@ -214,6 +224,77 @@ window.addEventListener("load", function() {
             console.error("Campo usuarios_search não encontrado!");
         }
 
+        // Inicializar Tom Select para UNIDADE ACADÊMICA (categorias)
+        var unidadeSelect = null;
+        var unidadeField = document.getElementById("unidade_academica_search");
+        if (unidadeField) {
+            console.log("Campo unidade_academica encontrado, inicializando...");
+
+            // Obter o caminho base do Moodle corretamente
+            var moodleRoot = (typeof M !== 'undefined' && M.cfg && M.cfg.wwwroot) ?
+                M.cfg.wwwroot :
+                window.location.origin;
+
+            unidadeSelect = new TomSelect(unidadeField, {
+                valueField: "id",
+                labelField: "label",
+                searchField: "name",
+                placeholder: "Digite para buscar unidade acadêmica...",
+                wrapperClass: "form-control h-auto",
+                plugins: ["remove_button"],
+                create: false,
+                render: {
+                    item: function(data, escape) {
+                        return '<div class="alert alert-info m-1 p-2">' + escape(data.label) + '</div>';
+                    },
+                    option: function(data, escape) {
+                        return '<div>' + escape(data.label) + '</div>';
+                    }
+                },
+                load: function(query, callback) {
+                    if (query.length < 2) {
+                        callback();
+                        return;
+                    }
+
+                    var url = moodleRoot + "/local/solicitacoes/ajax/buscar-categorias.php?query=" + encodeURIComponent(query) + "&limit=20";
+                    console.log("Buscando categorias:", url);
+
+                    fetch(url)
+                        .then(function(response) {
+                            console.log("Resposta recebida - Status:", response.status);
+                            if (!response.ok) {
+                                throw new Error("HTTP " + response.status);
+                            }
+                            return response.json();
+                        })
+                        .then(function(data) {
+                            console.log("Categorias encontradas:", data);
+                            if (Array.isArray(data)) {
+                                callback(data);
+                            } else {
+                                console.error("Resposta não é um array:", data);
+                                callback();
+                            }
+                        })
+                        .catch(function(error) {
+                            console.error("Erro ao buscar categorias:", error);
+                            callback();
+                        });
+                },
+                onChange: function(value) {
+                    var hiddenField = document.querySelector("input[name=unidade_academica_id]");
+                    if (hiddenField) {
+                        hiddenField.value = value;
+                        console.log("Unidade acadêmica selecionada:", value);
+                    }
+                }
+            });
+            console.log("Tom Select unidade_academica inicializado!");
+        } else {
+            console.log("Campo unidade_academica_search não encontrado (normal se não for criação de curso)");
+        }
+
         // Controlar visibilidade dos campos baseado no tipo de ação
         var tipoAcaoField = document.getElementById("tipo_acao");
         var papelContainer = document.getElementById("papel_container");
@@ -223,18 +304,50 @@ window.addEventListener("load", function() {
         var usuariosContainer = document.getElementById("usuarios_container");
         var usuariosField = document.getElementById("usuarios_search");
         var cadastroContainer = document.getElementById("cadastro_container");
+        var criarCursoContainer = document.getElementById("criar_curso_container");
         var firstnameField = document.getElementById("firstname");
         var lastnameField = document.getElementById("lastname");
         var cpfField = document.getElementById("cpf");
         var emailField = document.getElementById("email_novo_usuario");
-        
+        var codigoSigaaField = document.getElementById("codigo_sigaa");
+        var courseShortnameField = document.getElementById("course_shortname");
+        var anoSemestreField = document.getElementById("ano_semestre");
+        var unidadeAcademicaField = document.getElementById("unidade_academica_search");
+        var razoesCriacaoField = document.getElementById("razoes_criacao");
+
         if (tipoAcaoField) {
             tipoAcaoField.addEventListener("change", function() {
                 var tipoAcao = this.value;
-                
-                if (tipoAcao === "cadastro") {
+
+                if (tipoAcao === "criar_curso") {
+                    // Mostrar apenas campos de criação de curso
+                    // Ocultar curso, usuários, papel e cadastro
+                    if (criarCursoContainer) {
+                        criarCursoContainer.style.display = "flex";
+                        criarCursoContainer.style.flexWrap = "wrap";
+                    }
+                    if (cursoContainer) cursoContainer.style.display = "none";
+                    if (usuariosContainer) usuariosContainer.style.display = "none";
+                    if (papelContainer) papelContainer.style.display = "none";
+                    if (cadastroContainer) cadastroContainer.style.display = "none";
+
+                    // Ajustar required
+                    if (codigoSigaaField) codigoSigaaField.setAttribute("required", "required");
+                    if (courseShortnameField) courseShortnameField.setAttribute("required", "required");
+                    if (anoSemestreField) anoSemestreField.setAttribute("required", "required");
+                    if (unidadeAcademicaField) unidadeAcademicaField.setAttribute("required", "required");
+                    if (razoesCriacaoField) razoesCriacaoField.setAttribute("required", "required");
+                    if (cursoField) cursoField.removeAttribute("required");
+                    if (usuariosField) usuariosField.removeAttribute("required");
+                    if (papelField) papelField.removeAttribute("required");
+                    if (firstnameField) firstnameField.removeAttribute("required");
+                    if (lastnameField) lastnameField.removeAttribute("required");
+                    if (cpfField) cpfField.removeAttribute("required");
+                    if (emailField) emailField.removeAttribute("required");
+
+                } else if (tipoAcao === "cadastro") {
                     // Mostrar campos de cadastro, curso e papel
-                    // Ocultar campo de usuários existentes
+                    // Ocultar campo de usuários existentes e criação de curso
                     if (cadastroContainer) {
                         cadastroContainer.style.display = "flex";
                         cadastroContainer.style.flexWrap = "wrap";
@@ -242,7 +355,8 @@ window.addEventListener("load", function() {
                     if (cursoContainer) cursoContainer.style.display = "block";
                     if (papelContainer) papelContainer.style.display = "block";
                     if (usuariosContainer) usuariosContainer.style.display = "none";
-                    
+                    if (criarCursoContainer) criarCursoContainer.style.display = "none";
+
                     // Ajustar required
                     if (firstnameField) firstnameField.setAttribute("required", "required");
                     if (lastnameField) lastnameField.setAttribute("required", "required");
@@ -251,15 +365,21 @@ window.addEventListener("load", function() {
                     if (papelField) papelField.setAttribute("required", "required");
                     if (cursoField) cursoField.setAttribute("required", "required");
                     if (usuariosField) usuariosField.removeAttribute("required");
-                    
+                    if (codigoSigaaField) codigoSigaaField.removeAttribute("required");
+                    if (courseShortnameField) courseShortnameField.removeAttribute("required");
+                    if (anoSemestreField) anoSemestreField.removeAttribute("required");
+                    if (unidadeAcademicaField) unidadeAcademicaField.removeAttribute("required");
+                    if (razoesCriacaoField) razoesCriacaoField.removeAttribute("required");
+
                 } else if (tipoAcao === "inscricao") {
                     // Mostrar curso, usuários e papel
-                    // Ocultar campos de cadastro
+                    // Ocultar campos de cadastro e criação de curso
                     if (cursoContainer) cursoContainer.style.display = "block";
                     if (usuariosContainer) usuariosContainer.style.display = "block";
                     if (papelContainer) papelContainer.style.display = "block";
                     if (cadastroContainer) cadastroContainer.style.display = "none";
-                    
+                    if (criarCursoContainer) criarCursoContainer.style.display = "none";
+
                     // Ajustar required
                     if (papelField) papelField.setAttribute("required", "required");
                     if (cursoField) cursoField.setAttribute("required", "required");
@@ -268,14 +388,20 @@ window.addEventListener("load", function() {
                     if (lastnameField) lastnameField.removeAttribute("required");
                     if (cpfField) cpfField.removeAttribute("required");
                     if (emailField) emailField.removeAttribute("required");
-                    
+                    if (codigoSigaaField) codigoSigaaField.removeAttribute("required");
+                    if (courseShortnameField) courseShortnameField.removeAttribute("required");
+                    if (anoSemestreField) anoSemestreField.removeAttribute("required");
+                    if (unidadeAcademicaField) unidadeAcademicaField.removeAttribute("required");
+                    if (razoesCriacaoField) razoesCriacaoField.removeAttribute("required");
+
                 } else {
-                    // remocao ou suspensao: mostrar curso e usuários, ocultar papel e cadastro
+                    // remocao ou suspensao: mostrar curso e usuários, ocultar papel, cadastro e criação
                     if (cursoContainer) cursoContainer.style.display = "block";
                     if (usuariosContainer) usuariosContainer.style.display = "block";
                     if (papelContainer) papelContainer.style.display = "none";
                     if (cadastroContainer) cadastroContainer.style.display = "none";
-                    
+                    if (criarCursoContainer) criarCursoContainer.style.display = "none";
+
                     // Ajustar required
                     if (papelField) papelField.removeAttribute("required");
                     if (cursoField) cursoField.setAttribute("required", "required");
@@ -284,6 +410,11 @@ window.addEventListener("load", function() {
                     if (lastnameField) lastnameField.removeAttribute("required");
                     if (cpfField) cpfField.removeAttribute("required");
                     if (emailField) emailField.removeAttribute("required");
+                    if (codigoSigaaField) codigoSigaaField.removeAttribute("required");
+                    if (courseShortnameField) courseShortnameField.removeAttribute("required");
+                    if (anoSemestreField) anoSemestreField.removeAttribute("required");
+                    if (unidadeAcademicaField) unidadeAcademicaField.removeAttribute("required");
+                    if (razoesCriacaoField) razoesCriacaoField.removeAttribute("required");
                 }
             });
             // Disparar o evento para configurar o estado inicial
@@ -303,13 +434,13 @@ window.addEventListener("load", function() {
             function validarCPF(cpf) {
                 // Remove caracteres não numéricos
                 cpf = cpf.replace(/[^\d]/g, '');
-                
+
                 // Verifica se tem 11 dígitos
                 if (cpf.length !== 11) return false;
-                
+
                 // Verifica se todos os dígitos são iguais
                 if (/^(\d)\1{10}$/.test(cpf)) return false;
-                
+
                 // Valida primeiro dígito verificador
                 var soma = 0;
                 for (var i = 0; i < 9; i++) {
@@ -317,9 +448,9 @@ window.addEventListener("load", function() {
                 }
                 var resto = 11 - (soma % 11);
                 var digito1 = (resto === 10 || resto === 11) ? 0 : resto;
-                
+
                 if (digito1 !== parseInt(cpf.charAt(9))) return false;
-                
+
                 // Valida segundo dígito verificador
                 soma = 0;
                 for (var i = 0; i < 10; i++) {
@@ -327,9 +458,9 @@ window.addEventListener("load", function() {
                 }
                 resto = 11 - (soma % 11);
                 var digito2 = (resto === 10 || resto === 11) ? 0 : resto;
-                
+
                 if (digito2 !== parseInt(cpf.charAt(10))) return false;
-                
+
                 return true;
             }
 
@@ -337,10 +468,10 @@ window.addEventListener("load", function() {
             function formatarCPF(valor) {
                 // Remove tudo que não é número
                 valor = valor.replace(/\D/g, '');
-                
+
                 // Limita a 11 dígitos
                 valor = valor.substring(0, 11);
-                
+
                 // Aplica formatação
                 if (valor.length > 9) {
                     valor = valor.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
@@ -349,7 +480,7 @@ window.addEventListener("load", function() {
                 } else if (valor.length > 3) {
                     valor = valor.replace(/(\d{3})(\d{1,3})/, '$1.$2');
                 }
-                
+
                 return valor;
             }
 
@@ -357,10 +488,10 @@ window.addEventListener("load", function() {
             cpfField.addEventListener("input", function(e) {
                 var cursorPos = this.selectionStart;
                 var valorAnterior = this.value;
-                
+
                 // Formatar o valor
                 this.value = formatarCPF(this.value);
-                
+
                 // Ajustar posição do cursor após formatação
                 if (this.value.length < valorAnterior.length) {
                     // Se deletou, mantém posição
@@ -371,14 +502,14 @@ window.addEventListener("load", function() {
             // Event listener para validação ao sair do campo
             cpfField.addEventListener("blur", function() {
                 var cpfLimpo = this.value.replace(/\D/g, '');
-                
+
                 if (cpfLimpo.length === 0) {
                     // Campo vazio - remover feedback
                     cpfField.classList.remove("is-valid", "is-invalid");
                     feedbackDiv.textContent = "";
                     return;
                 }
-                
+
                 if (validarCPF(cpfLimpo)) {
                     // CPF válido
                     cpfField.classList.remove("is-invalid");
@@ -392,7 +523,7 @@ window.addEventListener("load", function() {
                     cpfField.classList.add("is-invalid");
                     feedbackDiv.className = "invalid-feedback";
                     feedbackDiv.style.display = "block";
-                    
+
                     if (cpfLimpo.length < 11) {
                         feedbackDiv.textContent = "CPF incompleto. Digite os 11 dígitos.";
                     } else {
@@ -416,7 +547,7 @@ window.addEventListener("load", function() {
                     var tipoAcao = document.getElementById("tipo_acao");
                     if (tipoAcao && tipoAcao.value === "cadastro") {
                         var cpfLimpo = cpfField.value.replace(/\D/g, '');
-                        
+
                         if (cpfLimpo.length === 0) {
                             e.preventDefault();
                             cpfField.classList.add("is-invalid");
@@ -426,7 +557,7 @@ window.addEventListener("load", function() {
                             cpfField.focus();
                             return false;
                         }
-                        
+
                         if (!validarCPF(cpfLimpo)) {
                             e.preventDefault();
                             cpfField.classList.add("is-invalid");
