@@ -13,7 +13,7 @@ try {
     header('Access-Control-Allow-Origin: *');
     
     // Obter parâmetros da URL
-    $query = isset($_GET['query']) ? trim($_GET['query']) : '';
+    $query = isset($_GET['q']) ? trim($_GET['q']) : '';
     $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
     
     // Debug - log dos parâmetros
