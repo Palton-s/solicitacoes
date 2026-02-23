@@ -46,8 +46,11 @@ if (optional_param('cancel', 0, PARAM_BOOL)) {
     exit;
 }
 
+// Capturar submitbutton uma única vez
+$submitbutton = optional_param('submitbutton', '', PARAM_TEXT);
+
 // Processar submissão do formulário
-if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, PARAM_TEXT)) {
+if (data_submitted() && confirm_sesskey() && $submitbutton) {
     global $USER, $DB;
     
     $errors = [];

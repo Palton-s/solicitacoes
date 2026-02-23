@@ -162,9 +162,14 @@ require(['jquery'], function($) {
             
             // Validação antes de submeter
             $('#form_inscricao').on('submit', function(e) {
+                console.log('=== FORM SUBMIT TRIGGERED ===');
                 var cursoId = $('#curso_id_selected').val();
                 var usuariosIds = $('#usuarios_ids_selected').val();
                 var papel = $('#papel').val();
+                
+                console.log('Curso ID:', cursoId);
+                console.log('Usuarios IDs:', usuariosIds);
+                console.log('Papel:', papel);
                 
                 if (!cursoId || cursoId === '') {
                     e.preventDefault();
@@ -184,6 +189,7 @@ require(['jquery'], function($) {
                     return false;
                 }
                 
+                console.log('=== VALIDACAO OK, SUBMETENDO... ===');
                 return true;
             });
         }

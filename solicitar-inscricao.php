@@ -52,6 +52,12 @@ $PAGE->requires->js_init_code("
     }
 ");
 
+// Log geral de acesso (sempre executa)
+error_log("========== INSCRICAO.PHP CARREGADO ==========");
+error_log("Inscrição - REQUEST_METHOD: " . $_SERVER['REQUEST_METHOD']);
+error_log("Inscrição - POST dados: " . print_r($_POST, true));
+error_log("Inscrição - GET dados: " . print_r($_GET, true));
+
 echo $OUTPUT->header();
 
 // Processar cancelamento
@@ -60,13 +66,16 @@ if (optional_param('cancel', 0, PARAM_BOOL)) {
     exit;
 }
 
+// Capturar parâmetros uma única vez (optional_param só funciona na primeira chamada)
+$submitbutton = optional_param('submitbutton', '', PARAM_TEXT);
+
 // Debug: verificar se chegou aqui
 error_log("Inscrição - Debug: Após cancelamento check");
 error_log("Inscrição - Debug: data_submitted=" . (data_submitted() ? 'true' : 'false'));
-error_log("Inscrição - Debug: submitbutton=" . optional_param('submitbutton', '', PARAM_TEXT));
+error_log("Inscrição - Debug: submitbutton=" . $submitbutton);
 
 // Processar submissão do formulário
-if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, PARAM_TEXT)) {
+if (data_submitted() && confirm_sesskey() && $submitbutton) {
     error_log("Inscrição - Debug: confirm_sesskey passou!");
     global $USER, $DB;
     
