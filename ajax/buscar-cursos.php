@@ -68,7 +68,7 @@ try {
             
             $results[] = array(
                 'id' => (int)$course->id,
-                'name' => $fullname,
+                'fullname' => $fullname,
                 'shortname' => $shortname,
                 'label' => $fullname . ' (' . $shortname . ')',
                 'visible' => (int)$course->visible === 1
