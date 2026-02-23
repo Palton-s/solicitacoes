@@ -72,6 +72,9 @@ if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, P
     $papel = required_param('papel', PARAM_ALPHANUMEXT);
     $observacoes = optional_param('observacoes', '', PARAM_TEXT);
     
+    // Debug log
+    error_log("Inscrição - Dados recebidos - curso: $curso_id, usuarios: $usuarios_ids, papel: $papel");
+    
     // Validações
     if (empty($curso_id) || $curso_id <= 0) {
         $errors[] = get_string('error_curso_required', 'local_solicitacoes');

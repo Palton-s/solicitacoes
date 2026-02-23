@@ -22,8 +22,7 @@
                     </label>
                     <select name="curso_nome" 
                             id="curso_nome" 
-                            class="form-control" 
-                            required>
+                            class="form-control">
                         <option value="">{{#str}}searching_courses, local_solicitacoes{{/str}}</option>
                     </select>
                     <small class="form-text text-muted">
@@ -63,8 +62,7 @@
                     <select name="usuarios_busca" 
                             id="usuarios_busca" 
                             class="form-control" 
-                            multiple 
-                            required>
+                            multiple>
                     </select>
                     <small class="form-text text-muted">
                         {{#str}}usuarios_busca_help, local_solicitacoes{{/str}}
@@ -126,7 +124,7 @@ require(['jquery'], function($) {
                     });
                 },
                 onChange: function(value) {
-                    $('#curso_id_selected').val(value);
+                    $('#curso_id_selected').val(value || '');
                 }
             });
             
@@ -158,8 +156,35 @@ require(['jquery'], function($) {
                     });
                 },
                 onChange: function(value) {
-                    $('#usuarios_ids_selected').val(value.join(','));
+                    $('#usuarios_ids_selected').val(Array.isArray(value) ? value.join(',') : '');
                 }
+            });
+            
+            // Validação antes de submeter
+            $('#form_inscricao').on('submit', function(e) {
+                var cursoId = $('#curso_id_selected').val();
+                var usuariosIds = $('#usuarios_ids_selected').val();
+                var papel = $('#papel').val();
+                
+                if (!cursoId || cursoId === '') {
+                    e.preventDefault();
+                    alert('Por favor, selecione um curso.');
+                    return false;
+                }
+                
+                if (!usuariosIds || usuariosIds === '') {
+                    e.preventDefault();
+                    alert('Por favor, selecione pelo menos um usuário.');
+                    return false;
+                }
+                
+                if (!papel || papel === '') {
+                    e.preventDefault();
+                    alert('Por favor, selecione um papel.');
+                    return false;
+                }
+                
+                return true;
             });
         }
     });
