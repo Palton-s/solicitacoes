@@ -60,9 +60,17 @@ if (optional_param('cancel', 0, PARAM_BOOL)) {
     exit;
 }
 
+// Debug: verificar se chegou aqui
+error_log("Inscrição - Debug: Após cancelamento check");
+error_log("Inscrição - Debug: data_submitted=" . (data_submitted() ? 'true' : 'false'));
+error_log("Inscrição - Debug: confirm_sesskey=" . (confirm_sesskey() ? 'true' : 'false'));
+error_log("Inscrição - Debug: submitbutton=" . optional_param('submitbutton', '', PARAM_TEXT));
+
 // Processar submissão do formulário
 if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, PARAM_TEXT)) {
     global $USER, $DB;
+    
+    error_log("Inscrição - Debug: ENTROU no bloco de submissão!");
     
     $errors = [];
     
@@ -74,28 +82,37 @@ if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, P
     
     // Debug log
     error_log("Inscrição - Dados recebidos - curso: $curso_id, usuarios: $usuarios_ids, papel: $papel");
+    error_log("Inscrição - Debug: Tipo usuarios_ids: " . gettype($usuarios_ids) . ", empty: " . (empty($usuarios_ids) ? 'SIM' : 'NAO'));
+    error_log("Inscrição - Debug: Tipo papel: " . gettype($papel) . ", empty: " . (empty($papel) ? 'SIM' : 'NAO'));
     
     // Validações
     if (empty($curso_id) || $curso_id <= 0) {
         $errors[] = get_string('error_curso_required', 'local_solicitacoes');
+        error_log("Inscrição - ERRO: Curso vazio ou inválido");
     }
     
     if (empty(trim($usuarios_ids))) {
         $errors[] = get_string('error_usuarios_required', 'local_solicitacoes');
+        error_log("Inscrição - ERRO: Usuários vazio");
     }
     
     // Validar papel
     if (empty($papel)) {
         $errors[] = get_string('error_papel_required', 'local_solicitacoes');
+        error_log("Inscrição - ERRO: Papel vazio");
     } else {
         $role_check = $DB->get_record('role', ['shortname' => $papel]);
         if (!$role_check) {
             $errors[] = get_string('error_papel_invalid', 'local_solicitacoes');
+            error_log("Inscrição - ERRO: Papel inválido: " . $papel);
         }
     }
     
+    error_log("Inscrição - Debug: Total de erros encontrados: " . count($errors));
+    
     // Se não houver erros, processar
     if (empty($errors)) {
+        error_log("Inscrição - Debug: Sem erros, processando solicitação...");
         $data = new \stdClass();
         $data->tipo_acao = 'inscricao';
         $data->curso_id_selected = $curso_id;
@@ -104,6 +121,7 @@ if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, P
         $data->observacoes = $observacoes;
         
         $success = \local_solicitacoes\solicitacoes_controller::process_request_submission($data);
+        error_log("Inscrição - Debug: Resultado do processamento: " . ($success ? 'SUCESSO' : 'FALHA'));
         if ($success) {
             redirect(new moodle_url('/local/solicitacoes/confirmacao.php'),
                      get_string('success_submit', 'local_solicitacoes'), null, \core\output\notification::NOTIFY_SUCCESS);
@@ -114,10 +132,14 @@ if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, P
         exit;
     } else {
         // Mostrar erros
+        error_log("Inscrição - Debug: Há erros, exibindo na tela. Total: " . count($errors));
         foreach ($errors as $error) {
+            error_log("Inscrição - ERRO exibido: " . $error);
             echo $OUTPUT->notification($error, \core\output\notification::NOTIFY_ERROR);
         }
     }
+} else {
+    error_log("Inscrição - Debug: NÃO entrou no bloco de submissão (condição if falhou)");
 }
 
 // Preparar dados para o template
