@@ -306,6 +306,11 @@ class solicitacoes_controller {
             // Buscar a solicitação
             $solicitacao = $DB->get_record('local_solicitacoes', ['id' => $solicitacao_id], '*', MUST_EXIST);
             
+            // Para criação de curso, não precisa de cursos ou usuários relacionados
+            if ($solicitacao->tipo_acao == 'criar_curso') {
+                return self::create_course($solicitacao);
+            }
+            
             // Buscar cursos relacionados
             $cursos = self::get_related_courses($solicitacao_id);
             
@@ -316,11 +321,6 @@ class solicitacoes_controller {
             // Para cadastro, não precisa buscar usuários existentes
             if ($solicitacao->tipo_acao == 'cadastro') {
                 return self::create_and_enrol_user($solicitacao, $cursos);
-            }
-            
-            // Para criação de curso, não precisa de cursos ou usuários relacionados
-            if ($solicitacao->tipo_acao == 'criar_curso') {
-                return self::create_course($solicitacao);
             }
             
             // Buscar usuários relacionados (para outros tipos de ação)
@@ -340,9 +340,6 @@ class solicitacoes_controller {
                     
                 case 'suspensao':
                     return self::suspend_users($cursos, $usuarios);
-                    
-                case 'criar_curso':
-                    return self::create_course($solicitacao);
                     
                 default:
                     return ['success' => false, 'message' => 'Tipo de ação desconhecido: ' . $solicitacao->tipo_acao];
