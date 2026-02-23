@@ -53,9 +53,12 @@ if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, P
     $errors = [];
     
     // Coletar dados do formulário
-    $curso_id = required_param('curso_id_selected', PARAM_INT);
-    $usuarios_ids = required_param('usuarios_ids_selected', PARAM_TEXT);
-    $observacoes = required_param('observacoes', PARAM_TEXT);
+    $curso_id = optional_param('curso_id_selected', 0, PARAM_INT);
+    $usuarios_ids = optional_param('usuarios_ids_selected', '', PARAM_TEXT);
+    $observacoes = optional_param('observacoes', '', PARAM_TEXT);
+    
+    // Debug log
+    error_log("Suspensão - Dados recebidos - curso: $curso_id, usuarios: $usuarios_ids, motivo: $observacoes");
     
     // Validações
     if (empty($curso_id) || $curso_id <= 0) {

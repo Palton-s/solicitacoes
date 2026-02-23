@@ -53,13 +53,16 @@ if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, P
     $errors = [];
     
     // Coletar dados do formulário
-    $curso_id = required_param('curso_id_selected', PARAM_INT);
-    $papel = required_param('papel', PARAM_ALPHA);
-    $firstname = required_param('firstname', PARAM_TEXT);
-    $lastname = required_param('lastname', PARAM_TEXT);
-    $cpf = required_param('cpf', PARAM_TEXT);
-    $email_novo_usuario = required_param('email_novo_usuario', PARAM_EMAIL);
+    $curso_id = optional_param('curso_id_selected', 0, PARAM_INT);
+    $papel = optional_param('papel', '', PARAM_ALPHANUMEXT);
+    $firstname = optional_param('firstname', '', PARAM_TEXT);
+    $lastname = optional_param('lastname', '', PARAM_TEXT);
+    $cpf = optional_param('cpf', '', PARAM_TEXT);
+    $email_novo_usuario = optional_param('email_novo_usuario', '', PARAM_EMAIL);
     $observacoes = optional_param('observacoes', '', PARAM_TEXT);
+    
+    // Debug log
+    error_log("Cadastro - Dados recebidos - curso: $curso_id, papel: $papel, nome: $firstname $lastname, cpf: $cpf, email: $email_novo_usuario");
     
     // Validações
     if (empty($curso_id) || $curso_id <= 0) {

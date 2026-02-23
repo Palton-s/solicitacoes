@@ -53,12 +53,15 @@ if (data_submitted() && confirm_sesskey() && optional_param('submitbutton', 0, P
     $errors = [];
     
     // Coletar dados do formulário
-    $codigo_sigaa = required_param('codigo_sigaa', PARAM_TEXT);
-    $course_shortname = required_param('course_shortname', PARAM_TEXT);
-    $unidade_academica_id = required_param('unidade_academica_id', PARAM_INT);
-    $ano_semestre = required_param('ano_semestre', PARAM_TEXT);
+    $codigo_sigaa = optional_param('codigo_sigaa', '', PARAM_TEXT);
+    $course_shortname = optional_param('course_shortname', '', PARAM_TEXT);
+    $unidade_academica_id = optional_param('unidade_academica_id', 0, PARAM_INT);
+    $ano_semestre = optional_param('ano_semestre', '', PARAM_TEXT);
     $course_summary = optional_param('course_summary', '', PARAM_RAW);
-    $razoes_criacao = required_param('razoes_criacao', PARAM_TEXT);
+    $razoes_criacao = optional_param('razoes_criacao', '', PARAM_TEXT);
+    
+    // Debug log
+    error_log("Criar Curso - Dados recebidos - codigo: $codigo_sigaa, shortname: $course_shortname, categoria: $unidade_academica_id, ano: $ano_semestre");
     
     // Validações
     if (empty(trim($codigo_sigaa))) {
