@@ -40,70 +40,9 @@ $PAGE->requires->js_init_code("
 
 echo $OUTPUT->header();
 
-// Processar cancelamento
-if (optional_param('cancel', 0, PARAM_BOOL)) {
-    redirect(new moodle_url('/local/solicitacoes/selecionar-acao.php'));
-    exit;
-}
-
-// Capturar submitbutton uma única vez
-$submitbutton = optional_param('submitbutton', '', PARAM_TEXT);
-
-// Processar submissão do formulário
-if (data_submitted() && confirm_sesskey() && $submitbutton) {
-    global $USER, $DB;
-    
-    $errors = [];
-    
-    // Coletar dados do formulário
-    $curso_id = optional_param('curso_id_selected', 0, PARAM_INT);
-    $usuarios_ids = optional_param('usuarios_ids_selected', '', PARAM_TEXT);
-    $observacoes = optional_param('observacoes', '', PARAM_TEXT);
-    
-    // Debug log
-    error_log("Remoção - Dados recebidos - curso: $curso_id, usuarios: $usuarios_ids, motivo: $observacoes");
-    
-    // Validações
-    if (empty($curso_id) || $curso_id <= 0) {
-        $errors[] = get_string('error_curso_required', 'local_solicitacoes');
-    }
-    
-    if (empty(trim($usuarios_ids))) {
-        $errors[] = get_string('error_usuarios_required', 'local_solicitacoes');
-    }
-    
-    if (empty(trim($observacoes))) {
-        $errors[] = get_string('error_motivo_required', 'local_solicitacoes');
-    }
-    
-    // Se não houver erros, processar
-    if (empty($errors)) {
-        $data = new \stdClass();
-        $data->tipo_acao = 'remocao';
-        $data->curso_id_selected = $curso_id;
-        $data->usuarios_ids_selected = $usuarios_ids;
-        $data->observacoes = $observacoes;
-        
-        $success = \local_solicitacoes\solicitacoes_controller::process_request_submission($data);
-        if ($success) {
-            redirect(new moodle_url('/local/solicitacoes/confirmacao.php'),
-                     get_string('success_submit', 'local_solicitacoes'), null, \core\output\notification::NOTIFY_SUCCESS);
-        } else {
-            redirect(new moodle_url('/local/solicitacoes/solicitar-remocao.php'),
-                     get_string('error_submit', 'local_solicitacoes'), null, \core\output\notification::NOTIFY_ERROR);
-        }
-        exit;
-    } else {
-        // Mostrar erros
-        foreach ($errors as $error) {
-            echo $OUTPUT->notification($error, \core\output\notification::NOTIFY_ERROR);
-        }
-    }
-}
-
 // Preparar dados para o template
 $template_data = [
-    'action_url' => (new moodle_url('/local/solicitacoes/solicitar-remocao.php'))->out(false),
+    'action_url' => (new moodle_url('/local/solicitacoes/processar-remocao.php'))->out(false),
     'sesskey' => sesskey(),
     'cancel_url' => (new moodle_url('/local/solicitacoes/selecionar-acao.php'))->out(false)
 ];
