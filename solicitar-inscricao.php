@@ -25,7 +25,7 @@ foreach ($all_roles as $roleid => $rolename) {
     if ($role) {
         $roles_array[] = [
             'shortname' => $role->shortname,
-            'localname' => $rolename
+            'localname' => role_get_name($role)
         ];
     }
 }
