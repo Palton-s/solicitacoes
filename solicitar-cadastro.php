@@ -73,30 +73,38 @@ class cadastro_form extends moodleform {
         $mform->addRule('curso_nome', null, 'required', null, 'client');
         $mform->addHelpButton('curso_nome', 'curso_nome_help', 'local_solicitacoes');
 
-        // Nome completo do usuário
-        $mform->addElement('text', 'nome_completo', get_string('nome_completo', 'local_solicitacoes'), 
-            array('size' => 50));
-        $mform->setType('nome_completo', PARAM_TEXT);
-        $mform->addRule('nome_completo', null, 'required', null, 'client');
-        $mform->addRule('nome_completo', null, 'maxlength', 255, 'client');
-        $mform->addHelpButton('nome_completo', 'nome_completo_help', 'local_solicitacoes');
+        // Primeiro nome do usuário
+        $mform->addElement('text', 'firstname', get_string('firstname', 'local_solicitacoes'), 
+            array('size' => 30));
+        $mform->setType('firstname', PARAM_TEXT);
+        $mform->addRule('firstname', null, 'required', null, 'client');
+        $mform->addRule('firstname', null, 'maxlength', 100, 'client');
+        $mform->addHelpButton('firstname', 'firstname_help', 'local_solicitacoes');
+
+        // Sobrenome do usuário
+        $mform->addElement('text', 'lastname', get_string('lastname', 'local_solicitacoes'), 
+            array('size' => 30));
+        $mform->setType('lastname', PARAM_TEXT);
+        $mform->addRule('lastname', null, 'required', null, 'client');
+        $mform->addRule('lastname', null, 'maxlength', 100, 'client');
+        $mform->addHelpButton('lastname', 'lastname_help', 'local_solicitacoes');
+
+        // CPF (será usado como username)
+        $mform->addElement('text', 'cpf', get_string('cpf', 'local_solicitacoes'), 
+            array('size' => 15, 'placeholder' => '000.000.000-00'));
+        $mform->setType('cpf', PARAM_TEXT);
+        $mform->addRule('cpf', null, 'required', null, 'client');
+        $mform->addRule('cpf', null, 'maxlength', 14, 'client');
+        $mform->addHelpButton('cpf', 'cpf_help', 'local_solicitacoes');
 
         // Email do usuário
-        $mform->addElement('text', 'email', get_string('email', 'local_solicitacoes'), 
+        $mform->addElement('text', 'email_novo_usuario', get_string('email_novo_usuario', 'local_solicitacoes'), 
             array('size' => 50));
-        $mform->setType('email', PARAM_EMAIL);
-        $mform->addRule('email', null, 'required', null, 'client');
-        $mform->addRule('email', null, 'email', null, 'client');
-        $mform->addRule('email', null, 'maxlength', 100, 'client');
-        $mform->addHelpButton('email', 'email_help', 'local_solicitacoes');
-
-        // Nome de usuário (username)
-        $mform->addElement('text', 'username', get_string('username', 'local_solicitacoes'), 
-            array('size' => 30));
-        $mform->setType('username', PARAM_USERNAME);
-        $mform->addRule('username', null, 'required', null, 'client');
-        $mform->addRule('username', null, 'maxlength', 100, 'client');
-        $mform->addHelpButton('username', 'username_help', 'local_solicitacoes');
+        $mform->setType('email_novo_usuario', PARAM_EMAIL);
+        $mform->addRule('email_novo_usuario', null, 'required', null, 'client');
+        $mform->addRule('email_novo_usuario', null, 'email', null, 'client');
+        $mform->addRule('email_novo_usuario', null, 'maxlength', 100, 'client');
+        $mform->addHelpButton('email_novo_usuario', 'email_novo_usuario_help', 'local_solicitacoes');
 
         // Papel (role) do usuário
         $roles_options = $this->get_available_roles();
@@ -208,49 +216,39 @@ class cadastro_form extends moodleform {
             $errors['curso_nome'] = get_string('error_course_required', 'local_solicitacoes');
         }
 
-        // Validar se pelo menos um curso foi selecionado e se são válidos
-        if (!empty($data['curso_nome'])) {
-            $cursos_selecionados = is_array($data['curso_nome']) ? $data['curso_nome'] : [$data['curso_nome']];
-            
-            if (empty($cursos_selecionados)) {
-                $errors['curso_nome'] = get_string('error_course_required', 'local_solicitacoes');
+        // Validar se o CPF já existe (usado como username)
+        if (!empty($data['cpf'])) {
+            // Limpar formatoção do CPF
+            $cpf_limpo = preg_replace('/[^0-9]/', '', $data['cpf']);
+            if (strlen($cpf_limpo) != 11) {
+                $errors['cpf'] = get_string('error_cpf_invalid', 'local_solicitacoes');
             } else {
-                // Validar cada curso selecionado
-                $cursos_invalidos = array();
-                foreach ($cursos_selecionados as $curso_id) {
-                    $curso_id = (int)$curso_id;
-                    if ($curso_id > 0) {
-                        $curso = $DB->get_record('course', ['id' => $curso_id], 'id, fullname');
-                        if (!$curso) {
-                            $cursos_invalidos[] = $curso_id;
-                        }
-                    } else {
-                        $cursos_invalidos[] = $curso_id;
-                    }
-                }
-                
-                if (!empty($cursos_invalidos)) {
-                    $errors['curso_nome'] = get_string('error_invalid_courses', 'local_solicitacoes', implode(', ', $cursos_invalidos));
+                // Verificar se CPF já existe como username
+                $existing_user = $DB->get_record('user', ['username' => $cpf_limpo], 'id, username');
+                if ($existing_user) {
+                    $errors['cpf'] = get_string('error_cpf_exists', 'local_solicitacoes');
                 }
             }
         } else {
-            $errors['curso_nome'] = get_string('error_course_required', 'local_solicitacoes');
+            $errors['cpf'] = get_string('error_cpf_required', 'local_solicitacoes');
         }
 
         // Validar se o email já existe
-        if (!empty($data['email'])) {
-            $existing_user = $DB->get_record('user', ['email' => $data['email']], 'id, email');
+        if (!empty($data['email_novo_usuario'])) {
+            $existing_user = $DB->get_record('user', ['email' => $data['email_novo_usuario']], 'id, email');
             if ($existing_user) {
-                $errors['email'] = get_string('error_email_exists', 'local_solicitacoes');
+                $errors['email_novo_usuario'] = get_string('error_email_exists', 'local_solicitacoes');
             }
         }
 
-        // Validar se o username já existe
-        if (!empty($data['username'])) {
-            $existing_user = $DB->get_record('user', ['username' => $data['username']], 'id, username');
-            if ($existing_user) {
-                $errors['username'] = get_string('error_username_exists', 'local_solicitacoes');
-            }
+        // Validar primeiro nome
+        if (empty($data['firstname'])) {
+            $errors['firstname'] = get_string('error_firstname_required', 'local_solicitacoes');
+        }
+
+        // Validar sobrenome
+        if (empty($data['lastname'])) {
+            $errors['lastname'] = get_string('error_lastname_required', 'local_solicitacoes');
         }
 
         // Validar papel selecionado

@@ -153,25 +153,20 @@ class solicitacoes_controller {
         
         // Adicionar campos de cadastro de usuário se aplicável
         if ($data->tipo_acao == 'cadastro') {
-            // Campos novos do moodleform
-            $record->firstname  = !empty($data->nome_completo) ? trim(explode(' ', $data->nome_completo)[0]) : '';
-            $record->lastname   = !empty($data->nome_completo) ? trim(str_replace($record->firstname, '', $data->nome_completo)) : '';
-            $record->username   = !empty($data->username) ? $data->username : '';
-            $record->email      = !empty($data->email) ? $data->email : '';
+            // Campos diretos do moodleform
+            $record->firstname  = !empty($data->firstname) ? trim($data->firstname) : '';
+            $record->lastname   = !empty($data->lastname) ? trim($data->lastname) : '';
+            $record->cpf        = !empty($data->cpf) ? preg_replace('/[^0-9]/', '', $data->cpf) : '';
+            $record->email      = !empty($data->email_novo_usuario) ? $data->email_novo_usuario : '';
             
-            // Fallback para campos antigos (compatibilidade)
-            if (empty($record->firstname) && !empty($data->firstname)) {
-                $record->firstname = $data->firstname;
+            // Fallback para campos antigos (compatibilidade com templates antigos)
+            if (empty($record->firstname) && !empty($data->nome_completo)) {
+                $parts = explode(' ', trim($data->nome_completo), 2);
+                $record->firstname = isset($parts[0]) ? $parts[0] : '';
+                $record->lastname = isset($parts[1]) ? $parts[1] : '';
             }
-            if (empty($record->lastname) && !empty($data->lastname)) {
-                $record->lastname = $data->lastname;
-            }
-            if (empty($record->email) && !empty($data->email_novo_usuario)) {
-                $record->email = $data->email_novo_usuario;
-            }
-            if (empty($record->username) && !empty($data->cpf)) {
-                $record->username = $data->cpf;
-                $record->cpf = $data->cpf;
+            if (empty($record->email) && !empty($data->email)) {
+                $record->email = $data->email;
             }
         }
         

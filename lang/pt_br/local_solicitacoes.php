@@ -159,17 +159,10 @@ $string['error_email_exists']        = 'E-mail já cadastrado no sistema.';
 $string['error_motivo_required']     = 'Por favor, informe o motivo da solicitação.';
 $string['novo_usuario']              = 'Novo usuário';
 
-// Campos específicos para cadastro
-$string['nome_completo']             = 'Nome Completo';
-$string['nome_completo_help']        = 'Nome completo do novo usuário (primeiro nome e sobrenome)';
-$string['email']                     = 'E-mail';
-$string['email_help']                = 'Endereço de e-mail do novo usuário';  
-$string['username']                  = 'Nome de Usuário';
-$string['username_help']             = 'Nome de usuário para login (deve ser único no sistema)';
+// Campos específicos para cadastro (usando campos da tabela)
 $string['papel_usuario']             = 'Papel do Usuário';
 $string['papel_usuario_help']        = 'Papel que será atribuído ao usuário no sistema';
 $string['choose_role']               = 'Selecione um papel...';
-$string['error_username_exists']     = 'Nome de usuário já existe no sistema.';
 $string['error_role_required']       = 'Por favor, selecione um papel para o usuário.';
 $string['error_invalid_role']        = 'Papel selecionado é inválido.';
 $string['usuario_criado']            = 'Usuário {$a} criado com sucesso.';
