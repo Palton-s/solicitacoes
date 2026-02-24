@@ -33,7 +33,7 @@ $string['solicitacoes:manage']  = 'Gerenciar solicitações de curso (aprovar/ne
 $string['request_form_title']   = 'Solicitação de Gerenciamento de Curso';
 $string['tipo_acao']            = 'Tipo de Ação';
 $string['curso_nome']           = 'Selecionar Curso';
-$string['curso_nome_help']      = 'Digite o nome do curso e selecione da lista de cursos disponíveis';
+$string['curso_nome_help']      = 'Digite o nome do curso e selecione da lista de cursos disponíveis. Você pode selecionar múltiplos cursos para inscrever os usuários.';
 $string['usuarios_busca']       = 'Selecionar Usuários';
 $string['usuarios_busca_help']  = 'Digite o nome ou email do usuário e selecione da lista. Você pode selecionar múltiplos usuários.';
 $string['usuarios_nomes']       = 'Nomes dos Usuários';
@@ -130,6 +130,8 @@ $string['my_requests']               = 'Minhas Solicitações';
 
 // Mensagens de erro de validação
 $string['error_curso_required']      = 'Por favor, selecione um curso.';
+$string['error_course_required']     = 'Por favor, selecione pelo menos um curso.';
+$string['error_invalid_courses']     = 'Os seguintes cursos são inválidos: {$a}';
 $string['error_usuarios_required']   = 'Por favor, selecione pelo menos um usuário.';
 $string['error_papel_required']      = 'Por favor, selecione um papel para a inscrição.';
 $string['error_papel_invalid']       = 'O papel selecionado é inválido.';

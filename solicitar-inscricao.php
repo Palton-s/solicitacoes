@@ -43,7 +43,9 @@ class inscricao_form extends moodleform {
             'multiple' => true,
             'placeholder' => get_string('searching_courses', 'local_solicitacoes'),
             'noselectionstring' => get_string('no_courses_found', 'local_solicitacoes'),
-        ));        $mform->setType('curso_nome', PARAM_INT);        $mform->addRule('curso_nome', null, 'required', null, 'client');
+        ));
+        $mform->setType('curso_nome', PARAM_SEQUENCE);
+        $mform->addRule('curso_nome', null, 'required', null, 'client');
         $mform->addHelpButton('curso_nome', 'curso_nome_help', 'local_solicitacoes');
 
         // Papel no curso
@@ -134,19 +136,33 @@ class inscricao_form extends moodleform {
             $errors['usuarios_busca'] = get_string('error_usuarios_required', 'local_solicitacoes');
         }
 
-        // Validar se o curso selecionado é válido
+        // Validar se pelo menos um curso foi selecionado e se são válidos
         if (!empty($data['curso_nome'])) {
-            // Garantir que curso_nome seja um valor único, não array
-            $curso_id = is_array($data['curso_nome']) ? (int)$data['curso_nome'][0] : (int)$data['curso_nome'];
+            $cursos_selecionados = is_array($data['curso_nome']) ? $data['curso_nome'] : [$data['curso_nome']];
             
-            if ($curso_id > 0) {
-                $curso = $DB->get_record('course', ['id' => $curso_id], 'id, fullname');
-                if (!$curso) {
-                    $errors['curso_nome'] = get_string('error_invalid_course', 'local_solicitacoes');
-                }
+            if (empty($cursos_selecionados)) {
+                $errors['curso_nome'] = get_string('error_course_required', 'local_solicitacoes');
             } else {
-                $errors['curso_nome'] = get_string('error_invalid_course', 'local_solicitacoes');
+                // Validar cada curso selecionado
+                $cursos_invalidos = array();
+                foreach ($cursos_selecionados as $curso_id) {
+                    $curso_id = (int)$curso_id;
+                    if ($curso_id > 0) {
+                        $curso = $DB->get_record('course', ['id' => $curso_id], 'id, fullname');
+                        if (!$curso) {
+                            $cursos_invalidos[] = $curso_id;
+                        }
+                    } else {
+                        $cursos_invalidos[] = $curso_id;
+                    }
+                }
+                
+                if (!empty($cursos_invalidos)) {
+                    $errors['curso_nome'] = get_string('error_invalid_courses', 'local_solicitacoes', implode(', ', $cursos_invalidos));
+                }
             }
+        } else {
+            $errors['curso_nome'] = get_string('error_course_required', 'local_solicitacoes');
         }
 
         return $errors;

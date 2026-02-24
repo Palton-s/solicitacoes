@@ -90,15 +90,27 @@ class solicitacoes_controller {
         if ($data->tipo_acao == 'inscricao') {
             $observacoes_info = '';
             
-            // Informações do curso
+            // Informações dos cursos selecionados
             if (!empty($data->curso_nome)) {
-                $curso_id = is_array($data->curso_nome) ? (int)$data->curso_nome[0] : (int)$data->curso_nome;
+                $cursos_selecionados = is_array($data->curso_nome) ? $data->curso_nome : [$data->curso_nome];
                 
-                if ($curso_id > 0) {
+                if (!empty($cursos_selecionados)) {
                     global $DB;
-                    $curso = $DB->get_record('course', ['id' => $curso_id], 'id, fullname, shortname');
-                    if ($curso) {
-                        $observacoes_info .= "CURSO SELECIONADO: " . $curso->fullname . ' (' . $curso->shortname . ') - ID: ' . $curso->id . "\n";
+                    $cursos_info = array();
+                    
+                    foreach ($cursos_selecionados as $curso_id) {
+                        $curso_id = (int)$curso_id;
+                        if ($curso_id > 0) {
+                            $curso = $DB->get_record('course', ['id' => $curso_id], 'id, fullname, shortname');
+                            if ($curso) {
+                                $cursos_info[] = $curso->fullname . ' (' . $curso->shortname . ') - ID: ' . $curso->id;
+                            }
+                        }
+                    }
+                    
+                    if (!empty($cursos_info)) {
+                        $observacoes_info .= "CURSOS SELECIONADOS:\n" . implode("\n", $cursos_info) . "\n";
+                        $observacoes_info .= "IDS DOS CURSOS: " . implode(',', $cursos_selecionados) . "\n";
                     }
                 }
             }
@@ -172,22 +184,25 @@ class solicitacoes_controller {
         error_log("save_related_courses: solicitacao_id = $solicitacao_id");
         error_log("save_related_courses: data = " . print_r($data, true));
         
-        // Verificar primeiro o formato novo (moodleform)
+        // Verificar primeiro o formato novo (moodleform) - múltiplos cursos
         if (!empty($data->curso_nome)) {
-            $curso_id = is_array($data->curso_nome) ? (int)$data->curso_nome[0] : (int)$data->curso_nome;
+            $cursos_selecionados = is_array($data->curso_nome) ? $data->curso_nome : [$data->curso_nome];
             
-            error_log("save_related_courses: curso_id extraído = $curso_id");
+            error_log("save_related_courses: cursos selecionados = " . print_r($cursos_selecionados, true));
             
-            if ($curso_id > 0) {
-                $curso_record = new \stdClass();
-                $curso_record->solicitacao_id = $solicitacao_id;
-                $curso_record->curso_id = $curso_id;
-                $curso_record->timecreated = time();
-                
-                error_log("save_related_courses: inserindo curso_record = " . print_r($curso_record, true));
-                
-                $result = $DB->insert_record('local_curso_solicitacoes', $curso_record);
-                error_log("save_related_courses: resultado da inserção = " . ($result ? $result : 'FALHOU'));
+            foreach ($cursos_selecionados as $curso_id) {
+                $curso_id = (int)$curso_id;
+                if ($curso_id > 0) {
+                    $curso_record = new \stdClass();
+                    $curso_record->solicitacao_id = $solicitacao_id;
+                    $curso_record->curso_id = $curso_id;
+                    $curso_record->timecreated = time();
+                    
+                    error_log("save_related_courses: inserindo curso_record = " . print_r($curso_record, true));
+                    
+                    $result = $DB->insert_record('local_curso_solicitacoes', $curso_record);
+                    error_log("save_related_courses: resultado da inserção = " . ($result ? $result : 'FALHOU'));
+                }
             }
         }
         // Fallback para formato antigo
