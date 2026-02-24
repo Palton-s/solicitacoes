@@ -23,6 +23,8 @@ class solicitacoes_controller {
     public static function process_request_submission($data) {
         global $DB, $USER, $OUTPUT;
         
+        error_log("process_request_submission: recebidos dados = " . print_r($data, true));
+        
         try {
             // Debug - verificar dados recebidos
             error_log("Form data received: " . print_r($data, true));
@@ -36,14 +38,18 @@ class solicitacoes_controller {
             // Salvar no banco
             $id = $DB->insert_record('local_solicitacoes', $record);
             
+            error_log("process_request_submission: solicitação criada com ID = $id");
+            
             if ($id) {
                 // Salvar cursos relacionados (apenas para tipos de ação que não são criação de curso)
                 if ($data->tipo_acao != 'criar_curso') {
+                    error_log("process_request_submission: salvando cursos relacionados");
                     self::save_related_courses($id, $data);
                 }
                 
                 // Salvar usuários relacionados (não aplicável para cadastro e criação de curso)
                 if ($data->tipo_acao != 'cadastro' && $data->tipo_acao != 'criar_curso') {
+                    error_log("process_request_submission: salvando usuários relacionados");
                     self::save_related_users($id, $data);
                 }
                 
@@ -52,6 +58,7 @@ class solicitacoes_controller {
                 
                 return true;
             } else {
+                error_log("process_request_submission: FALHA ao criar solicitação");
                 return false;
             }
             
@@ -162,16 +169,25 @@ class solicitacoes_controller {
     private static function save_related_courses($solicitacao_id, $data) {
         global $DB;
         
+        error_log("save_related_courses: solicitacao_id = $solicitacao_id");
+        error_log("save_related_courses: data = " . print_r($data, true));
+        
         // Verificar primeiro o formato novo (moodleform)
         if (!empty($data->curso_nome)) {
             $curso_id = is_array($data->curso_nome) ? (int)$data->curso_nome[0] : (int)$data->curso_nome;
+            
+            error_log("save_related_courses: curso_id extraído = $curso_id");
             
             if ($curso_id > 0) {
                 $curso_record = new \stdClass();
                 $curso_record->solicitacao_id = $solicitacao_id;
                 $curso_record->curso_id = $curso_id;
                 $curso_record->timecreated = time();
-                $DB->insert_record('local_curso_solicitacoes', $curso_record);
+                
+                error_log("save_related_courses: inserindo curso_record = " . print_r($curso_record, true));
+                
+                $result = $DB->insert_record('local_curso_solicitacoes', $curso_record);
+                error_log("save_related_courses: resultado da inserção = " . ($result ? $result : 'FALHOU'));
             }
         }
         // Fallback para formato antigo
@@ -180,7 +196,13 @@ class solicitacoes_controller {
             $curso_record->solicitacao_id = $solicitacao_id;
             $curso_record->curso_id = (int)$data->curso_id_selected;
             $curso_record->timecreated = time();
-            $DB->insert_record('local_curso_solicitacoes', $curso_record);
+            
+            error_log("save_related_courses: inserindo curso_record (formato antigo) = " . print_r($curso_record, true));
+            
+            $result = $DB->insert_record('local_curso_solicitacoes', $curso_record);
+            error_log("save_related_courses: resultado da inserção (formato antigo) = " . ($result ? $result : 'FALHOU'));
+        } else {
+            error_log("save_related_courses: NENHUM CURSO ENCONTRADO NOS DADOS");
         }
     }
 
@@ -260,12 +282,19 @@ class solicitacoes_controller {
     public static function get_related_courses($solicitacao_id) {
         global $DB;
         
+        error_log("get_related_courses: buscando cursos para solicitacao_id = $solicitacao_id");
+        
         $sql = "SELECT c.id, c.fullname, c.shortname, cs.timecreated
                 FROM {local_curso_solicitacoes} cs
                 JOIN {course} c ON c.id = cs.curso_id
                 WHERE cs.solicitacao_id = :solicitacao_id";
         
-        return $DB->get_records_sql($sql, array('solicitacao_id' => $solicitacao_id));
+        $cursos = $DB->get_records_sql($sql, array('solicitacao_id' => $solicitacao_id));
+        
+        error_log("get_related_courses: encontrados " . count($cursos) . " cursos");
+        error_log("get_related_courses: cursos = " . print_r($cursos, true));
+        
+        return $cursos;
     }
     
     /**
@@ -392,9 +421,13 @@ class solicitacoes_controller {
     public static function execute_request_action($solicitacao_id) {
         global $DB;
         
+        error_log("execute_request_action: iniciando para solicitacao_id = $solicitacao_id");
+        
         try {
             // Buscar a solicitação
             $solicitacao = $DB->get_record('local_solicitacoes', ['id' => $solicitacao_id], '*', MUST_EXIST);
+            
+            error_log("execute_request_action: solicitação encontrada: " . print_r($solicitacao, true));
             
             // Para criação de curso, não precisa de cursos ou usuários relacionados
             if ($solicitacao->tipo_acao == 'criar_curso') {
@@ -404,7 +437,10 @@ class solicitacoes_controller {
             // Buscar cursos relacionados
             $cursos = self::get_related_courses($solicitacao_id);
             
+            error_log("execute_request_action: cursos encontrados = " . count($cursos));
+            
             if (empty($cursos)) {
+                error_log("execute_request_action: ERRO - Nenhum curso encontrado para esta solicitação");
                 return ['success' => false, 'message' => 'Nenhum curso encontrado para esta solicitação.'];
             }
             
