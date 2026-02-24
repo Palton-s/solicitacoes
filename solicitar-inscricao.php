@@ -59,6 +59,7 @@ class inscricao_form extends moodleform {
         }
         
         $mform->addElement('select', 'papel', get_string('papel_label', 'local_solicitacoes'), $roles_options);
+        $mform->setType('papel', PARAM_TEXT);
         $mform->addRule('papel', null, 'required', null, 'client');
         $mform->addHelpButton('papel', 'papel_help_dinamico', 'local_solicitacoes');
 
@@ -160,12 +161,12 @@ if ($data = $mform->get_data()) {
     
     try {
         $record = new stdClass();
-        $record->userid = $USER->id;
+        $record->userid = (int)$USER->id;
         $record->tipo_acao = 'inscricao';
         $record->status = 'pendente';
         $record->timecreated = time();
         $record->timemodified = time();
-        $record->papel = $data->papel;
+        $record->papel = (string)$data->papel;
         
         // Construir informações para observações
         // Buscar informações do curso selecionado
@@ -202,9 +203,9 @@ if ($data = $mform->get_data()) {
         }
         
         if (!empty($data->observacoes)) {
-            $observacoes_completas .= "OBSERVAÇÕES ADICIONAIS: " . $data->observacoes;
+            $observacoes_completas .= "OBSERVAÇÕES ADICIONAIS: " . (string)$data->observacoes;
         }
-        $record->observacoes = $observacoes_completas;
+        $record->observacoes = (string)$observacoes_completas;
         
         // Inserir a solicitação
         $solicitacao_id = $DB->insert_record('local_solicitacoes', $record);
