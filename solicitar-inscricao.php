@@ -136,8 +136,15 @@ class inscricao_form extends moodleform {
 
         // Validar se o curso selecionado é válido
         if (!empty($data['curso_nome'])) {
-            $curso = $DB->get_record('course', ['id' => $data['curso_nome']], 'id, fullname');
-            if (!$curso) {
+            // Garantir que curso_nome seja um valor único, não array
+            $curso_id = is_array($data['curso_nome']) ? (int)$data['curso_nome'][0] : (int)$data['curso_nome'];
+            
+            if ($curso_id > 0) {
+                $curso = $DB->get_record('course', ['id' => $curso_id], 'id, fullname');
+                if (!$curso) {
+                    $errors['curso_nome'] = get_string('error_invalid_course', 'local_solicitacoes');
+                }
+            } else {
                 $errors['curso_nome'] = get_string('error_invalid_course', 'local_solicitacoes');
             }
         }
@@ -168,11 +175,14 @@ if ($data = $mform->get_data()) {
         $record->timemodified = time();
         $record->papel = (string)$data->papel;
         
+        // Processar curso_nome (pode vir como array do autocomplete)
+        $curso_id = is_array($data->curso_nome) ? (int)$data->curso_nome[0] : (int)$data->curso_nome;
+        
         // Construir informações para observações
         // Buscar informações do curso selecionado
         $curso_info = "Curso não encontrado";
-        if (!empty($data->curso_nome)) {
-            $curso = $DB->get_record('course', ['id' => $data->curso_nome], 'id, fullname, shortname');
+        if ($curso_id > 0) {
+            $curso = $DB->get_record('course', ['id' => $curso_id], 'id, fullname, shortname');
             if ($curso) {
                 $curso_info = $curso->fullname . ' (' . $curso->shortname . ') - ID: ' . $curso->id;
             }
