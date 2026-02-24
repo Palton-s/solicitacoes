@@ -22,10 +22,10 @@ $PAGE->set_title(get_string('form_criar_curso_titulo', 'local_solicitacoes'));
 $PAGE->set_heading(get_string('form_criar_curso_titulo', 'local_solicitacoes'));
 
 // Incluir CSS e JS necessários
-$PAGE->requires->css(new moodle_url('https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css'));
-$PAGE->requires->css(new moodle_url('/local/solicitacoes/styles/tomselect_custom.css'));
-$PAGE->requires->css(new moodle_url('/local/solicitacoes/styles/request_form.css'));
-$PAGE->requires->js(new moodle_url('https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js'), true);
+#$PAGE->requires->css(new moodle_url('https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css'));
+#$PAGE->requires->css(new moodle_url('/local/solicitacoes/styles/tomselect_custom.css'));
+#$PAGE->requires->css(new moodle_url('/local/solicitacoes/styles/request_form.css'));
+#$PAGE->requires->js(new moodle_url('https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js'), true);
 
 // Inicializar M.cfg.wwwroot para AJAX
 $PAGE->requires->js_init_code("

@@ -64,11 +64,21 @@
             </div>
 
             {{#js}}
-            require(['core/form_autocomplete'], function(Autocomplete) {
-                // Transforma o select acima no campo de busca nativo
-                Autocomplete.enhance('#id_category', false, false, 'Busque a unidade...', false, true);
+            require(['jquery', 'core/form_autocomplete'], function($, Autocomplete) {
+                // Usamos o jQuery apenas para garantir que o DOM está pronto
+                $(document).ready(function() {
+                    Autocomplete.enhance(
+                        '#id_category', 
+                        false, 
+                        false, 
+                        'Digite para buscar...', 
+                        false, 
+                        true, 
+                        'Não encontrado'
+                    );
+                });
             });
-            {{/js}}
+            {{#js}}
 
 
 
