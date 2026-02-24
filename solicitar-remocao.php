@@ -5,6 +5,30 @@ require_once($CFG->libdir . '/formslib.php');
 
 require_login();
 
+// Forçar carregamento de strings problemáticas
+$forced_strings = [
+    'form_remocao_descricao' => 'Use este formulário para solicitar a remoção de usuários de um ou mais cursos.',
+    'no_users_found' => 'Nenhum usuário encontrado',
+    'observacoes_placeholder' => 'Digite observações adicionais sobre esta solicitação (opcional)...'
+];
+
+// Adicionar strings ao cache temporariamente
+foreach ($forced_strings as $key => $value) {
+    if (get_string($key, 'local_solicitacoes') === "[[{$key}]]") {
+        // Se a string não carregou, usar valor direto
+        $GLOBALS['forced_strings_'.$key] = $value;
+    }
+}
+
+// Função helper para get_string com fallback
+function get_string_with_fallback($key, $component = 'moodle', $a = null) {
+    $result = get_string($key, $component, $a);
+    if ($result === "[[{$key}]]" && isset($GLOBALS['forced_strings_'.$key])) {
+        return $GLOBALS['forced_strings_'.$key];
+    }
+    return $result;
+}
+
 $context = context_system::instance();
 
 // Verificar permissão para criar solicitações
@@ -33,7 +57,7 @@ class remocao_form extends moodleform {
         // Aviso/descrição
         $aviso_html = '<div class="alert alert-warning" role="alert">' . 
                       '<i class="fas fa-exclamation-triangle"></i> ' . 
-                      get_string('form_remocao_descricao', 'local_solicitacoes') . 
+                      get_string_with_fallback('form_remocao_descricao', 'local_solicitacoes') . 
                       '</div>';
         $mform->addElement('html', $aviso_html);
 
@@ -54,7 +78,7 @@ class remocao_form extends moodleform {
             'placeholder' => get_string('usuarios_busca_help', 'local_solicitacoes'),
             'casesensitive' => false,
             'showsuggestions' => true,
-            'noselectionstring' => get_string('no_users_found', 'local_solicitacoes'),
+            'noselectionstring' => get_string_with_fallback('no_users_found', 'local_solicitacoes'),
             'ajax' => 'core_user/form_user_selector',
         ));
         $mform->setType('usuarios_busca', PARAM_SEQUENCE);
@@ -63,7 +87,7 @@ class remocao_form extends moodleform {
 
         // Observações
         $mform->addElement('textarea', 'observacoes', get_string('observacoes', 'local_solicitacoes'), 
-            array('rows' => 5, 'cols' => 50, 'placeholder' => get_string('observacoes_placeholder', 'local_solicitacoes')));
+            array('rows' => 5, 'cols' => 50, 'placeholder' => get_string_with_fallback('observacoes_placeholder', 'local_solicitacoes')));
         $mform->setType('observacoes', PARAM_TEXT);
         $mform->addHelpButton('observacoes', 'observacoes_help', 'local_solicitacoes');
 
