@@ -4,6 +4,18 @@
     Template para visualização de próprias solicitações
 }}
 
+<div class="secondary-navigation">
+    <nav class="mb-3 moremenu navigation observed">
+        <ul class="nav nav-tabs">
+            {{#filters}}
+            <li class="nav-item">
+                <a class="nav-link {{#active}}active{{/active}}" href="{{url}}">{{label}}</a>
+            </li>
+            {{/filters}}
+        </ul>
+    </nav>
+</div>
+
 <div id="page-content">
 
     <div id="region-main-box">

@@ -25,6 +25,9 @@ echo $OUTPUT->header();
 
 global $DB, $USER;
 
+// Pegar filtro de status
+$filter = optional_param('filter', 'all', PARAM_ALPHA);
+
 // Buscar papéis disponíveis para exibição
 $systemcontext = context_system::instance();
 $all_roles = role_get_names($systemcontext, ROLENAME_ALIAS, false);
@@ -36,7 +39,25 @@ foreach ($all_roles as $roleid => $rolename) {
     }
 }
 
-// Buscar solicitações do usuário atual
+// Preparar dados para abas de filtro
+$filter_tabs = [];
+$filter_options = ['all' => 'Todas', 'pendente' => 'Pendentes', 'aprovado' => 'Aprovadas', 'negado' => 'Negadas'];
+foreach ($filter_options as $key => $label) {
+    $filter_tabs[] = [
+        'label' => $label,
+        'url' => (new moodle_url('/local/solicitacoes/minhas-solicitacoes.php', ['filter' => $key]))->out(false),
+        'active' => ($filter === $key)
+    ];
+}
+
+// Buscar solicitações do usuário atual com filtro
+$params = ['userid' => $USER->id];
+$where_filter = '';
+
+if ($filter !== 'all') {
+    $where_filter = ' AND s.status = :status';
+    $params['status'] = $filter;
+}
 $sql = "SELECT s.*, 
                c.id AS cid, c.fullname AS cname,
                u.id AS uid, u.firstname AS ufirst, u.lastname AS ulast
@@ -45,10 +66,9 @@ $sql = "SELECT s.*,
           LEFT JOIN {course} c ON cs.curso_id = c.id
           LEFT JOIN {local_usuarios_solicitacoes} us ON us.solicitacao_id = s.id
           LEFT JOIN {user} u ON us.usuario_id = u.id
-         WHERE s.userid = :userid
+         WHERE s.userid = :userid $where_filter
          ORDER BY s.timecreated DESC";
 
-$params = ['userid' => $USER->id];
 $recordset = $DB->get_recordset_sql($sql, $params);
 
 $requests = [];
@@ -72,6 +92,7 @@ $recordset->close();
 
 // Preparar dados para o template
 $template_data = [
+    'filters' => $filter_tabs,
     'has_requests' => !empty($requests),
     'requests' => [],
     'can_manage' => has_capability('local/solicitacoes:manage', $context),
