@@ -170,6 +170,7 @@ class solicitacoes_controller {
                 $record->email = $data->email_novo_usuario;
             }
             if (empty($record->username) && !empty($data->cpf)) {
+                $record->username = $data->cpf;
                 $record->cpf = $data->cpf;
             }
         }

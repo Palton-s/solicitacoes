@@ -62,6 +62,17 @@ class cadastro_form extends moodleform {
                       '</div>';
         $mform->addElement('html', $aviso_html);
 
+        // Campo de curso (autocomplete com cursos carregados no PHP)
+        $cursos_disponiveis = $this->get_available_courses();
+        $mform->addElement('autocomplete', 'curso_nome', get_string('curso_nome', 'local_solicitacoes'), $cursos_disponiveis, array(
+            'multiple' => true,
+            'placeholder' => get_string('searching_courses', 'local_solicitacoes'),
+            'noselectionstring' => get_string('no_courses_found', 'local_solicitacoes'),
+        ));
+        $mform->setType('curso_nome', PARAM_SEQUENCE);
+        $mform->addRule('curso_nome', null, 'required', null, 'client');
+        $mform->addHelpButton('curso_nome', 'curso_nome_help', 'local_solicitacoes');
+
         // Nome completo do usuário
         $mform->addElement('text', 'nome_completo', get_string('nome_completo', 'local_solicitacoes'), 
             array('size' => 50));
@@ -132,11 +143,99 @@ class cadastro_form extends moodleform {
     }
 
     /**
+     * Buscar cursos disponíveis para seleção 
+     */
+    protected function get_available_courses() {
+        global $DB, $USER;
+        
+        $cursos_options = array();
+        
+        try {
+            // Buscar todos os cursos onde o usuário tem algum papel (é participante)
+            $sql = "SELECT DISTINCT c.id, c.fullname, c.shortname 
+                    FROM {course} c
+                    JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = 50
+                    LEFT JOIN {role_assignments} ra ON ra.contextid = ctx.id AND ra.userid = :userid
+                    WHERE c.id != 1 
+                    AND (ra.id IS NOT NULL OR c.visible = 1)
+                    ORDER BY c.fullname";
+            
+            $cursos = $DB->get_records_sql($sql, ['userid' => $USER->id]);
+            
+            foreach ($cursos as $curso) {
+                $cursos_options[$curso->id] = $curso->fullname . ' (' . $curso->shortname . ')';
+            }
+        } catch (Exception $e) {
+            error_log("Erro ao buscar cursos: " . $e->getMessage());
+        }
+        
+        return $cursos_options;
+    }
+
+    /**
      * Validação personalizada do formulário
      */
     public function validation($data, $files) {
         global $DB;
         $errors = parent::validation($data, $files);
+
+        // Validar se pelo menos um curso foi selecionado e se são válidos
+        if (!empty($data['curso_nome'])) {
+            $cursos_selecionados = is_array($data['curso_nome']) ? $data['curso_nome'] : [$data['curso_nome']];
+            
+            if (empty($cursos_selecionados)) {
+                $errors['curso_nome'] = get_string('error_course_required', 'local_solicitacoes');
+            } else {
+                // Validar cada curso selecionado
+                $cursos_invalidos = array();
+                foreach ($cursos_selecionados as $curso_id) {
+                    $curso_id = (int)$curso_id;
+                    if ($curso_id > 0) {
+                        $curso = $DB->get_record('course', ['id' => $curso_id], 'id, fullname');
+                        if (!$curso) {
+                            $cursos_invalidos[] = $curso_id;
+                        }
+                    } else {
+                        $cursos_invalidos[] = $curso_id;
+                    }
+                }
+                
+                if (!empty($cursos_invalidos)) {
+                    $errors['curso_nome'] = get_string('error_invalid_courses', 'local_solicitacoes', implode(', ', $cursos_invalidos));
+                }
+            }
+        } else {
+            $errors['curso_nome'] = get_string('error_course_required', 'local_solicitacoes');
+        }
+
+        // Validar se pelo menos um curso foi selecionado e se são válidos
+        if (!empty($data['curso_nome'])) {
+            $cursos_selecionados = is_array($data['curso_nome']) ? $data['curso_nome'] : [$data['curso_nome']];
+            
+            if (empty($cursos_selecionados)) {
+                $errors['curso_nome'] = get_string('error_course_required', 'local_solicitacoes');
+            } else {
+                // Validar cada curso selecionado
+                $cursos_invalidos = array();
+                foreach ($cursos_selecionados as $curso_id) {
+                    $curso_id = (int)$curso_id;
+                    if ($curso_id > 0) {
+                        $curso = $DB->get_record('course', ['id' => $curso_id], 'id, fullname');
+                        if (!$curso) {
+                            $cursos_invalidos[] = $curso_id;
+                        }
+                    } else {
+                        $cursos_invalidos[] = $curso_id;
+                    }
+                }
+                
+                if (!empty($cursos_invalidos)) {
+                    $errors['curso_nome'] = get_string('error_invalid_courses', 'local_solicitacoes', implode(', ', $cursos_invalidos));
+                }
+            }
+        } else {
+            $errors['curso_nome'] = get_string('error_course_required', 'local_solicitacoes');
+        }
 
         // Validar se o email já existe
         if (!empty($data['email'])) {
