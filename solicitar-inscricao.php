@@ -43,8 +43,7 @@ class inscricao_form extends moodleform {
             'multiple' => true,
             'placeholder' => get_string('searching_courses', 'local_solicitacoes'),
             'noselectionstring' => get_string('no_courses_found', 'local_solicitacoes'),
-        ));
-        $mform->addRule('curso_nome', null, 'required', null, 'client');
+        ));        $mform->setType('curso_nome', PARAM_INT);        $mform->addRule('curso_nome', null, 'required', null, 'client');
         $mform->addHelpButton('curso_nome', 'curso_nome_help', 'local_solicitacoes');
 
         // Papel no curso

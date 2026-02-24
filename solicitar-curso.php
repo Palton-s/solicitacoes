@@ -61,6 +61,7 @@ class criar_curso_form extends moodleform {
             'placeholder' => get_string('select_category', 'local_solicitacoes'),
             'noselectionstring' => get_string('select_category', 'local_solicitacoes'),
         ]);
+        $mform->setType('category', PARAM_INT);
         $mform->addRule('category', null, 'required', null, 'client');
         $mform->addHelpButton('category', 'unidade_academica_help', 'local_solicitacoes');
 
