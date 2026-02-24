@@ -72,6 +72,7 @@ class inscricao_form extends moodleform {
             'noselectionstring' => get_string('no_users_found', 'local_solicitacoes'),
             'ajax' => 'core_user/form_user_selector',
         ));
+        $mform->setType('usuarios_busca', PARAM_SEQUENCE);
         $mform->addRule('usuarios_busca', null, 'required', null, 'client');
         $mform->addHelpButton('usuarios_busca', 'usuarios_busca_help', 'local_solicitacoes');
 
@@ -119,7 +120,17 @@ class inscricao_form extends moodleform {
         $errors = parent::validation($data, $files);
 
         // Validar se pelo menos um usuário foi selecionado
-        if (empty($data['usuarios_busca']) || !is_array($data['usuarios_busca']) || count($data['usuarios_busca']) == 0) {
+        $usuarios_validos = false;
+        if (!empty($data['usuarios_busca'])) {
+            if (is_array($data['usuarios_busca'])) {
+                $usuarios_validos = count($data['usuarios_busca']) > 0;
+            } else {
+                // Se vier como string (fallback), verificar se não está vazio
+                $usuarios_validos = trim($data['usuarios_busca']) !== '';
+            }
+        }
+        
+        if (!$usuarios_validos) {
             $errors['usuarios_busca'] = get_string('error_usuarios_required', 'local_solicitacoes');
         }
 
@@ -169,16 +180,26 @@ if ($data = $mform->get_data()) {
         $observacoes_completas = "CURSO SELECIONADO: " . $curso_info . "\n";
         
         // Processar usuários selecionados
-        if (!empty($data->usuarios_busca) && is_array($data->usuarios_busca)) {
-            $usernames = array();
-            foreach ($data->usuarios_busca as $userid) {
-                $user = $DB->get_record('user', ['id' => $userid], 'firstname, lastname, email');
-                if ($user) {
-                    $usernames[] = fullname($user) . ' (' . $user->email . ')';
+        if (!empty($data->usuarios_busca)) {
+            // Garantir que usuarios_busca seja sempre um array
+            $usuarios_array = is_array($data->usuarios_busca) ? $data->usuarios_busca : explode(',', $data->usuarios_busca);
+            
+            if (count($usuarios_array) > 0) {
+                $usernames = array();
+                foreach ($usuarios_array as $userid) {
+                    $userid = trim($userid);
+                    if (!empty($userid) && is_numeric($userid)) {
+                        $user = $DB->get_record('user', ['id' => $userid], 'firstname, lastname, email');
+                        if ($user) {
+                            $usernames[] = fullname($user) . ' (' . $user->email . ')';
+                        }
+                    }
+                }
+                if (!empty($usernames)) {
+                    $observacoes_completas .= "USUÁRIOS SELECIONADOS: " . implode(', ', $usernames) . "\n";
+                    $observacoes_completas .= "IDs DOS USUÁRIOS: " . implode(',', $usuarios_array) . "\n";
                 }
             }
-            $observacoes_completas .= "USUÁRIOS SELECIONADOS: " . implode(', ', $usernames) . "\n";
-            $observacoes_completas .= "IDs DOS USUÁRIOS: " . implode(',', $data->usuarios_busca) . "\n";
         }
         
         if (!empty($data->observacoes)) {
