@@ -41,7 +41,6 @@ $PAGE->requires->js_init_code("
 echo $OUTPUT->header();
 
 
-require_once($CFG->libdir . '/coursecatlib.php');
 
 // Pega a lista formatada de categorias (igual à que você viu no curso)
 $categorias_raw = core_course_category::make_categories_list();
