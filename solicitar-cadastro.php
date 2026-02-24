@@ -107,11 +107,21 @@ class cadastro_form extends moodleform {
         $mform->addHelpButton('email_novo_usuario', 'email_novo_usuario_help', 'local_solicitacoes');
 
         // Papel (role) do usuário
-        $roles_options = $this->get_available_roles();
-        $mform->addElement('select', 'papel_usuario', get_string('papel_usuario', 'local_solicitacoes'), $roles_options);
-        $mform->setType('papel_usuario', PARAM_INT);
-        $mform->addRule('papel_usuario', null, 'required', null, 'client');
-        $mform->addHelpButton('papel_usuario', 'papel_usuario_help', 'local_solicitacoes');
+        $systemcontext = context_system::instance();
+        $all_roles = role_get_names($systemcontext, ROLENAME_ALIAS, false);
+        $roles_options = array('' => get_string('choose_role', 'local_solicitacoes'));
+        
+        foreach ($all_roles as $roleid => $rolename) {
+            $role = $DB->get_record('role', ['id' => $roleid], 'shortname, name');
+            if ($role) {
+                $roles_options[$role->shortname] = role_get_name($role);
+            }
+        }
+        
+        $mform->addElement('select', 'papel', get_string('papel_usuario', 'local_solicitacoes'), $roles_options);
+        $mform->setType('papel', PARAM_TEXT);
+        $mform->addRule('papel', null, 'required', null, 'client');
+        $mform->addHelpButton('papel', 'papel_usuario_help', 'local_solicitacoes');
 
         // Observações
         $mform->addElement('textarea', 'observacoes', get_string('observacoes', 'local_solicitacoes'), 
@@ -121,33 +131,6 @@ class cadastro_form extends moodleform {
 
         // Botões de ação
         $this->add_action_buttons(true, get_string('request_submit', 'local_solicitacoes'));
-    }
-
-    /**
-     * Buscar papéis disponíveis no sistema 
-     */
-    protected function get_available_roles() {
-        global $DB;
-        
-        $roles_options = array();
-        $roles_options[0] = get_string('choose_role', 'local_solicitacoes');
-        
-        try {
-            // Buscar papéis disponíveis no contexto do sistema
-            $systemcontext = context_system::instance();
-            $all_roles = role_get_names($systemcontext, ROLENAME_ALIAS, false);
-            
-            foreach ($all_roles as $roleid => $rolename) {
-                $role = $DB->get_record('role', ['id' => $roleid], 'shortname, name');
-                if ($role) {
-                    $roles_options[$roleid] = role_get_name($role);
-                }
-            }
-        } catch (Exception $e) {
-            error_log("Erro ao buscar papéis: " . $e->getMessage());
-        }
-        
-        return $roles_options;
     }
 
     /**
@@ -252,13 +235,14 @@ class cadastro_form extends moodleform {
         }
 
         // Validar papel selecionado
-        if (!empty($data['papel_usuario']) && $data['papel_usuario'] > 0) {
-            $role = $DB->get_record('role', ['id' => $data['papel_usuario']], 'id, name');
+        if (!empty($data['papel'])) {
+            // Verificar se o shortname do papel é válido
+            $role = $DB->get_record('role', ['shortname' => $data['papel']], 'id, shortname, name');
             if (!$role) {
-                $errors['papel_usuario'] = get_string('error_invalid_role', 'local_solicitacoes');
+                $errors['papel'] = get_string('error_invalid_role', 'local_solicitacoes');
             }
         } else {
-            $errors['papel_usuario'] = get_string('error_role_required', 'local_solicitacoes');
+            $errors['papel'] = get_string('error_role_required', 'local_solicitacoes');
         }
 
         return $errors;

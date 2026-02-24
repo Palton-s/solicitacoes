@@ -82,7 +82,7 @@ class solicitacoes_controller {
         $record->timecreated    = time();
         $record->timemodified   = time();
         $record->tipo_acao      = $data->tipo_acao;
-        $record->papel          = (($data->tipo_acao == 'inscricao' || $data->tipo_acao == 'cadastro') && !empty($data->papel_usuario)) ? $data->papel_usuario : ((!empty($data->papel)) ? $data->papel : '');
+        $record->papel          = (($data->tipo_acao == 'inscricao' || $data->tipo_acao == 'cadastro') && !empty($data->papel)) ? $data->papel : '';
         
         // Construir observações com informações detalhadas para inscrições
         $observacoes_completas = !empty($data->observacoes) ? $data->observacoes : '';
