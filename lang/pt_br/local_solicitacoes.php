@@ -215,5 +215,6 @@ $string['form_inscricao_descricao']  = 'Você está solicitando inscrição de u
 $string['form_remocao_titulo']       = 'Solicitar Remoção de Usuários';
 $string['form_remocao_descricao']    = 'Use este formulário para solicitar a remoção de usuários de um ou mais cursos.';
 $string['form_suspensao_titulo']     = 'Solicitar Suspensão de Usuários';
+$string['form_suspensao_descricao']  = 'Use este formulário para solicitar a suspensão temporária de usuários em um ou mais cursos.';
 $string['form_cadastro_titulo']      = 'Solicitar Cadastro de Novo Usuário';
 $string['form_criar_curso_titulo']   = 'Solicitar Criação de Disciplina';
