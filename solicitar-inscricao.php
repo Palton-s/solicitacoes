@@ -37,14 +37,12 @@ class inscricao_form extends moodleform {
                       '</div>';
         $mform->addElement('html', $aviso_html);
 
-        // Campo de curso (autocomplete)
-        $mform->addElement('autocomplete', 'curso_nome', get_string('curso_nome', 'local_solicitacoes'), array(), array(
+        // Campo de curso (autocomplete com cursos carregados no PHP)
+        $cursos_disponiveis = $this->get_available_courses();
+        $mform->addElement('autocomplete', 'curso_nome', get_string('curso_nome', 'local_solicitacoes'), $cursos_disponiveis, array(
             'multiple' => false,
             'placeholder' => get_string('searching_courses', 'local_solicitacoes'),
-            'casesensitive' => false,
-            'showsuggestions' => true,
             'noselectionstring' => get_string('no_courses_found', 'local_solicitacoes'),
-            'ajax' => 'core_course/form_course_selector',
         ));
         $mform->addRule('curso_nome', null, 'required', null, 'client');
         $mform->addHelpButton('curso_nome', 'curso_nome_help', 'local_solicitacoes');
@@ -85,6 +83,32 @@ class inscricao_form extends moodleform {
 
         // Botões de ação
         $this->add_action_buttons(true, get_string('request_submit', 'local_solicitacoes'));
+    }
+
+    /**
+     * Buscar cursos disponíveis para o usuário atual
+     */
+    private function get_available_courses() {
+        global $DB, $USER;
+        
+        $cursos_options = array('' => get_string('searching_courses', 'local_solicitacoes'));
+        
+        // Buscar todos os cursos onde o usuário tem algum papel (é participante)
+        $sql = "SELECT DISTINCT c.id, c.fullname, c.shortname 
+                FROM {course} c
+                JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = 50
+                LEFT JOIN {role_assignments} ra ON ra.contextid = ctx.id AND ra.userid = :userid
+                WHERE c.id != 1 
+                AND (ra.id IS NOT NULL OR c.visible = 1)
+                ORDER BY c.fullname";
+        
+        $cursos = $DB->get_records_sql($sql, ['userid' => $USER->id]);
+        
+        foreach ($cursos as $curso) {
+            $cursos_options[$curso->id] = $curso->fullname . ' (' . $curso->shortname . ')';
+        }
+        
+        return $cursos_options;
     }
 
     /**
