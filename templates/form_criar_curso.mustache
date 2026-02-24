@@ -47,6 +47,31 @@
                     </small>
                 </div>
             </div>
+
+            
+            <div class="mb-3 row">
+                <div class="col-md-3">
+                    <label for="id_category">Unidade Acadêmica</label>
+                </div>
+                <div class="col-md-9">
+                    <select class="custom-select" name="category" id="id_category">
+                        <option value="">Escolha uma categoria...</option>
+                        {{#categorias}}
+                            <option value="{{id}}">{{nome}}</option>
+                        {{/categorias}}
+                    </select>
+                </div>
+            </div>
+
+            {{#js}}
+            require(['core/form_autocomplete'], function(Autocomplete) {
+                // Transforma o select acima no campo de busca nativo
+                Autocomplete.enhance('#id_category', false, false, 'Busque a unidade...', false, true);
+            });
+            {{/js}}
+
+
+
         </div>
 
         <div class="row mb-3">

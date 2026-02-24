@@ -40,12 +40,27 @@ $PAGE->requires->js_init_code("
 
 echo $OUTPUT->header();
 
+
+require_once($CFG->libdir . '/coursecatlib.php');
+
+// Pega a lista formatada de categorias (igual à que você viu no curso)
+$categorias_raw = core_course_category::make_categories_list();
+$categorias_formatadas = [];
+
+foreach ($categorias_raw as $id => $nome) {
+    $categorias_formatadas[] = [
+        'id' => $id,
+        'nome' => $nome
+    ];
+}
+
 // Preparar dados para o template
 $template_data = [
     'action_url' => (new moodle_url('/local/solicitacoes/processar-curso.php'))->out(false),
     'sesskey' => sesskey(),
     'cancel_url' => (new moodle_url('/local/solicitacoes/selecionar-acao.php'))->out(false),
-    'aviso_sigaa' => get_string('aviso_criar_curso', 'local_solicitacoes')
+    'aviso_sigaa' => get_string('aviso_criar_curso', 'local_solicitacoes'),
+    'categorias' => $categorias_formatadas // <--- Nova variável
 ];
 
 echo $OUTPUT->render_from_template('local_solicitacoes/form_criar_curso', $template_data);
