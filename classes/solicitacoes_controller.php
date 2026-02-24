@@ -82,7 +82,7 @@ class solicitacoes_controller {
         $record->timecreated    = time();
         $record->timemodified   = time();
         $record->tipo_acao      = $data->tipo_acao;
-        $record->papel          = (($data->tipo_acao == 'inscricao' || $data->tipo_acao == 'cadastro') && !empty($data->papel)) ? $data->papel : '';
+        $record->papel          = (($data->tipo_acao == 'inscricao' || $data->tipo_acao == 'cadastro') && !empty($data->papel_usuario)) ? $data->papel_usuario : ((!empty($data->papel)) ? $data->papel : '');
         
         // Construir observações com informações detalhadas para inscrições
         $observacoes_completas = !empty($data->observacoes) ? $data->observacoes : '';
@@ -153,10 +153,25 @@ class solicitacoes_controller {
         
         // Adicionar campos de cadastro de usuário se aplicável
         if ($data->tipo_acao == 'cadastro') {
-            $record->firstname  = !empty($data->firstname) ? $data->firstname : '';
-            $record->lastname   = !empty($data->lastname) ? $data->lastname : '';
-            $record->cpf        = !empty($data->cpf) ? $data->cpf : '';
-            $record->email      = !empty($data->email_novo_usuario) ? $data->email_novo_usuario : '';
+            // Campos novos do moodleform
+            $record->firstname  = !empty($data->nome_completo) ? trim(explode(' ', $data->nome_completo)[0]) : '';
+            $record->lastname   = !empty($data->nome_completo) ? trim(str_replace($record->firstname, '', $data->nome_completo)) : '';
+            $record->username   = !empty($data->username) ? $data->username : '';
+            $record->email      = !empty($data->email) ? $data->email : '';
+            
+            // Fallback para campos antigos (compatibilidade)
+            if (empty($record->firstname) && !empty($data->firstname)) {
+                $record->firstname = $data->firstname;
+            }
+            if (empty($record->lastname) && !empty($data->lastname)) {
+                $record->lastname = $data->lastname;
+            }
+            if (empty($record->email) && !empty($data->email_novo_usuario)) {
+                $record->email = $data->email_novo_usuario;
+            }
+            if (empty($record->username) && !empty($data->cpf)) {
+                $record->cpf = $data->cpf;
+            }
         }
         
         // Adicionar campos de criação de curso se aplicável

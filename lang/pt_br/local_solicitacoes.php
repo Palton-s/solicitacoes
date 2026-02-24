@@ -158,6 +158,20 @@ $string['error_email_invalid']       = 'E-mail inválido.';
 $string['error_email_exists']        = 'E-mail já cadastrado no sistema.';
 $string['error_motivo_required']     = 'Por favor, informe o motivo da solicitação.';
 $string['novo_usuario']              = 'Novo usuário';
+
+// Campos específicos para cadastro
+$string['nome_completo']             = 'Nome Completo';
+$string['nome_completo_help']        = 'Nome completo do novo usuário (primeiro nome e sobrenome)';
+$string['email']                     = 'E-mail';
+$string['email_help']                = 'Endereço de e-mail do novo usuário';  
+$string['username']                  = 'Nome de Usuário';
+$string['username_help']             = 'Nome de usuário para login (deve ser único no sistema)';
+$string['papel_usuario']             = 'Papel do Usuário';
+$string['papel_usuario_help']        = 'Papel que será atribuído ao usuário no sistema';
+$string['choose_role']               = 'Selecione um papel...';
+$string['error_username_exists']     = 'Nome de usuário já existe no sistema.';
+$string['error_role_required']       = 'Por favor, selecione um papel para o usuário.';
+$string['error_invalid_role']        = 'Papel selecionado é inválido.';
 $string['usuario_criado']            = 'Usuário {$a} criado com sucesso.';
 
 // Campos de criação de curso
@@ -217,4 +231,5 @@ $string['form_remocao_descricao']    = 'Use este formulário para solicitar a re
 $string['form_suspensao_titulo']     = 'Solicitar Suspensão de Usuários';
 $string['form_suspensao_descricao']  = 'Use este formulário para solicitar a suspensão temporária de usuários em um ou mais cursos.';
 $string['form_cadastro_titulo']      = 'Solicitar Cadastro de Novo Usuário';
+$string['form_cadastro_descricao']   = 'Use este formulário para solicitar o cadastro de um novo usuário no sistema com um papel específico.';
 $string['form_criar_curso_titulo']   = 'Solicitar Criação de Disciplina';
