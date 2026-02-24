@@ -47,6 +47,7 @@ $string['observacoes']          = 'Observações';
 $string['observacoes_help']     = 'Informações adicionais sobre a solicitação (opcional).';
 $string['observacoes_placeholder'] = 'Digite observações adicionais sobre esta solicitação (opcional)...';
 $string['request_submit']       = 'Enviar Solicitação';
+// Strings de interface do usuário
 $string['no_courses_found']     = 'Nenhum curso encontrado';
 $string['searching_courses']    = 'Buscando cursos...';
 $string['no_users_found']       = 'Nenhum usuário encontrado';
@@ -208,6 +209,7 @@ $string['btn_criar_curso_titulo']        = 'Criar Disciplina';
 $string['btn_criar_curso_desc']          = 'Solicitar criação de nova disciplina';
 
 // Títulos dos formulários específicos
+// Títulos e descrições dos formulários
 $string['form_inscricao_titulo']     = 'Solicitar Inscrição de Usuário';
 $string['form_inscricao_descricao']  = 'Você está solicitando inscrição de usuários em uma disciplina. Selecione o papel apropriado para os usuários.';
 $string['form_remocao_titulo']       = 'Solicitar Remoção de Usuários';
