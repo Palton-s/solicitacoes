@@ -37,9 +37,15 @@ class inscricao_form extends moodleform {
                       '</div>';
         $mform->addElement('html', $aviso_html);
 
-        // Campo de curso (por enquanto campo de texto, pode ser convertido para AJAX depois)
-        $mform->addElement('text', 'curso_nome', get_string('curso_nome', 'local_solicitacoes'), ['size' => 50]);
-        $mform->setType('curso_nome', PARAM_TEXT);
+        // Campo de curso (autocomplete)
+        $mform->addElement('autocomplete', 'curso_nome', get_string('curso_nome', 'local_solicitacoes'), array(), array(
+            'multiple' => false,
+            'placeholder' => get_string('searching_courses', 'local_solicitacoes'),
+            'casesensitive' => false,
+            'showsuggestions' => true,
+            'noselectionstring' => get_string('no_courses_found', 'local_solicitacoes'),
+            'ajax' => 'core_course/form_course_selector',
+        ));
         $mform->addRule('curso_nome', null, 'required', null, 'client');
         $mform->addHelpButton('curso_nome', 'curso_nome_help', 'local_solicitacoes');
 
@@ -85,11 +91,20 @@ class inscricao_form extends moodleform {
      * Validação personalizada do formulário
      */
     public function validation($data, $files) {
+        global $DB;
         $errors = parent::validation($data, $files);
 
         // Validar se pelo menos um usuário foi selecionado
         if (empty($data['usuarios_busca']) || !is_array($data['usuarios_busca']) || count($data['usuarios_busca']) == 0) {
             $errors['usuarios_busca'] = get_string('error_usuarios_required', 'local_solicitacoes');
+        }
+
+        // Validar se o curso selecionado é válido
+        if (!empty($data['curso_nome'])) {
+            $curso = $DB->get_record('course', ['id' => $data['curso_nome']], 'id, fullname');
+            if (!$curso) {
+                $errors['curso_nome'] = get_string('error_invalid_course', 'local_solicitacoes');
+            }
         }
 
         return $errors;
@@ -119,7 +134,15 @@ if ($data = $mform->get_data()) {
         $record->papel = $data->papel;
         
         // Construir informações para observações
-        $observacoes_completas = "CURSO: " . $data->curso_nome . "\n";
+        // Buscar informações do curso selecionado
+        $curso_info = "Curso não encontrado";
+        if (!empty($data->curso_nome)) {
+            $curso = $DB->get_record('course', ['id' => $data->curso_nome], 'id, fullname, shortname');
+            if ($curso) {
+                $curso_info = $curso->fullname . ' (' . $curso->shortname . ') - ID: ' . $curso->id;
+            }
+        }
+        $observacoes_completas = "CURSO SELECIONADO: " . $curso_info . "\n";
         
         // Processar usuários selecionados
         if (!empty($data->usuarios_busca) && is_array($data->usuarios_busca)) {

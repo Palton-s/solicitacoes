@@ -32,8 +32,8 @@ $string['solicitacoes:manage']  = 'Gerenciar solicitações de curso (aprovar/ne
 
 $string['request_form_title']   = 'Solicitação de Gerenciamento de Curso';
 $string['tipo_acao']            = 'Tipo de Ação';
-$string['curso_nome']           = 'Nome do Curso';
-$string['curso_nome_help']      = 'Digite o nome do curso e selecione da lista de sugestões';
+$string['curso_nome']           = 'Selecionar Curso';
+$string['curso_nome_help']      = 'Digite o nome do curso e selecione da lista de cursos disponíveis';
 $string['usuarios_busca']       = 'Selecionar Usuários';
 $string['usuarios_busca_help']  = 'Digite o nome ou email do usuário e selecione da lista. Você pode selecionar múltiplos usuários.';
 $string['usuarios_nomes']       = 'Nomes dos Usuários';
@@ -51,6 +51,7 @@ $string['searching_courses']    = 'Buscando cursos...';
 $string['no_users_found']       = 'Nenhum usuário encontrado';
 $string['searching_users']      = 'Buscando usuários...';
 $string['error_usuarios_required'] = 'Por favor, selecione pelo menos um usuário da lista.';
+$string['error_invalid_course']    = 'Curso inválido ou sem acesso.';
 $string['form_inscricao_descricao'] = 'Você está solicitando inscrição de usuários em uma disciplina. Selecione o papel apropriado para os usuários.';
 
 $string['acao_inscricao']       = 'Inscrição';
