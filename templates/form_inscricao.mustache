@@ -1,53 +1,8 @@
 {{!
-    Template para formulário específico de inscrição de usuários
+    Template simplificado - agora usa moodleform nativo
+    Este template não é mais usado pois o formulário é gerado via moodleform
+    Mantido apenas por compatibilidade
 }}
-
-<div class="local-solicitacoes-form-container">
-    <div class="alert alert-info" role="alert">
-        <i class="fas fa-info-circle"></i> {{#str}}form_inscricao_descricao, local_solicitacoes{{/str}}
-    </div>
-
-    <form id="form_inscricao" method="post" action="{{action_url}}" class="mform">
-        <input type="hidden" name="sesskey" value="{{sesskey}}">
-        <input type="hidden" name="submitbutton" value="1">
-        <input type="hidden" name="curso_id_selected" id="curso_id_selected" value="">
-        <input type="hidden" name="usuarios_ids_selected" id="usuarios_ids_selected" value="">
-
-        <div class="row mb-3">
-            <div class="col-12">
-                <div class="form-group">
-                    <label for="curso_nome" class="form-label">
-                        {{#str}}curso_nome, local_solicitacoes{{/str}}
-                        <span class="text-danger">*</span>
-                    </label>
-                    <select name="curso_nome" 
-                            id="curso_nome" 
-                            class="form-control">
-                        <option value="">{{#str}}searching_courses, local_solicitacoes{{/str}}</option>
-                    </select>
-                    <small class="form-text text-muted">
-                        {{#str}}curso_nome_help, local_solicitacoes{{/str}}
-                    </small>
-                </div>
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <div class="col-12">
-                <div class="form-group">
-                    <label for="papel" class="form-label">
-                        {{#str}}papel_label, local_solicitacoes{{/str}}
-                        <span class="text-danger">*</span>
-                    </label>
-                    <select name="papel" id="papel" class="form-control" required>
-                        <option value="">{{#str}}select_role, local_solicitacoes{{/str}}</option>
-                        {{#roles}}
-                        <option value="{{shortname}}">{{localname}}</option>
-                        {{/roles}}
-                    </select>
-                    <small class="form-text text-muted">
-                        {{#str}}papel_help_dinamico, local_solicitacoes{{/str}}
-                    </small>
                 </div>
             </div>
         </div>
