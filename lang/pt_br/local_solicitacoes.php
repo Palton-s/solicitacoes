@@ -116,6 +116,12 @@ $string['error_nopermission_viewrequest'] = 'Desculpe, você não tem acesso par
 $string['motivo_negacao']            = 'Motivo da Negação';
 $string['motivo_negacao_label']      = 'Informe o motivo da negação';
 $string['motivo_negacao_required']   = 'Por favor, informe o motivo da negação.';
+$string['motivo_negacao_help']       = 'Este motivo será visível para o solicitante.';
+$string['deny_request_title']        = 'Negar Solicitação';
+$string['deny_request_warning']      = 'Você está prestes a negar esta solicitação';
+$string['confirm_deny']              = 'Confirmar Negação';
+$string['request_denied_success']    = 'Solicitação negada com sucesso.';
+$string['requester']                 = 'Solicitante';
 
 // Notificações
 $string['messageprovider:solicitacao_criada'] = 'Notificação de solicitação criada';

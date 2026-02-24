@@ -1,8 +1,25 @@
 <?php
 require('../../config.php');
 require_once(__DIR__ . '/lib.php');
+require_once($CFG->libdir . '/formslib.php');
 
 require_login();
+
+// Função helper para get_string com fallback
+if (!function_exists('get_string_with_fallback')) {
+    function get_string_with_fallback($key, $component = 'moodle', $a = null) {
+        $result = get_string($key, $component, $a);
+        if ($result === "[[{$key}]]") {
+            // Fallback para strings que não carregaram
+            $fallbacks = [
+                'motivo_negacao_placeholder' => 'Digite aqui o motivo pelo qual esta solicitação está sendo negada...',
+                'motivo_negacao_help' => 'Este motivo será visível para o solicitante.'
+            ];
+            return isset($fallbacks[$key]) ? $fallbacks[$key] : $result;
+        }
+        return $result;
+    }
+}
 
 $context = context_system::instance();
 $id = required_param('id', PARAM_INT);
@@ -20,6 +37,99 @@ if (!has_capability('local/solicitacoes:manage', $context)) {
 
 // Buscar solicitação
 $request = $DB->get_record('local_solicitacoes', ['id' => $id], '*', MUST_EXIST);
+
+/**
+ * Formulário nativo do Moodle para negar solicitações
+ */
+class negar_solicitacao_form extends moodleform {
+    
+    private $request_data;
+    private $cursos;
+    private $usuarios;
+    
+    public function __construct($action = null, $request_data = null, $cursos = null, $usuarios = null) {
+        $this->request_data = $request_data;
+        $this->cursos = $cursos;
+        $this->usuarios = $usuarios;
+        parent::__construct($action);
+    }
+
+    protected function definition() {
+        global $CFG, $DB;
+        
+        $mform = $this->_form;
+        $request = $this->request_data;
+        $cursos = $this->cursos;
+        $usuarios = $this->usuarios;
+
+        // Header 
+        $mform->addElement('header', 'negacao_details', get_string('deny_request_title', 'local_solicitacoes'));
+
+        // Informações da solicitação
+        $info_html = '<div class="alert alert-warning" role="alert">';
+        $info_html .= '<h6 class="mb-3"><i class="fas fa-exclamation-triangle"></i> ' . get_string('deny_request_warning', 'local_solicitacoes') . '</h6>';
+        
+        // Tipo de ação
+        $acao_strings = [
+            'inscricao' => get_string('acao_inscricao', 'local_solicitacoes'),
+            'remocao' => get_string('acao_remocao', 'local_solicitacoes'),
+            'suspensao' => get_string('acao_suspensao', 'local_solicitacoes'),
+            'cadastro' => get_string('acao_cadastro', 'local_solicitacoes'),
+            'criar_curso' => get_string('acao_criar_curso', 'local_solicitacoes')
+        ];
+        $acao_label = isset($acao_strings[$request->tipo_acao]) ? $acao_strings[$request->tipo_acao] : $request->tipo_acao;
+        $info_html .= '<p><strong>' . get_string('action_type', 'local_solicitacoes') . ':</strong> ' . $acao_label . '</p>';
+        
+        // Cursos
+        if (!empty($cursos)) {
+            $cursos_list = [];
+            foreach ($cursos as $curso) {
+                $cursos_list[] = format_string($curso->fullname);
+            }
+            $info_html .= '<p><strong>' . get_string('course', 'local_solicitacoes') . '(s):</strong> ' . implode(', ', $cursos_list) . '</p>';
+        }
+        
+        // Usuários
+        if (!empty($usuarios)) {
+            $info_html .= '<p><strong>' . get_string('target_users', 'local_solicitacoes') . ':</strong></p><ul class="mb-2">';
+            foreach ($usuarios as $usuario) {
+                $info_html .= '<li>' . fullname($usuario) . ' (' . $usuario->email . ')</li>';
+            }
+            $info_html .= '</ul>';
+        }
+        
+        // Solicitante
+        $solicitante = core_user::get_user($request->userid);
+        $info_html .= '<p><strong>' . get_string('requester', 'local_solicitacoes') . ':</strong> ' . fullname($solicitante) . '</p>';
+        
+        $info_html .= '</div>';
+        $mform->addElement('html', $info_html);
+
+        // Campo para motivo da negação
+        $mform->addElement('textarea', 'motivo_negacao', get_string('motivo_negacao_label', 'local_solicitacoes'), 
+            array('rows' => 6, 'cols' => 60, 'placeholder' => get_string_with_fallback('motivo_negacao_placeholder', 'local_solicitacoes')));
+        $mform->setType('motivo_negacao', PARAM_TEXT);
+        $mform->addRule('motivo_negacao', null, 'required', null, 'client');
+        $mform->addHelpButton('motivo_negacao', 'motivo_negacao_help', 'local_solicitacoes');
+
+        // Botões de ação
+        $this->add_action_buttons(true, get_string('confirm_deny', 'local_solicitacoes'));
+    }
+
+    /**
+     * Validação personalizada do formulário
+     */
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+
+        // Validar se o motivo não está vazio
+        if (empty(trim($data['motivo_negacao']))) {
+            $errors['motivo_negacao'] = get_string('motivo_negacao_required', 'local_solicitacoes');
+        }
+
+        return $errors;
+    }
+}
 
 // Buscar cursos relacionados
 $sql_cursos = "SELECT c.id, c.fullname, c.shortname
@@ -48,117 +158,38 @@ if ($request->status === 'negado') {
 
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/solicitacoes/negar-solicitacao.php', array('id' => $id)));
-$PAGE->set_title('Negar Solicitação');
-$PAGE->set_heading('Negar Solicitação');
+$PAGE->set_title(get_string('deny_request_title', 'local_solicitacoes'));
+$PAGE->set_heading(get_string('deny_request_title', 'local_solicitacoes'));
 
-// Processar formulário
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    require_sesskey();
+// Criar instância do formulário
+$mform = new negar_solicitacao_form(null, $request, $cursos, $usuarios);
+
+// Processar formulário se submetido  
+if ($data = $mform->get_data()) {
+    // Atualizar solicitação
+    $request->status = 'negado';
+    $request->motivo_negacao = $data->motivo_negacao;
+    $request->timemodified = time();
+    $request->adminid = $USER->id;
     
-    $motivo_negacao = required_param('motivo_negacao', PARAM_TEXT);
+    $DB->update_record('local_solicitacoes', $request);
     
-    if (empty(trim($motivo_negacao))) {
-        \core\notification::error(get_string('motivo_negacao_required', 'local_solicitacoes'));
-    } else {
-        // Atualizar solicitação
-        $request->status = 'negado';
-        $request->motivo_negacao = $motivo_negacao;
-        $request->timemodified = time();
-        $request->adminid = $USER->id;
-        
-        $DB->update_record('local_solicitacoes', $request);
-        
-        // Enviar notificação de negação
-        local_solicitacoes_notify_negada($id);
-        
-        redirect(
-            new moodle_url('/local/solicitacoes/gerenciar.php'),
-            'Solicitação negada com sucesso.',
-            null,
-            \core\output\notification::NOTIFY_SUCCESS
-        );
-        exit;
-    }
+    // Enviar notificação de negação
+    local_solicitacoes_notify_negada($id);
+    
+    redirect(
+        new moodle_url('/local/solicitacoes/gerenciar.php'),
+        get_string('request_denied_success', 'local_solicitacoes'),
+        null,
+        \core\output\notification::NOTIFY_SUCCESS
+    );
+}
+
+// Se foi cancelado
+if ($mform->is_cancelled()) {
+    redirect(new moodle_url('/local/solicitacoes/detalhes.php', array('id' => $id)));
 }
 
 echo $OUTPUT->header();
-
-// Exibir informações da solicitação
-echo html_writer::start_div('alert alert-secondary');
-echo html_writer::tag('h5', 'Você está prestes a negar esta solicitação:', array('class' => 'mb-3'));
-
-// Traduzir tipo de ação
-$acao_strings = array(
-    'inscricao' => get_string('acao_inscricao', 'local_solicitacoes'),
-    'remocao' => get_string('acao_remocao', 'local_solicitacoes'),
-    'suspensao' => get_string('acao_suspensao', 'local_solicitacoes')
-);
-$acao_label = isset($acao_strings[$request->tipo_acao]) ? $acao_strings[$request->tipo_acao] : $request->tipo_acao;
-
-echo html_writer::tag('p', html_writer::tag('strong', 'Tipo: ') . $acao_label);
-
-// Exibir cursos
-if (!empty($cursos)) {
-    $cursos_list = array();
-    foreach ($cursos as $curso) {
-        $cursos_list[] = format_string($curso->fullname);
-    }
-    echo html_writer::tag('p', html_writer::tag('strong', 'Curso(s): ') . implode(', ', $cursos_list));
-} else {
-    echo html_writer::tag('p', html_writer::tag('strong', 'Curso: ') . format_string($request->curso_nome));
-}
-
-// Exibir usuários afetados
-if (!empty($usuarios)) {
-    echo html_writer::tag('p', html_writer::tag('strong', 'Usuários afetados:'));
-    echo html_writer::start_tag('ul', array('class' => 'mb-2'));
-    foreach ($usuarios as $usuario) {
-        echo html_writer::tag('li', fullname($usuario) . ' (' . $usuario->email . ')');
-    }
-    echo html_writer::end_tag('ul');
-} else {
-    // Fallback para campo texto
-    echo html_writer::tag('p', html_writer::tag('strong', 'Usuários: ') . nl2br(format_text($request->usuarios_nomes)));
-}
-
-$solicitante = core_user::get_user($request->userid);
-echo html_writer::tag('p', html_writer::tag('strong', 'Solicitante: ') . fullname($solicitante));
-
-echo html_writer::end_div();
-
-// Formulário para informar motivo
-echo html_writer::start_div('card mt-4');
-echo html_writer::start_div('card-header bg-light');
-echo html_writer::tag('h5', get_string('motivo_negacao_label', 'local_solicitacoes'), array('class' => 'mb-0 text-dark'));
-echo html_writer::end_div();
-echo html_writer::start_div('card-body');
-
-echo html_writer::start_tag('form', array('method' => 'post', 'action' => ''));
-echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()));
-
-echo html_writer::start_div('form-group');
-echo html_writer::tag('label', 'Informe o motivo da negação:', array('for' => 'motivo_negacao', 'class' => 'font-weight-bold'));
-echo html_writer::tag('textarea', '', array(
-    'class' => 'form-control',
-    'id' => 'motivo_negacao',
-    'name' => 'motivo_negacao',
-    'rows' => '6',
-    'required' => 'required',
-    'placeholder' => 'Digite aqui o motivo pelo qual esta solicitação está sendo negada...'
-));
-echo html_writer::tag('small', 'Este motivo será visível para o solicitante.', array('class' => 'form-text text-muted'));
-echo html_writer::end_div();
-
-echo html_writer::start_div('form-group mt-4');
-echo html_writer::tag('button', 'Confirmar Negação', array('type' => 'submit', 'class' => 'btn btn-primary btn-lg mr-2'));
-
-$cancel_url = new moodle_url('/local/solicitacoes/detalhes.php', array('id' => $id));
-echo html_writer::link($cancel_url, 'Cancelar', array('class' => 'btn btn-lg'));
-echo html_writer::end_div();
-
-echo html_writer::end_tag('form');
-
-echo html_writer::end_div();
-echo html_writer::end_div();
-
-echo $OUTPUT->footer();
+$mform->display();
+echo $OUTPUT->footer();?
