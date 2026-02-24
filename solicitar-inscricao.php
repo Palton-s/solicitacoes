@@ -163,73 +163,25 @@ $mform = new inscricao_form();
 
 // Processar formulário se submetido  
 if ($data = $mform->get_data()) {
-    // Processar dados do formulário
-    global $DB, $USER;
+    // Adicionar o tipo de ação aos dados
+    $data->tipo_acao = 'inscricao';
     
-    try {
-        $record = new stdClass();
-        $record->userid = (int)$USER->id;
-        $record->tipo_acao = 'inscricao';
-        $record->status = 'pendente';
-        $record->timecreated = time();
-        $record->timemodified = time();
-        $record->papel = (string)$data->papel;
-        
-        // Processar curso_nome (pode vir como array do autocomplete)
-        $curso_id = is_array($data->curso_nome) ? (int)$data->curso_nome[0] : (int)$data->curso_nome;
-        
-        // Construir informações para observações
-        // Buscar informações do curso selecionado
-        $curso_info = "Curso não encontrado";
-        if ($curso_id > 0) {
-            $curso = $DB->get_record('course', ['id' => $curso_id], 'id, fullname, shortname');
-            if ($curso) {
-                $curso_info = $curso->fullname . ' (' . $curso->shortname . ') - ID: ' . $curso->id;
-            }
-        }
-        $observacoes_completas = "CURSO SELECIONADO: " . $curso_info . "\n";
-        
-        // Processar usuários selecionados
-        if (!empty($data->usuarios_busca)) {
-            // Garantir que usuarios_busca seja sempre um array
-            $usuarios_array = is_array($data->usuarios_busca) ? $data->usuarios_busca : explode(',', $data->usuarios_busca);
-            
-            if (count($usuarios_array) > 0) {
-                $usernames = array();
-                foreach ($usuarios_array as $userid) {
-                    $userid = trim($userid);
-                    if (!empty($userid) && is_numeric($userid)) {
-                        $user = $DB->get_record('user', ['id' => $userid], 'firstname, lastname, email');
-                        if ($user) {
-                            $usernames[] = fullname($user) . ' (' . $user->email . ')';
-                        }
-                    }
-                }
-                if (!empty($usernames)) {
-                    $observacoes_completas .= "USUÁRIOS SELECIONADOS: " . implode(', ', $usernames) . "\n";
-                    $observacoes_completas .= "IDs DOS USUÁRIOS: " . implode(',', $usuarios_array) . "\n";
-                }
-            }
-        }
-        
-        if (!empty($data->observacoes)) {
-            $observacoes_completas .= "OBSERVAÇÕES ADICIONAIS: " . (string)$data->observacoes;
-        }
-        $record->observacoes = (string)$observacoes_completas;
-        
-        // Inserir a solicitação
-        $solicitacao_id = $DB->insert_record('local_solicitacoes', $record);
-        
+    // Utilizar o controller para processar a solicitação
+    require_once(__DIR__ . '/classes/solicitacoes_controller.php');
+    
+    $success = \local_solicitacoes\solicitacoes_controller::process_request_submission($data);
+    
+    if ($success) {
         redirect(
             new moodle_url('/local/solicitacoes/confirmacao.php'),
             get_string('request_submitted', 'local_solicitacoes'),
             null,
             \core\output\notification::NOTIFY_SUCCESS
         );
-    } catch (Exception $e) {
+    } else {
         redirect(
             new moodle_url('/local/solicitacoes/solicitar-inscricao.php'),
-            get_string('error_submitting', 'local_solicitacoes') . ': ' . $e->getMessage(),
+            get_string('error_submitting', 'local_solicitacoes'),
             null,
             \core\output\notification::NOTIFY_ERROR
         );

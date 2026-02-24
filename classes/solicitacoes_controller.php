@@ -76,7 +76,59 @@ class solicitacoes_controller {
         $record->timemodified   = time();
         $record->tipo_acao      = $data->tipo_acao;
         $record->papel          = (($data->tipo_acao == 'inscricao' || $data->tipo_acao == 'cadastro') && !empty($data->papel)) ? $data->papel : '';
-        $record->observacoes    = !empty($data->observacoes) ? $data->observacoes : '';
+        
+        // Construir observações com informações detalhadas para inscrições
+        $observacoes_completas = !empty($data->observacoes) ? $data->observacoes : '';
+        
+        if ($data->tipo_acao == 'inscricao') {
+            $observacoes_info = '';
+            
+            // Informações do curso
+            if (!empty($data->curso_nome)) {
+                $curso_id = is_array($data->curso_nome) ? (int)$data->curso_nome[0] : (int)$data->curso_nome;
+                
+                if ($curso_id > 0) {
+                    global $DB;
+                    $curso = $DB->get_record('course', ['id' => $curso_id], 'id, fullname, shortname');
+                    if ($curso) {
+                        $observacoes_info .= "CURSO SELECIONADO: " . $curso->fullname . ' (' . $curso->shortname . ') - ID: ' . $curso->id . "\n";
+                    }
+                }
+            }
+            
+            // Informações dos usuários
+            if (!empty($data->usuarios_busca)) {
+                $usuarios_array = is_array($data->usuarios_busca) ? $data->usuarios_busca : explode(',', $data->usuarios_busca);
+                
+                if (count($usuarios_array) > 0) {
+                    $usernames = array();
+                    foreach ($usuarios_array as $userid) {
+                        $userid = trim($userid);
+                        if (!empty($userid) && is_numeric($userid)) {
+                            $user = $DB->get_record('user', ['id' => $userid], 'firstname, lastname, email');
+                            if ($user) {
+                                $usernames[] = fullname($user) . ' (' . $user->email . ')';
+                            }
+                        }
+                    }
+                    if (!empty($usernames)) {
+                        $observacoes_info .= "USUÁRIOS SELECIONADOS: " . implode(', ', $usernames) . "\n";
+                        $observacoes_info .= "IDs DOS USUÁRIOS: " . implode(',', $usuarios_array) . "\n";
+                    }
+                }
+            }
+            
+            // Combinar observações
+            if (!empty($observacoes_info)) {
+                if (!empty($observacoes_completas)) {
+                    $observacoes_completas = $observacoes_info . "OBSERVAÇÕES ADICIONAIS: " . $observacoes_completas;
+                } else {
+                    $observacoes_completas = $observacoes_info;
+                }
+            }
+        }
+        
+        $record->observacoes = $observacoes_completas;
         $record->status         = 'pendente';
         $record->adminid        = null;
         
@@ -110,7 +162,20 @@ class solicitacoes_controller {
     private static function save_related_courses($solicitacao_id, $data) {
         global $DB;
         
-        if (!empty($data->curso_id_selected)) {
+        // Verificar primeiro o formato novo (moodleform)
+        if (!empty($data->curso_nome)) {
+            $curso_id = is_array($data->curso_nome) ? (int)$data->curso_nome[0] : (int)$data->curso_nome;
+            
+            if ($curso_id > 0) {
+                $curso_record = new \stdClass();
+                $curso_record->solicitacao_id = $solicitacao_id;
+                $curso_record->curso_id = $curso_id;
+                $curso_record->timecreated = time();
+                $DB->insert_record('local_curso_solicitacoes', $curso_record);
+            }
+        }
+        // Fallback para formato antigo
+        elseif (!empty($data->curso_id_selected)) {
             $curso_record = new \stdClass();
             $curso_record->solicitacao_id = $solicitacao_id;
             $curso_record->curso_id = (int)$data->curso_id_selected;
@@ -130,7 +195,32 @@ class solicitacoes_controller {
         
         $usuarios_nomes = '';
         
-        if (!empty($data->usuarios_ids_selected)) {
+        // Verificar primeiro o formato novo (moodleform)
+        if (!empty($data->usuarios_busca)) {
+            $usuarios_array = is_array($data->usuarios_busca) ? $data->usuarios_busca : explode(',', $data->usuarios_busca);
+            
+            error_log("Usuarios IDs recebidos (novo formato): " . print_r($usuarios_array, true));
+            
+            // Salvar cada usuário na tabela de relacionamento  
+            $timecreated = time();
+            foreach ($usuarios_array as $user_id) {
+                $user_id = (int)trim($user_id);
+                if ($user_id > 0) {
+                    // Verificar se usuário existe
+                    $user = $DB->get_record('user', array('id' => $user_id), 'id');
+                    if ($user) {
+                        $usuario_record = new \stdClass();
+                        $usuario_record->solicitacao_id = $solicitacao_id;
+                        $usuario_record->usuario_id = $user_id;
+                        $usuario_record->timecreated = $timecreated;
+                        $DB->insert_record('local_usuarios_solicitacoes', $usuario_record);
+                        error_log("Usuario ID $user_id vinculado à solicitação $solicitacao_id");
+                    }
+                }
+            }
+        }
+        // Fallback para formato antigo
+        elseif (!empty($data->usuarios_ids_selected)) {
             error_log("Usuarios IDs recebidos: " . $data->usuarios_ids_selected);
             
             // Limpar e processar IDs
@@ -159,6 +249,7 @@ class solicitacoes_controller {
                 }
             }
         }
+    }
     }
     
     /**
