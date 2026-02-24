@@ -135,16 +135,16 @@ if ($data = $mform->get_data()) {
     
     try {
         $record = new stdClass();
-        $record->user_id = $USER->id;
-        $record->tipo = 'criar_curso';
+        $record->userid = $USER->id;                    // Campo correto: userid (não user_id)
+        $record->tipo_acao = 'criar_curso';             // Campo correto: tipo_acao (não tipo)
         $record->status = 'pendente';
-        $record->data_criacao = time();
+        $record->timecreated = time();                  // Campo correto: timecreated (não data_criacao) 
+        $record->timemodified = time();                 // Campo obrigatório que estava faltando
         $record->codigo_sigaa = $data->codigo_sigaa;
-        $record->course_shortname = $data->course_shortname; 
-        $record->course_fullname = $data->course_fullname;
-        $record->category_id = $data->category;
-        $record->ano_semestre = $data->ano_semestre;
+        $record->course_shortname = $data->course_shortname;
         $record->course_summary = $data->course_summary;
+        $record->unidade_academica_id = $data->category;  // Campo correto: unidade_academica_id (não category_id)
+        $record->ano_semestre = $data->ano_semestre;
         $record->razoes_criacao = $data->razoes_criacao;
         
         $DB->insert_record('local_solicitacoes', $record);
