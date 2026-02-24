@@ -59,12 +59,17 @@ class inscricao_form extends moodleform {
         $mform->addRule('papel', null, 'required', null, 'client');
         $mform->addHelpButton('papel', 'papel_help_dinamico', 'local_solicitacoes');
 
-        // Campo de usuários (por enquanto textarea, pode ser convertido para AJAX depois)
-        $mform->addElement('textarea', 'usuarios_busca', get_string('usuarios_busca', 'local_solicitacoes'), 
-            ['wrap' => 'virtual', 'rows' => 3, 'cols' => 60]);
-        $mform->setType('usuarios_busca', PARAM_TEXT);
+        // Campo de usuários (autocomplete múltiplo)
+        $mform->addElement('autocomplete', 'usuarios_busca', get_string('usuarios_busca', 'local_solicitacoes'), array(), array(
+            'multiple' => true,
+            'placeholder' => get_string('usuarios_busca_help', 'local_solicitacoes'),
+            'casesensitive' => false,
+            'showsuggestions' => true,
+            'noselectionstring' => get_string('no_users_found', 'local_solicitacoes'),
+            'ajax' => 'core_user/form_user_selector',
+        ));
         $mform->addRule('usuarios_busca', null, 'required', null, 'client');
-        $mform->addHelpButton('usuarios_busca', 'usuarios_nomes_help', 'local_solicitacoes');
+        $mform->addHelpButton('usuarios_busca', 'usuarios_busca_help', 'local_solicitacoes');
 
         // Observações
         $mform->addElement('textarea', 'observacoes', get_string('observacoes', 'local_solicitacoes'), 
@@ -82,8 +87,8 @@ class inscricao_form extends moodleform {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        // Validar se os usuários foram informados
-        if (empty($data['usuarios_busca']) || trim($data['usuarios_busca']) == '') {
+        // Validar se pelo menos um usuário foi selecionado
+        if (empty($data['usuarios_busca']) || !is_array($data['usuarios_busca']) || count($data['usuarios_busca']) == 0) {
             $errors['usuarios_busca'] = get_string('error_usuarios_required', 'local_solicitacoes');
         }
 
@@ -112,13 +117,25 @@ if ($data = $mform->get_data()) {
         $record->timecreated = time();
         $record->timemodified = time();
         $record->papel = $data->papel;
-        $record->observacoes = $data->observacoes;
         
-        // Para simplificação inicial, vamos armazenar no campo observacoes
+        // Construir informações para observações
         $observacoes_completas = "CURSO: " . $data->curso_nome . "\n";
-        $observacoes_completas .= "USUÁRIOS: " . $data->usuarios_busca . "\n";
+        
+        // Processar usuários selecionados
+        if (!empty($data->usuarios_busca) && is_array($data->usuarios_busca)) {
+            $usernames = array();
+            foreach ($data->usuarios_busca as $userid) {
+                $user = $DB->get_record('user', ['id' => $userid], 'firstname, lastname, email');
+                if ($user) {
+                    $usernames[] = fullname($user) . ' (' . $user->email . ')';
+                }
+            }
+            $observacoes_completas .= "USUÁRIOS SELECIONADOS: " . implode(', ', $usernames) . "\n";
+            $observacoes_completas .= "IDs DOS USUÁRIOS: " . implode(',', $data->usuarios_busca) . "\n";
+        }
+        
         if (!empty($data->observacoes)) {
-            $observacoes_completas .= "OBSERVAÇÕES: " . $data->observacoes;
+            $observacoes_completas .= "OBSERVAÇÕES ADICIONAIS: " . $data->observacoes;
         }
         $record->observacoes = $observacoes_completas;
         
