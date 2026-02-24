@@ -250,7 +250,6 @@ class solicitacoes_controller {
             }
         }
     }
-    }
     
     /**
      * Busca informações dos cursos relacionados à solicitação
