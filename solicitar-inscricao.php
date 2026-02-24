@@ -40,7 +40,7 @@ class inscricao_form extends moodleform {
         // Campo de curso (autocomplete com cursos carregados no PHP)
         $cursos_disponiveis = $this->get_available_courses();
         $mform->addElement('autocomplete', 'curso_nome', get_string('curso_nome', 'local_solicitacoes'), $cursos_disponiveis, array(
-            'multiple' => false,
+            'multiple' => true,
             'placeholder' => get_string('searching_courses', 'local_solicitacoes'),
             'noselectionstring' => get_string('no_courses_found', 'local_solicitacoes'),
         ));
