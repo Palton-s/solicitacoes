@@ -162,7 +162,10 @@ $PAGE->set_title(get_string('deny_request_title', 'local_solicitacoes'));
 $PAGE->set_heading(get_string('deny_request_title', 'local_solicitacoes'));
 
 // Criar instância do formulário
-$mform = new negar_solicitacao_form(null, $request, $cursos, $usuarios);
+$mform = new negar_solicitacao_form(
+    new moodle_url('/local/solicitacoes/negar-solicitacao.php', ['id' => $id]),
+    $request, $cursos, $usuarios
+);
 
 // Processar formulário se submetido  
 if ($data = $mform->get_data()) {
