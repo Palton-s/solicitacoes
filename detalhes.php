@@ -143,9 +143,11 @@ $date_html = html_writer::tag('small',
 
 echo $OUTPUT->heading($header_name . ' ' . $badge_html . $date_html, 3);
 
-// ─── Coluna única ─────────────────────────────────────────────────────────────
+// ─── Duas colunas ─────────────────────────────────────────────────────────────
 echo html_writer::start_div('row');
-echo html_writer::start_div('col-md-8 offset-md-2');
+
+// ════ COLUNA ESQUERDA: tipo · usuários · cursos · status ══════════════════════
+echo html_writer::start_div('col-lg-7');
 
 // 1. Card: Tipo de ação --------------------------------------------------------
 if ($request->tipo_acao === 'criar_curso') {
@@ -177,8 +179,8 @@ if ($request->tipo_acao === 'criar_curso') {
 
     echo render_card(html_writer::tag('strong', get_string('acao_criar_curso', 'local_solicitacoes')), $body);
 } else {
-    $body = detail_row(get_string('request_type', 'local_solicitacoes'), $acao_label);
-    echo render_card(html_writer::tag('strong', get_string('request_type', 'local_solicitacoes')), $body);
+    $body = detail_row(get_string('action_type', 'local_solicitacoes'), $acao_label);
+    echo render_card(html_writer::tag('strong', get_string('action_type', 'local_solicitacoes')), $body);
 }
 
 // 2. Card: Usuários afetados ---------------------------------------------------
@@ -254,13 +256,12 @@ if ($request->tipo_acao !== 'criar_curso') {
 }
 
 // 4. Card: Status --------------------------------------------------------------
-$status_body  = detail_row(get_string('status', 'local_solicitacoes'),
+$status_body = detail_row(get_string('status', 'local_solicitacoes'),
     html_writer::tag('span', $badge_label, ['class' => 'badge badge-pill ' . $badge_class])
 );
-
 echo render_card(html_writer::tag('strong', get_string('status', 'local_solicitacoes')), $status_body);
 
-// 5. Card: Motivo da negação (só se negado) ------------------------------------
+// 4a. Card: Motivo da negação (logo abaixo do status, só se negado) ------------
 if ($request->status === 'negado' && !empty($request->motivo_negacao)) {
     echo render_card(
         html_writer::tag('strong', get_string('motivo_negacao', 'local_solicitacoes')),
@@ -268,7 +269,12 @@ if ($request->status === 'negado' && !empty($request->motivo_negacao)) {
     );
 }
 
-// 6. Card: Observações ---------------------------------------------------------
+echo html_writer::end_div(); // fim col-lg-7
+
+// ════ COLUNA DIREITA: observações · solicitante · criado em ═══════════════════
+echo html_writer::start_div('col-lg-5');
+
+// 5. Card: Observações ---------------------------------------------------------
 if (!empty($request->observacoes)) {
     echo render_card(
         html_writer::tag('strong', get_string('observacoes', 'local_solicitacoes')),
@@ -276,9 +282,9 @@ if (!empty($request->observacoes)) {
     );
 }
 
-// 7. Card: Solicitante ---------------------------------------------------------
-$solicitante     = core_user::get_user($request->userid);
-$solicitante_pic = $OUTPUT->user_picture($solicitante, ['size' => 40, 'link' => false, 'class' => 'mr-2']);
+// 6. Card: Solicitante ---------------------------------------------------------
+$solicitante      = core_user::get_user($request->userid);
+$solicitante_pic  = $OUTPUT->user_picture($solicitante, ['size' => 40, 'link' => false, 'class' => 'mr-2']);
 $solicitante_body = html_writer::div(
     $solicitante_pic .
     html_writer::div(
@@ -288,10 +294,9 @@ $solicitante_body = html_writer::div(
     ),
     'd-flex align-items-center'
 );
-
 echo render_card(html_writer::tag('strong', get_string('user', 'local_solicitacoes')), $solicitante_body);
 
-// 8. Card: Responsável pelo processamento --------------------------------------
+// 7. Card: Responsável pelo processamento --------------------------------------
 if ($request->adminid) {
     $admin      = core_user::get_user($request->adminid);
     $admin_pic  = $OUTPUT->user_picture($admin, ['size' => 40, 'link' => false, 'class' => 'mr-2']);
@@ -309,15 +314,14 @@ if ($request->adminid) {
     );
 }
 
-// 9. Card: Data e hora da solicitação ------------------------------------------
+// 8. Card: Criado em -----------------------------------------------------------
 $time_body = detail_row(
-    get_string('timecreated', 'local_solicitacoes'),
+    get_string('created_at', 'local_solicitacoes'),
     userdate($request->timecreated, get_string('strftimedatetime', 'langconfig'))
 );
+echo render_card(html_writer::tag('strong', get_string('created_at', 'local_solicitacoes')), $time_body);
 
-echo render_card(html_writer::tag('strong', get_string('timecreated', 'local_solicitacoes')), $time_body);
-
-echo html_writer::end_div(); // fim col
+echo html_writer::end_div(); // fim col-lg-5
 echo html_writer::end_div(); // fim row
 
 // ─── Ações (apenas gestores) ──────────────────────────────────────────────────

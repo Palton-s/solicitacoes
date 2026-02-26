@@ -57,7 +57,7 @@ class inscricao_form extends moodleform {
         #$mform->addElement('header', 'inscricao_details', get_string('form_inscricao_titulo', 'local_solicitacoes'));
 
         // Aviso/descrição
-        $aviso_html = '<div class="alert alert-info" role="alert">' . 
+        $aviso_html = '<div class="alert alert-info m-4" role="alert">' . 
                       '<i class="fas fa-info-circle"></i> ' . 
                       get_string_with_fallback('form_inscricao_descricao', 'local_solicitacoes') . 
                       '</div>';
