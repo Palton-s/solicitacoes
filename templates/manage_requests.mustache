@@ -4,15 +4,17 @@
     Template para gerenciamento de solicitações
 }}
 
-<nav class="mb-3">
-    <ul class="nav nav-tabs">
-        {{#filters}}
-        <li class="nav-item">
-            <a class="nav-link {{#active}}active{{/active}}" href="{{url}}">{{label}}</a>
-        </li>
-        {{/filters}}
-    </ul>
-</nav>
+<div class="">
+    <nav class="mb-3 moremenu navigation observed">
+        <ul class="nav nav-tabs">
+            {{#filters}}
+            <li class="nav-item">
+                <a class="nav-link {{#active}}active{{/active}}" href="{{url}}">{{label}}</a>
+            </li>
+            {{/filters}}
+        </ul>
+    </nav>
+</div>
 
 <div id="page-content">
 
