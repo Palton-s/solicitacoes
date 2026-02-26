@@ -28,10 +28,10 @@ class criar_curso_form extends moodleform {
         $mform = $this->_form;
 
         // Header 
-        $mform->addElement('header', 'course_details', get_string('form_criar_curso_titulo', 'local_solicitacoes'));
+        #$mform->addElement('header', 'course_details', get_string('form_criar_curso_titulo', 'local_solicitacoes'));
 
         // Aviso SIGAA
-        $aviso_html = '<div class="alert alert-info" role="alert">' . 
+        $aviso_html = '<div class="alert alert-info m-4" role="alert">' . 
                       get_string('aviso_criar_curso', 'local_solicitacoes') . 
                       '</div>';
         $mform->addElement('html', $aviso_html);

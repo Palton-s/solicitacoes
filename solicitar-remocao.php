@@ -52,10 +52,10 @@ class remocao_form extends moodleform {
         $mform = $this->_form;
 
         // Header 
-        $mform->addElement('header', 'remocao_details', get_string('form_remocao_titulo', 'local_solicitacoes'));
+        #$mform->addElement('header', 'remocao_details', get_string('form_remocao_titulo', 'local_solicitacoes'));
 
         // Aviso/descrição
-        $aviso_html = '<div class="alert alert-warning" role="alert">' . 
+        $aviso_html = '<div class="alert alert-warning m-4" role="alert">' . 
                       '<i class="fas fa-exclamation-triangle"></i> ' . 
                       get_string_with_fallback('form_remocao_descricao', 'local_solicitacoes') . 
                       '</div>';

@@ -54,10 +54,10 @@ class suspensao_form extends moodleform {
         $mform = $this->_form;
 
         // Header 
-        $mform->addElement('header', 'suspensao_details', get_string('form_suspensao_titulo', 'local_solicitacoes'));
+        #$mform->addElement('header', 'suspensao_details', get_string('form_suspensao_titulo', 'local_solicitacoes'));
 
         // Aviso/descrição
-        $aviso_html = '<div class="alert alert-warning" role="alert">' . 
+        $aviso_html = '<div class="alert alert-warning m-4" role="alert">' . 
                       '<i class="fas fa-pause-circle"></i> ' . 
                       get_string_with_fallback('form_suspensao_descricao', 'local_solicitacoes') . 
                       '</div>';

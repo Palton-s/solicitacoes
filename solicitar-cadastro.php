@@ -53,10 +53,10 @@ class cadastro_form extends moodleform {
         $mform = $this->_form;
 
         // Header 
-        $mform->addElement('header', 'cadastro_details', get_string('form_cadastro_titulo', 'local_solicitacoes'));
+        #$mform->addElement('header', 'cadastro_details', get_string('form_cadastro_titulo', 'local_solicitacoes'));
 
         // Aviso/descrição
-        $aviso_html = '<div class="alert alert-info" role="alert">' . 
+        $aviso_html = '<div class="alert alert-info m-4" role="alert">' . 
                       '<i class="fas fa-user-plus"></i> ' . 
                       get_string_with_fallback('form_cadastro_descricao', 'local_solicitacoes') . 
                       '</div>';

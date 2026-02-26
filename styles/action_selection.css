@@ -118,9 +118,11 @@
 
 /* Dark mode support (if Moodle theme supports it) */
 
+
+/*
 @media (prefers-color-scheme: dark) {
     .action-card {
-        background: #2d3748;
+        background: #FFF;
         border-color: #4a5568;
         color: #e2e8f0;
     }
@@ -130,4 +132,4 @@
     .action-card-desc {
         color: #cbd5e0;
     }
-}
+}*/
