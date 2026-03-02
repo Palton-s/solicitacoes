@@ -107,11 +107,10 @@ class cadastro_form extends moodleform {
         $mform->addHelpButton('email_novo_usuario', 'email_novo_usuario_help', 'local_solicitacoes');
 
         // Papel (role) do usuário
-        $systemcontext = context_system::instance();
-        $all_roles = role_get_names($systemcontext, ROLENAME_ALIAS, false);
+        $course_role_ids = get_roles_for_contextlevels(CONTEXT_COURSE);
         $roles_options = array('' => get_string('choose_role', 'local_solicitacoes'));
-        
-        foreach ($all_roles as $roleid => $rolename) {
+
+        foreach ($course_role_ids as $roleid) {
             $role = $DB->get_record('role', ['id' => $roleid], 'shortname, name');
             if ($role) {
                 $roles_options[$role->shortname] = role_get_name($role);
