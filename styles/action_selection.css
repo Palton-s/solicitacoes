@@ -92,8 +92,16 @@
     color: #17a2b8;
 }
 
+.action-users .action-card-icon {
+    color: #0069d9;
+}
+
 .action-course .action-card-icon {
     color: #6f42c1;
+}
+
+.action-remove-course .action-card-icon {
+    color: #dc3545;
 }
 
 

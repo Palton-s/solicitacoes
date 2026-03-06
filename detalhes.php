@@ -88,6 +88,7 @@ $acao_strings = [
     'suspensao'   => get_string('acao_suspensao',   'local_solicitacoes'),
     'cadastro'    => get_string('acao_cadastro',    'local_solicitacoes'),
     'criar_curso' => get_string('acao_criar_curso', 'local_solicitacoes'),
+    'remove_course' => get_string('acao_remover_curso', 'local_solicitacoes'),
 ];
 $acao_label = $acao_strings[$request->tipo_acao] ?? $request->tipo_acao;
 

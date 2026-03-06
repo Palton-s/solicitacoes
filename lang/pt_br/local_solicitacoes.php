@@ -60,6 +60,7 @@ $string['acao_inscricao']       = 'Inscrição';
 $string['acao_remocao']         = 'Remoção';
 $string['acao_suspensao']       = 'Suspensão';
 $string['acao_cadastro']        = 'Cadastro de Usuário';
+$string['acao_remover_curso']   = 'Remover Curso';
 
 $string['papel_student']        = 'Estudante';
 $string['papel_teacher']        = 'Professor';
@@ -204,12 +205,26 @@ $string['course_created_success']    = 'Curso "{$a}" criado com sucesso!';
 $string['no_categories_found']       = 'Nenhuma categoria encontrada';
 $string['searching_categories']      = 'Buscando categorias...';
 $string['select_year_semester']      = '× SELECIONE ANO/SEMESTRE E UNIDADE ACADÊМICA';
+$string['course_archived_success']   = '{$a} curso(s) movido(s) para a categoria oculta e ocultado(s) com sucesso.';
+$string['course_archive_partial']    = 'Remoção parcial de cursos: {$a->success} sucesso(s), {$a->error} erro(s).';
+$string['error_hidden_category_not_configured'] = 'A categoria oculta não está configurada no plugin. Configure em Administração do site > Plugins locais > Solicitações de Gerenciamento de Curso.';
+$string['error_hidden_category_invalid'] = 'A categoria oculta configurada é inválida ou não existe mais.';
+$string['hidden_course_category'] = 'Categoria oculta para remoção de curso';
+$string['hidden_course_category_desc'] = 'Categoria para onde os cursos serão movidos quando uma solicitação de remoção de curso for aprovada. O curso também ficará invisível.';
 
 // Página de seleção de ações
 $string['selecionar_acao_titulo']    = 'O que você deseja fazer?';
 $string['selecionar_acao_subtitulo'] = 'Escolha o tipo de solicitação que deseja enviar';
+$string['selecionar_usuarios_titulo'] = 'Ações de Usuários';
+$string['selecionar_usuarios_subtitulo'] = 'Escolha a ação de gerenciamento de usuários';
+$string['selecionar_cursos_titulo'] = 'Ações de Cursos';
+$string['selecionar_cursos_subtitulo'] = 'Escolha a ação de gerenciamento de cursos';
 
 // Botões de ação
+$string['btn_grupo_usuarios_titulo']   = 'Usuários';
+$string['btn_grupo_usuarios_desc']     = 'Acessar solicitações de inscrição, remoção, suspensão e cadastro de usuários';
+$string['btn_grupo_cursos_titulo']     = 'Cursos';
+$string['btn_grupo_cursos_desc']       = 'Acessar solicitações de criação e remoção de cursos';
 $string['btn_inscrever_usuario_titulo']  = 'Inscrever Usuário';
 $string['btn_inscrever_usuario_desc']    = 'Inscrever usuários em disciplinas com qualquer papel';
 $string['btn_remover_usuario_titulo']    = 'Remover Usuário';
@@ -220,6 +235,8 @@ $string['btn_cadastrar_usuario_titulo']  = 'Cadastrar Novo Usuário';
 $string['btn_cadastrar_usuario_desc']    = 'Criar novo usuário e vincular a disciplina';
 $string['btn_criar_curso_titulo']        = 'Criar Disciplina';
 $string['btn_criar_curso_desc']          = 'Solicitar criação de nova disciplina';
+$string['btn_remover_curso_titulo']      = 'Remover Curso';
+$string['btn_remover_curso_desc']        = 'Solicitar remoção lógica do curso (mover para categoria oculta)';
 
 // Títulos dos formulários específicos
 // Títulos e descrições dos formulários
@@ -232,3 +249,5 @@ $string['form_suspensao_descricao']  = 'Use este formulário para solicitar a su
 $string['form_cadastro_titulo']      = 'Solicitar Cadastro de Novo Usuário';
 $string['form_cadastro_descricao']   = 'Use este formulário para solicitar o cadastro de um novo usuário no sistema com um papel específico.';
 $string['form_criar_curso_titulo']   = 'Solicitar Criação de Disciplina';
+$string['form_remover_curso_titulo'] = 'Solicitar Remoção de Curso';
+$string['form_remover_curso_descricao'] = 'Ao aprovar, o curso não será excluído. Ele será movido para a categoria oculta configurada no plugin e ficará invisível.';

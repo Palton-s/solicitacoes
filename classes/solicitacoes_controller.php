@@ -48,7 +48,7 @@ class solicitacoes_controller {
                 }
                 
                 // Salvar usuários relacionados (não aplicável para cadastro e criação de curso)
-                if ($data->tipo_acao != 'cadastro' && $data->tipo_acao != 'criar_curso') {
+                if ($data->tipo_acao != 'cadastro' && $data->tipo_acao != 'criar_curso' && $data->tipo_acao != 'remove_course') {
                     error_log("process_request_submission: salvando usuários relacionados");
                     self::save_related_users($id, $data);
                 }
@@ -469,6 +469,11 @@ class solicitacoes_controller {
                 error_log("execute_request_action: ERRO - Nenhum curso encontrado para esta solicitação");
                 return ['success' => false, 'message' => 'Nenhum curso encontrado para esta solicitação.'];
             }
+
+            // Para remoção de curso, não precisa de usuários relacionados.
+            if ($solicitacao->tipo_acao == 'remove_course') {
+                return self::archive_courses($cursos);
+            }
             
             // Para cadastro, não precisa buscar usuários existentes
             if ($solicitacao->tipo_acao == 'cadastro') {
@@ -492,6 +497,9 @@ class solicitacoes_controller {
                     
                 case 'suspensao':
                     return self::suspend_users($cursos, $usuarios);
+
+                case 'remove_course':
+                    return self::archive_courses($cursos);
                     
                 default:
                     return ['success' => false, 'message' => 'Tipo de ação desconhecido: ' . $solicitacao->tipo_acao];
@@ -844,5 +852,61 @@ class solicitacoes_controller {
                 'message' => 'Erro ao criar curso: ' . $e->getMessage()
             ];
         }
+    }
+
+    /**
+     * Move cursos para categoria oculta configurada e os torna invisíveis.
+     *
+     * @param array $cursos Array de cursos relacionados à solicitação
+     * @return array Array com 'success' e 'message'
+     */
+    private static function archive_courses($cursos) {
+        global $DB, $CFG;
+        require_once($CFG->dirroot . '/course/lib.php');
+
+        $hiddencategoryid = (int)get_config('local_solicitacoes', 'hidden_course_category');
+        if (empty($hiddencategoryid)) {
+            return [
+                'success' => false,
+                'message' => get_string('error_hidden_category_not_configured', 'local_solicitacoes')
+            ];
+        }
+
+        if (!$DB->record_exists('course_categories', ['id' => $hiddencategoryid])) {
+            return [
+                'success' => false,
+                'message' => get_string('error_hidden_category_invalid', 'local_solicitacoes')
+            ];
+        }
+
+        $successcount = 0;
+        $errorcount = 0;
+
+        foreach ($cursos as $curso) {
+            try {
+                $course = $DB->get_record('course', ['id' => $curso->id], '*', MUST_EXIST);
+                $course->category = $hiddencategoryid;
+                $course->visible = 0;
+                $course->timemodified = time();
+
+                update_course($course);
+                $successcount++;
+            } catch (\Exception $e) {
+                $errorcount++;
+                error_log('Erro ao arquivar curso ID ' . $curso->id . ': ' . $e->getMessage());
+            }
+        }
+
+        if ($errorcount > 0) {
+            return [
+                'success' => false,
+                'message' => get_string('course_archive_partial', 'local_solicitacoes', ['success' => $successcount, 'error' => $errorcount])
+            ];
+        }
+
+        return [
+            'success' => true,
+            'message' => get_string('course_archived_success', 'local_solicitacoes', $successcount)
+        ];
     }
 }
