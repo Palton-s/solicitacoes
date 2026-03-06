@@ -43,7 +43,7 @@ foreach ($all_roles as $roleid => $rolename) {
     }
 }
 
-$sql = "SELECT r.*, u.firstname, u.lastname, u.email
+$sql = "SELECT r.*, u.firstname AS requester_firstname, u.lastname AS requester_lastname, u.email AS requester_email
         FROM {local_solicitacoes} r
         JOIN {user} u ON r.userid = u.id
         WHERE r.id = :id";
@@ -289,8 +289,8 @@ $solicitante_pic  = $OUTPUT->user_picture($solicitante, ['size' => 40, 'link' =>
 $solicitante_body = html_writer::div(
     $solicitante_pic .
     html_writer::div(
-        html_writer::tag('strong', fullname($request)) .
-        html_writer::tag('div', s($request->email), ['class' => 'small text-muted']),
+        html_writer::tag('strong', fullname($solicitante)) .
+        html_writer::tag('div', s($solicitante->email), ['class' => 'small text-muted']),
         ''
     ),
     'd-flex align-items-center'
