@@ -632,6 +632,7 @@ class solicitacoes_controller {
         global $DB;
         
         $success_count = 0;
+        $skipped_count = 0;
         $error_count = 0;
         
         foreach ($cursos as $curso) {
@@ -651,7 +652,7 @@ class solicitacoes_controller {
                     
                     if (empty($enrolments)) {
                         error_log("Usuário {$usuario->id} não está inscrito no curso {$curso->id}");
-                        $error_count++;
+                        $skipped_count++;
                         continue;
                     }
                     
@@ -674,13 +675,13 @@ class solicitacoes_controller {
         if ($error_count > 0) {
             return [
                 'success' => false,
-                'message' => "Suspensão parcial: $success_count sucesso(s), $error_count erro(s)"
+                'message' => "Suspensão parcial: $success_count suspensão(ões), $skipped_count sem inscrição, $error_count erro(s)"
             ];
         }
         
         return [
             'success' => true,
-            'message' => "Usuários suspensos com sucesso! Total: $success_count"
+            'message' => "Solicitação processada: $success_count suspensão(ões) e $skipped_count usuário(s) sem inscrição no curso"
         ];
     }
 
