@@ -151,7 +151,7 @@ if ($data = $mform->get_data()) {
         $DB->insert_record('local_solicitacoes', $record);
         
         redirect(
-            new moodle_url('/local/solicitacoes/confirmacao.php'),
+            new moodle_url('/local/solicitacoes/minhas-solicitacoes.php'),
             get_string('request_submitted', 'local_solicitacoes'),
             null,
             \core\output\notification::NOTIFY_SUCCESS

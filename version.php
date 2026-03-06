@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_solicitacoes';
-$plugin->version   = 2026030607;        // YYYYMMDDXX - v1.4.0: Fluxo por domínio e remoção lógica de curso.
+$plugin->version   = 2026030608;        // YYYYMMDDXX - v1.4.0: Fluxo por domínio e remoção lógica de curso.
 $plugin->requires  = 2022041900;        // Requer Moodle 4.0 ou superior.
 $plugin->maturity  = MATURITY_STABLE;   // MATURITY_ALPHA, MATURITY_BETA, MATURITY_RC ou MATURITY_STABLE.
 $plugin->release   = 'v1.4.0';          // Versão legível para humanos.
