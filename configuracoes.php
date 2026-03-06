@@ -52,14 +52,14 @@ $form->set_data([
 ]);
 
 if ($form->is_cancelled()) {
-    redirect(new moodle_url('/admin/settings.php', ['section' => 'local_solicitacoes_settings']));
+    redirect(new moodle_url('/local/solicitacoes/configuracoes.php'));
 }
 
 if ($data = $form->get_data()) {
     set_config('hidden_course_category', (int)$data->hidden_course_category, 'local_solicitacoes');
 
     redirect(
-        new moodle_url('/admin/settings.php', ['section' => 'local_solicitacoes_settings']),
+        new moodle_url('/local/solicitacoes/configuracoes.php'),
         get_string('changessaved'),
         null,
         \core\output\notification::NOTIFY_SUCCESS
