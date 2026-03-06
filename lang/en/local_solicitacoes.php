@@ -23,6 +23,8 @@
  */
 
 $string['pluginname'] = 'Course Management Requests';
+$string['menu_settings'] = 'Request Settings';
+$string['menu_manage'] = 'Manage Requests';
 
 // Capabilities
 $string['solicitacoes:view']    = 'View own requests';

@@ -23,6 +23,8 @@
  */
 
 $string['pluginname'] = 'Solicitações de Gerenciamento de Curso';
+$string['menu_settings'] = 'Configurações de Solicitações';
+$string['menu_manage'] = 'Gerenciar Solicitações';
 
 // Capabilities
 $string['solicitacoes:view']    = 'Ver próprias solicitações';
