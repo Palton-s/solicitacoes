@@ -2,8 +2,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
-    require_once($CFG->libdir . '/coursecatlib.php');
-
     $settings = new admin_settingpage(
         'local_solicitacoes_settings',
         get_string('pluginname', 'local_solicitacoes')
