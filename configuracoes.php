@@ -1,6 +1,7 @@
 <?php
 require('../../config.php');
 require_once($CFG->libdir . '/formslib.php');
+require_once($CFG->libdir . '/adminlib.php');
 
 admin_externalpage_setup('local_solicitacoes_settings');
 
