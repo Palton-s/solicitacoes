@@ -133,7 +133,9 @@ class cadastro_form extends moodleform {
     }
 
     /**
-     * Buscar cursos disponíveis para seleção 
+     * Buscar cursos disponíveis para o usuário atual:
+     * - admins e usuários com papel no contexto do sistema veem todos os cursos
+     * - demais: cursos onde está matriculado + cursos de categorias com papel atribuído
      */
     protected function get_available_courses() {
         global $DB, $USER;
@@ -141,17 +143,46 @@ class cadastro_form extends moodleform {
         $cursos_options = array();
         
         try {
-            // Buscar todos os cursos onde o usuário tem algum papel (é participante)
-            $sql = "SELECT DISTINCT c.id, c.fullname, c.shortname 
-                    FROM {course} c
-                    JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = 50
-                    LEFT JOIN {role_assignments} ra ON ra.contextid = ctx.id AND ra.userid = :userid
-                    WHERE c.id != 1 
-                    AND (ra.id IS NOT NULL OR c.visible = 1)
-                    ORDER BY c.fullname";
-            
-            $cursos = $DB->get_records_sql($sql, ['userid' => $USER->id]);
-            
+            $system_context = context_system::instance();
+
+            // Admins e usuários com papel no contexto do sistema (ex: gerentes) veem tudo
+            if (is_siteadmin() || $DB->record_exists('role_assignments', [
+                'userid'    => $USER->id,
+                'contextid' => $system_context->id,
+            ])) {
+                $sql = "SELECT id, fullname, shortname 
+                        FROM {course} 
+                        WHERE id > 1
+                        ORDER BY fullname ASC";
+                $cursos = $DB->get_records_sql($sql);
+            } else {
+                // 1. Cursos onde o usuário está matriculado (inclui ocultos acessíveis)
+                $cursos = enrol_get_users_courses($USER->id, true);
+
+                // 2. Cursos pertencentes a categorias onde o usuário tem papel (ocultos inclusive)
+                $sql_cat = "SELECT DISTINCT c.id, c.fullname, c.shortname 
+                            FROM {course} c
+                            JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = :ctxcourse
+                            WHERE c.id != 1
+                            AND EXISTS (
+                                SELECT 1 FROM {role_assignments} ra
+                                JOIN {context} catctx ON catctx.id = ra.contextid
+                                WHERE ra.userid = :userid
+                                AND catctx.contextlevel = :ctxcat
+                                AND ctx.path LIKE " . $DB->sql_concat('catctx.path', "'/%'") . "
+                            )
+                            ORDER BY c.fullname ASC";
+
+                $cat_courses = $DB->get_records_sql($sql_cat, [
+                    'ctxcourse' => CONTEXT_COURSE,
+                    'userid'    => $USER->id,
+                    'ctxcat'    => CONTEXT_COURSECAT,
+                ]);
+
+                // Combinar (chaves são IDs de curso — sem duplicatas)
+                $cursos = $cursos + $cat_courses;
+            }
+
             foreach ($cursos as $curso) {
                 $cursos_options[$curso->id] = $curso->fullname . ' (' . $curso->shortname . ')';
             }
@@ -176,16 +207,12 @@ class cadastro_form extends moodleform {
             if (empty($cursos_selecionados)) {
                 $errors['curso_nome'] = get_string('error_course_required', 'local_solicitacoes');
             } else {
-                // Validar cada curso selecionado
+                // Validar cada curso selecionado e verificar se o usuário tem acesso
+                $cursos_acessiveis = $this->get_available_courses();
                 $cursos_invalidos = array();
                 foreach ($cursos_selecionados as $curso_id) {
                     $curso_id = (int)$curso_id;
-                    if ($curso_id > 0) {
-                        $curso = $DB->get_record('course', ['id' => $curso_id], 'id, fullname');
-                        if (!$curso) {
-                            $cursos_invalidos[] = $curso_id;
-                        }
-                    } else {
+                    if ($curso_id <= 0 || !array_key_exists($curso_id, $cursos_acessiveis)) {
                         $cursos_invalidos[] = $curso_id;
                     }
                 }
