@@ -226,7 +226,8 @@ foreach ($requests as $r) {
         'remocao' => get_string('acao_remocao', 'local_solicitacoes'),
         'suspensao' => get_string('acao_suspensao', 'local_solicitacoes'),
         'cadastro' => get_string('acao_cadastro', 'local_solicitacoes'),
-        'criar_curso' => get_string('acao_criar_curso', 'local_solicitacoes')
+        'criar_curso' => get_string('acao_criar_curso', 'local_solicitacoes'),
+        'remove_course' => get_string('acao_remover_curso', 'local_solicitacoes')
     ];
     $acao_label = isset($acao_strings[$r->tipo_acao]) ? $acao_strings[$r->tipo_acao] : $r->tipo_acao;
     

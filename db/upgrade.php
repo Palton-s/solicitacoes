@@ -259,5 +259,14 @@ function xmldb_local_solicitacoes_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026022301, 'local', 'solicitacoes');
     }
 
+    // Upgrade para versão 2026030600 - Configuração de categoria oculta para remoção de curso
+    if ($oldversion < 2026030600) {
+        if (get_config('local_solicitacoes', 'hidden_course_category') === false) {
+            set_config('hidden_course_category', 0, 'local_solicitacoes');
+        }
+
+        upgrade_plugin_savepoint(true, 2026030600, 'local', 'solicitacoes');
+    }
+
     return true;
 }

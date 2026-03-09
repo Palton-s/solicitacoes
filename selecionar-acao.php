@@ -28,38 +28,17 @@ echo $OUTPUT->header();
 // Preparar dados para o template
 $actions = [
     [
-        'icon' => 'fas fa-user-plus',
-        'title' => get_string('btn_inscrever_usuario_titulo', 'local_solicitacoes'),
-        'description' => get_string('btn_inscrever_usuario_desc', 'local_solicitacoes'),
-        'url' => (new moodle_url('/local/solicitacoes/solicitar-inscricao.php'))->out(false),
-        'class' => 'action-enrol'
-    ],
-    [
-        'icon' => 'fas fa-user-times',
-        'title' => get_string('btn_remover_usuario_titulo', 'local_solicitacoes'),
-        'description' => get_string('btn_remover_usuario_desc', 'local_solicitacoes'),
-        'url' => (new moodle_url('/local/solicitacoes/solicitar-remocao.php'))->out(false),
-        'class' => 'action-remove'
-    ],
-    [
-        'icon' => 'fas fa-pause-circle',
-        'title' => get_string('btn_suspender_usuario_titulo', 'local_solicitacoes'),
-        'description' => get_string('btn_suspender_usuario_desc', 'local_solicitacoes'),
-        'url' => (new moodle_url('/local/solicitacoes/solicitar-suspensao.php'))->out(false),
-        'class' => 'action-suspend'
-    ],
-    [
-        'icon' => 'fas fa-user-check',
-        'title' => get_string('btn_cadastrar_usuario_titulo', 'local_solicitacoes'),
-        'description' => get_string('btn_cadastrar_usuario_desc', 'local_solicitacoes'),
-        'url' => (new moodle_url('/local/solicitacoes/solicitar-cadastro.php'))->out(false),
-        'class' => 'action-register'
+        'icon' => 'fas fa-users',
+        'title' => get_string('btn_grupo_usuarios_titulo', 'local_solicitacoes'),
+        'description' => get_string('btn_grupo_usuarios_desc', 'local_solicitacoes'),
+        'url' => (new moodle_url('/local/solicitacoes/selecionar-usuarios.php'))->out(false),
+        'class' => 'action-users'
     ],
     [
         'icon' => 'fas fa-book-open',
-        'title' => get_string('btn_criar_curso_titulo', 'local_solicitacoes'),
-        'description' => get_string('btn_criar_curso_desc', 'local_solicitacoes'),
-        'url' => (new moodle_url('/local/solicitacoes/solicitar-curso.php'))->out(false),
+        'title' => get_string('btn_grupo_cursos_titulo', 'local_solicitacoes'),
+        'description' => get_string('btn_grupo_cursos_desc', 'local_solicitacoes'),
+        'url' => (new moodle_url('/local/solicitacoes/selecionar-cursos.php'))->out(false),
         'class' => 'action-course'
     ]
 ];

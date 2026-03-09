@@ -108,9 +108,14 @@ if (!$requests) {
 foreach ($requests as $r) {
     // Processar Cursos
     $links_cursos = [];
+    $showcourselinks = !($r->tipo_acao == 'remove_course' && $r->status == 'aprovado');
     foreach ($r->cursos as $cid => $cname) {
-        $url = new moodle_url('/course/view.php', ['id' => $cid]);
-        $links_cursos[] = html_writer::link($url, format_string($cname));
+        if ($showcourselinks) {
+            $url = new moodle_url('/course/view.php', ['id' => $cid]);
+            $links_cursos[] = html_writer::link($url, format_string($cname));
+        } else {
+            $links_cursos[] = format_string($cname);
+        }
     }
     $cursos_display = implode(', ', $links_cursos);
 
@@ -152,7 +157,9 @@ foreach ($requests as $r) {
         'inscricao' => get_string('acao_inscricao', 'local_solicitacoes'),
         'remocao' => get_string('acao_remocao', 'local_solicitacoes'),
         'suspensao' => get_string('acao_suspensao', 'local_solicitacoes'),
-        'cadastro' => get_string('acao_cadastro', 'local_solicitacoes')
+        'cadastro' => get_string('acao_cadastro', 'local_solicitacoes'),
+        'criar_curso' => get_string('acao_criar_curso', 'local_solicitacoes'),
+        'remove_course' => get_string('acao_remover_curso', 'local_solicitacoes')
     ];
     $acao_label = isset($acao_strings[$r->tipo_acao]) ? $acao_strings[$r->tipo_acao] : $r->tipo_acao;
     

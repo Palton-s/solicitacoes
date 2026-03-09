@@ -102,13 +102,6 @@ class criar_curso_form extends moodleform {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        // Validar formato do código SIGAA
-        if (!empty($data['codigo_sigaa'])) {
-            if (!preg_match('/^[A-Z]{3}\d{4}/', $data['codigo_sigaa'])) {
-                $errors['codigo_sigaa'] = get_string('error_codigo_sigaa_format', 'local_solicitacoes');
-            }
-        }
-
         // Validar se a categoria existe e o usuário tem permissão
         if (!empty($data['category'])) {
             $category = core_course_category::get($data['category'], IGNORE_MISSING);
@@ -151,7 +144,7 @@ if ($data = $mform->get_data()) {
         $DB->insert_record('local_solicitacoes', $record);
         
         redirect(
-            new moodle_url('/local/solicitacoes/confirmacao.php'),
+            new moodle_url('/local/solicitacoes/minhas-solicitacoes.php'),
             get_string('request_submitted', 'local_solicitacoes'),
             null,
             \core\output\notification::NOTIFY_SUCCESS

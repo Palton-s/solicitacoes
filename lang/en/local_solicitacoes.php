@@ -23,6 +23,8 @@
  */
 
 $string['pluginname'] = 'Course Management Requests';
+$string['menu_settings'] = 'Request Settings';
+$string['menu_manage'] = 'Manage Requests';
 
 // Capabilities
 $string['solicitacoes:view']    = 'View own requests';
@@ -53,6 +55,7 @@ $string['acao_inscricao']       = 'Enrollment';
 $string['acao_remocao']         = 'Removal';
 $string['acao_cadastro']        = 'User Registration';
 $string['acao_suspensao']       = 'Suspension';
+$string['acao_remover_curso']   = 'Remove Course';
 
 $string['papel_student']        = 'Student';
 $string['papel_teacher']        = 'Teacher';
@@ -174,12 +177,26 @@ $string['course_created_success']    = 'Course "{$a}" created successfully!';
 $string['no_categories_found']       = 'No categories found';
 $string['searching_categories']      = 'Searching categories...';
 $string['select_year_semester']      = '× SELECT YEAR/SEMESTER AND ACADEMIC UNIT';
+$string['course_archived_success']   = '{$a} course(s) moved to the hidden category and hidden successfully.';
+$string['course_archive_partial']    = 'Partial course removal: {$a->success} success(es), {$a->error} error(s).';
+$string['error_hidden_category_not_configured'] = 'Hidden category is not configured in the plugin settings. Configure it in Site administration > Local plugins > Course Management Requests.';
+$string['error_hidden_category_invalid'] = 'Configured hidden category is invalid or no longer exists.';
+$string['hidden_course_category'] = 'Hidden category for course removal';
+$string['hidden_course_category_desc'] = 'Category where courses are moved when a course removal request is approved. The course is also set to hidden.';
 
 // Action selection page
 $string['selecionar_acao_titulo']    = 'What would you like to do?';
 $string['selecionar_acao_subtitulo'] = 'Choose the type of request you want to submit';
+$string['selecionar_usuarios_titulo'] = 'User Actions';
+$string['selecionar_usuarios_subtitulo'] = 'Choose a user management action';
+$string['selecionar_cursos_titulo'] = 'Course Actions';
+$string['selecionar_cursos_subtitulo'] = 'Choose a course management action';
 
 // Action buttons
+$string['btn_grupo_usuarios_titulo']  = 'Users';
+$string['btn_grupo_usuarios_desc']    = 'Access enrollment, removal, suspension and user registration requests';
+$string['btn_grupo_cursos_titulo']    = 'Courses';
+$string['btn_grupo_cursos_desc']      = 'Access course creation and removal requests';
 $string['btn_inscrever_usuario_titulo']  = 'Enroll User';
 $string['btn_inscrever_usuario_desc']    = 'Enroll users in courses with any role';
 $string['btn_remover_usuario_titulo']    = 'Remove User';
@@ -190,6 +207,8 @@ $string['btn_cadastrar_usuario_titulo']  = 'Register New User';
 $string['btn_cadastrar_usuario_desc']    = 'Create new user and link to course';
 $string['btn_criar_curso_titulo']        = 'Create Course';
 $string['btn_criar_curso_desc']          = 'Request creation of a new course';
+$string['btn_remover_curso_titulo']      = 'Remove Course';
+$string['btn_remover_curso_desc']        = 'Request logical course removal (move to hidden category)';
 
 // Specific form titles
 $string['form_inscricao_titulo']     = 'Request User Enrollment';
@@ -198,3 +217,5 @@ $string['form_remocao_titulo']       = 'Request User Removal';
 $string['form_suspensao_titulo']     = 'Request User Suspension';
 $string['form_cadastro_titulo']      = 'Request New User Registration';
 $string['form_criar_curso_titulo']   = 'Request Course Creation';
+$string['form_remover_curso_titulo'] = 'Request Course Removal';
+$string['form_remover_curso_descricao'] = 'On approval, the course is not deleted. It is moved to the configured hidden category and set to hidden.';

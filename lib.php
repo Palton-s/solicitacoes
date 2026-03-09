@@ -121,7 +121,7 @@ function local_solicitacoes_extend_navigation(global_navigation $navigation) {
         if (local_solicitacoes_can_submit($context)) {
             $node->add(
                 get_string('request_form_title', 'local_solicitacoes'),
-                new moodle_url('/local/solicitacoes/nova-solicitacao.php'),
+                new moodle_url('/local/solicitacoes/selecionar-acao.php'),
                 navigation_node::TYPE_CUSTOM
             );
         }
@@ -169,7 +169,10 @@ function local_solicitacoes_notify_criada($solicitacao_id) {
     $acao_strings = [
         'inscricao' => get_string('acao_inscricao', 'local_solicitacoes'),
         'remocao' => get_string('acao_remocao', 'local_solicitacoes'),
-        'suspensao' => get_string('acao_suspensao', 'local_solicitacoes')
+        'suspensao' => get_string('acao_suspensao', 'local_solicitacoes'),
+        'cadastro' => get_string('acao_cadastro', 'local_solicitacoes'),
+        'criar_curso' => get_string('acao_criar_curso', 'local_solicitacoes'),
+        'remove_course' => get_string('acao_remover_curso', 'local_solicitacoes')
     ];
     $tipo_acao = isset($acao_strings[$solicitacao->tipo_acao]) ? $acao_strings[$solicitacao->tipo_acao] : $solicitacao->tipo_acao;
     
@@ -216,7 +219,10 @@ function local_solicitacoes_notify_aprovada($solicitacao_id) {
     $acao_strings = [
         'inscricao' => get_string('acao_inscricao', 'local_solicitacoes'),
         'remocao' => get_string('acao_remocao', 'local_solicitacoes'),
-        'suspensao' => get_string('acao_suspensao', 'local_solicitacoes')
+        'suspensao' => get_string('acao_suspensao', 'local_solicitacoes'),
+        'cadastro' => get_string('acao_cadastro', 'local_solicitacoes'),
+        'criar_curso' => get_string('acao_criar_curso', 'local_solicitacoes'),
+        'remove_course' => get_string('acao_remover_curso', 'local_solicitacoes')
     ];
     $tipo_acao = isset($acao_strings[$solicitacao->tipo_acao]) ? $acao_strings[$solicitacao->tipo_acao] : $solicitacao->tipo_acao;
     
@@ -263,7 +269,10 @@ function local_solicitacoes_notify_negada($solicitacao_id) {
     $acao_strings = [
         'inscricao' => get_string('acao_inscricao', 'local_solicitacoes'),
         'remocao' => get_string('acao_remocao', 'local_solicitacoes'),
-        'suspensao' => get_string('acao_suspensao', 'local_solicitacoes')
+        'suspensao' => get_string('acao_suspensao', 'local_solicitacoes'),
+        'cadastro' => get_string('acao_cadastro', 'local_solicitacoes'),
+        'criar_curso' => get_string('acao_criar_curso', 'local_solicitacoes'),
+        'remove_course' => get_string('acao_remover_curso', 'local_solicitacoes')
     ];
     $tipo_acao = isset($acao_strings[$solicitacao->tipo_acao]) ? $acao_strings[$solicitacao->tipo_acao] : $solicitacao->tipo_acao;
     
