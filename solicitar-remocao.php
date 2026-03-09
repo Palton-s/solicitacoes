@@ -79,7 +79,7 @@ class remocao_form extends moodleform {
             'casesensitive' => false,
             'showsuggestions' => true,
             'noselectionstring' => get_string_with_fallback('no_users_found', 'local_solicitacoes'),
-            'ajax' => 'core_user/form_user_selector',
+            'ajax' => 'local_solicitacoes/user_selector',
         ));
         $mform->setType('usuarios_busca', PARAM_SEQUENCE);
         $mform->addRule('usuarios_busca', null, 'required', null, 'client');

@@ -6,12 +6,14 @@ define('AJAX_SCRIPT', true);
 try {
     // Carregar configuração do Moodle
     require_once('../../../config.php');
-    
+
+    require_login();
+    require_sesskey();
+
     // Headers para AJAX
     header('Content-Type: application/json; charset=utf-8');
     header('Cache-Control: no-cache, no-store, must-revalidate');
-    header('Access-Control-Allow-Origin: *');
-    
+
     // Obter parâmetros da URL
     $query = isset($_GET['q']) ? trim($_GET['q']) : '';
     $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 10;
