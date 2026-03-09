@@ -97,8 +97,8 @@ class remocao_form extends moodleform {
 
     /**
      * Buscar cursos disponíveis para o usuário atual:
-     * - cursos onde o usuário está inscrito diretamente (tem papel no contexto do curso)
-     * - cursos pertencentes a categorias onde o usuário tem papel atribuído
+     * - admins e usuários com papel no contexto do sistema veem todos os cursos
+     * - demais: cursos onde está matriculado + cursos de categorias com papel atribuído
      */
     protected function get_available_courses() {
         global $DB, $USER;
@@ -106,43 +106,45 @@ class remocao_form extends moodleform {
         $cursos_options = array();
         
         try {
-            if (is_siteadmin()) {
-                // Administradores veem todos os cursos visíveis
+            $system_context = context_system::instance();
+
+            // Admins e usuários com papel no contexto do sistema (ex: gerentes) veem tudo
+            if (is_siteadmin() || $DB->record_exists('role_assignments', [
+                'userid'    => $USER->id,
+                'contextid' => $system_context->id,
+            ])) {
                 $sql = "SELECT id, fullname, shortname 
                         FROM {course} 
                         WHERE id > 1 AND visible = 1 
                         ORDER BY fullname ASC";
                 $cursos = $DB->get_records_sql($sql);
             } else {
-                // Cursos onde o usuário está inscrito diretamente (tem papel no contexto do curso)
-                // OU cursos pertencentes a categorias onde o usuário tem papel atribuído
-                $sql = "SELECT DISTINCT c.id, c.fullname, c.shortname 
-                        FROM {course} c
-                        JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = :ctxcourse
-                        WHERE c.id != 1
-                        AND c.visible = 1
-                        AND (
-                            EXISTS (
+                // 1. Cursos onde o usuário está matriculado ativamente
+                $cursos = enrol_get_users_courses($USER->id, true);
+
+                // 2. Cursos pertencentes a categorias onde o usuário tem papel
+                $sql_cat = "SELECT DISTINCT c.id, c.fullname, c.shortname 
+                            FROM {course} c
+                            JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = :ctxcourse
+                            WHERE c.id != 1
+                            AND c.visible = 1
+                            AND EXISTS (
                                 SELECT 1 FROM {role_assignments} ra
-                                WHERE ra.contextid = ctx.id AND ra.userid = :userid1
-                            )
-                            OR
-                            EXISTS (
-                                SELECT 1 FROM {role_assignments} ra2
-                                JOIN {context} catctx ON catctx.id = ra2.contextid
-                                WHERE ra2.userid = :userid2
+                                JOIN {context} catctx ON catctx.id = ra.contextid
+                                WHERE ra.userid = :userid
                                 AND catctx.contextlevel = :ctxcat
                                 AND ctx.path LIKE " . $DB->sql_concat('catctx.path', "'/%'") . "
                             )
-                        )
-                        ORDER BY c.fullname ASC";
+                            ORDER BY c.fullname ASC";
 
-                $cursos = $DB->get_records_sql($sql, [
+                $cat_courses = $DB->get_records_sql($sql_cat, [
                     'ctxcourse' => CONTEXT_COURSE,
-                    'userid1'   => $USER->id,
-                    'userid2'   => $USER->id,
+                    'userid'    => $USER->id,
                     'ctxcat'    => CONTEXT_COURSECAT,
                 ]);
+
+                // Combinar (chaves são IDs de curso — sem duplicatas)
+                $cursos = $cursos + $cat_courses;
             }
 
             foreach ($cursos as $curso) {
