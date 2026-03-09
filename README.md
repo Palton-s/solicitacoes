@@ -22,6 +22,7 @@ Plugin local do Moodle que fornece um fluxo de solicitações para operações d
 | `suspensao` | Suspender usuários em cursos temporariamente |
 | `cadastro` | Solicitar criação de novo usuário + inscrição em curso |
 | `criar_curso` | Solicitar criação de nova disciplina em uma unidade acadêmica |
+| `remove_course` | Solicitar a exclusão/remoção de uma disciplina |
 
 **Recursos gerais:**
 - Formulários nativos usando Moodle Forms API
@@ -96,6 +97,7 @@ local/solicitacoes/
 ├── solicitar-curso.php             # Formulário: criação de disciplina
 ├── solicitar-inscricao.php         # Formulário: inscrição de usuários
 ├── solicitar-remocao.php           # Formulário: remoção de usuários
+├── solicitar-remover-curso.php     # Formulário: exclusão de disciplina
 ├── solicitar-suspensao.php         # Formulário: suspensão de usuários
 ├── version.php                     # Metadados de versão do plugin
 └── README.md                       # Este arquivo
@@ -136,7 +138,7 @@ mdl_course                             mdl_user
 | `userid` | INT(10) | NÃO | — | FK → `mdl_user.id` — usuário que abriu a solicitação |
 | `timecreated` | INT(10) | NÃO | — | Timestamp Unix de criação |
 | `timemodified` | INT(10) | NÃO | — | Timestamp Unix da última modificação |
-| `tipo_acao` | VARCHAR(50) | NÃO | `inscricao` | Tipo: `inscricao`, `remocao`, `suspensao`, `cadastro`, `criar_curso` |
+| `tipo_acao` | VARCHAR(50) | NÃO | `inscricao` | Tipo: `inscricao`, `remocao`, `suspensao`, `cadastro`, `criar_curso`, `remove_course` |
 | `papel` | VARCHAR(100) | SIM | — | Shortname do papel no curso (preenchido em `inscricao` e `cadastro`) |
 | `observacoes` | TEXT | SIM | — | Observações livres do solicitante |
 | `status` | VARCHAR(50) | NÃO | `pendente` | Estado atual: `pendente`, `aprovado`, `negado` |
