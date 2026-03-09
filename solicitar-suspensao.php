@@ -117,19 +117,18 @@ class suspensao_form extends moodleform {
             ])) {
                 $sql = "SELECT id, fullname, shortname 
                         FROM {course} 
-                        WHERE id > 1 AND visible = 1 
+                        WHERE id > 1
                         ORDER BY fullname ASC";
                 $cursos = $DB->get_records_sql($sql);
             } else {
-                // 1. Cursos onde o usuário está matriculado ativamente
+                // 1. Cursos onde o usuário está matriculado (inclui ocultos acessíveis)
                 $cursos = enrol_get_users_courses($USER->id, true);
 
-                // 2. Cursos pertencentes a categorias onde o usuário tem papel
+                // 2. Cursos pertencentes a categorias onde o usuário tem papel (ocultos inclusive)
                 $sql_cat = "SELECT DISTINCT c.id, c.fullname, c.shortname 
                             FROM {course} c
                             JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = :ctxcourse
                             WHERE c.id != 1
-                            AND c.visible = 1
                             AND EXISTS (
                                 SELECT 1 FROM {role_assignments} ra
                                 JOIN {context} catctx ON catctx.id = ra.contextid
