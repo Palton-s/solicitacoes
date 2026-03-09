@@ -115,26 +115,60 @@ class inscricao_form extends moodleform {
     }
 
     /**
-     * Buscar cursos disponíveis para o usuário atual
+     * Buscar cursos disponíveis para o usuário atual:
+     * - cursos onde o usuário está inscrito diretamente (tem papel no contexto do curso)
+     * - cursos pertencentes a categorias onde o usuário tem papel atribuído
      */
     private function get_available_courses() {
         global $DB, $USER;
         
         $cursos_options = array('' => get_string('searching_courses', 'local_solicitacoes'));
         
-        // Buscar todos os cursos onde o usuário tem algum papel (é participante)
-        $sql = "SELECT DISTINCT c.id, c.fullname, c.shortname 
-                FROM {course} c
-                JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = 50
-                LEFT JOIN {role_assignments} ra ON ra.contextid = ctx.id AND ra.userid = :userid
-                WHERE c.id != 1 
-                AND (ra.id IS NOT NULL OR c.visible = 1)
-                ORDER BY c.fullname";
-        
-        $cursos = $DB->get_records_sql($sql, ['userid' => $USER->id]);
-        
-        foreach ($cursos as $curso) {
-            $cursos_options[$curso->id] = $curso->fullname . ' (' . $curso->shortname . ')';
+        try {
+            if (is_siteadmin()) {
+                // Administradores veem todos os cursos visíveis
+                $sql = "SELECT id, fullname, shortname 
+                        FROM {course} 
+                        WHERE id > 1 AND visible = 1 
+                        ORDER BY fullname ASC";
+                $cursos = $DB->get_records_sql($sql);
+            } else {
+                // Cursos onde o usuário está inscrito diretamente (tem papel no contexto do curso)
+                // OU cursos pertencentes a categorias onde o usuário tem papel atribuído
+                $sql = "SELECT DISTINCT c.id, c.fullname, c.shortname 
+                        FROM {course} c
+                        JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = :ctxcourse
+                        WHERE c.id != 1
+                        AND c.visible = 1
+                        AND (
+                            EXISTS (
+                                SELECT 1 FROM {role_assignments} ra
+                                WHERE ra.contextid = ctx.id AND ra.userid = :userid1
+                            )
+                            OR
+                            EXISTS (
+                                SELECT 1 FROM {role_assignments} ra2
+                                JOIN {context} catctx ON catctx.id = ra2.contextid
+                                WHERE ra2.userid = :userid2
+                                AND catctx.contextlevel = :ctxcat
+                                AND ctx.path LIKE " . $DB->sql_concat('catctx.path', "'/%'") . "
+                            )
+                        )
+                        ORDER BY c.fullname ASC";
+
+                $cursos = $DB->get_records_sql($sql, [
+                    'ctxcourse' => CONTEXT_COURSE,
+                    'userid1'   => $USER->id,
+                    'userid2'   => $USER->id,
+                    'ctxcat'    => CONTEXT_COURSECAT,
+                ]);
+            }
+
+            foreach ($cursos as $curso) {
+                $cursos_options[$curso->id] = $curso->fullname . ' (' . $curso->shortname . ')';
+            }
+        } catch (Exception $e) {
+            error_log("Erro ao buscar cursos: " . $e->getMessage());
         }
         
         return $cursos_options;
@@ -169,16 +203,12 @@ class inscricao_form extends moodleform {
             if (empty($cursos_selecionados)) {
                 $errors['curso_nome'] = get_string('error_course_required', 'local_solicitacoes');
             } else {
-                // Validar cada curso selecionado
+                // Validar cada curso selecionado e verificar se o usuário tem acesso
+                $cursos_acessiveis = $this->get_available_courses();
                 $cursos_invalidos = array();
                 foreach ($cursos_selecionados as $curso_id) {
                     $curso_id = (int)$curso_id;
-                    if ($curso_id > 0) {
-                        $curso = $DB->get_record('course', ['id' => $curso_id], 'id, fullname');
-                        if (!$curso) {
-                            $cursos_invalidos[] = $curso_id;
-                        }
-                    } else {
+                    if ($curso_id <= 0 || !array_key_exists($curso_id, $cursos_acessiveis)) {
                         $cursos_invalidos[] = $curso_id;
                     }
                 }
