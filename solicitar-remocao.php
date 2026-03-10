@@ -72,14 +72,28 @@ class remocao_form extends moodleform {
         $mform->addRule('curso_nome', null, 'required', null, 'client');
         $mform->addHelpButton('curso_nome', 'curso_nome_help', 'local_solicitacoes');
 
-        // Campo de usuários (autocomplete múltiplo)
+        // Campo de usuários (autocomplete múltiplo) - Sistema nativo do Moodle
+        // Busca por: firstname, lastname, fullname, username e email
         $mform->addElement('autocomplete', 'usuarios_busca', get_string('usuarios_busca', 'local_solicitacoes'), array(), array(
             'multiple' => true,
             'placeholder' => get_string('usuarios_busca_help', 'local_solicitacoes'),
-            'casesensitive' => false,
-            'showsuggestions' => true,
             'noselectionstring' => get_string_with_fallback('no_users_found', 'local_solicitacoes'),
-            'ajax' => 'local_solicitacoes/user_selector',
+            'ajax' => 'core_user/form_user_selector',
+            'data-includecontactableprivacy' => false,
+            'data-includesuspended' => true,
+            'data-includeunenrolled' => true,
+            'data-includeenrolled' => true,
+            'data-includeall' => true,
+            'showsuggestions' => true,
+            'casesensitive' => false,
+            'valuehtmlcallback' => function($userid) {
+                global $DB;
+                if (empty($userid)) return '';
+                $user = $DB->get_record('user', ['id' => $userid], 'id, firstname, lastname, username, email');
+                if (!$user) return '';
+                $fullname = fullname($user);
+                return $fullname . ' (' . $user->username . ') - ' . $user->email;
+            }
         ));
         $mform->setType('usuarios_busca', PARAM_SEQUENCE);
         $mform->addRule('usuarios_busca', null, 'required', null, 'client');

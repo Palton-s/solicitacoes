@@ -1,5 +1,8 @@
 # Plugin Moodle: Solicitações de Gerenciamento de Curso (`local_solicitacoes`)
 
+> **⚠️ ATUALIZAÇÃO IMPORTANTE:** Este plugin foi migrado para usar o sistema nativo de busca de usuários do Moodle.  
+> **Requisito:** Usuários precisam da permissão `moodle/user:viewdetails` para usar a busca de usuários.
+
 **Versão:** v1.4.0 (`2026030903`)  
 **Requer:** Moodle 4.0 ou superior (`2022041900`)  
 **Maturidade:** Estável  
@@ -28,7 +31,11 @@ Plugin local do Moodle que fornece um fluxo de solicitações para operações d
 - Formulários nativos usando Moodle Forms API
 - Seleção de cursos com autocomplete — filtra apenas cursos aos quais o solicitante tem acesso (matrícula direta, papel em categoria ou papel em nível de sistema)
 - Cursos ocultos acessíveis ao usuário também são listados
-- Seleção de usuários via módulo AMD próprio (`local_solicitacoes/user_selector`) sem exigir `moodle/user:viewdetails`
+- **Busca avançada de usuários** via sistema nativo do Moodle (`core_user/form_user_selector`):
+  - 🔍 **Busca por múltiplos campos:** firstname, lastname, fullname, username e email
+  - 🎯 **Busca inteligente:** não diferencia maiúsculas/minúsculas
+  - 👥 **Seleção múltipla** com interface intuitiva
+  - **⚠️ Requer permissão `moodle/user:viewdetails`**
 - Notificações internas (popup) e por e-mail nos eventos: criação, aprovação e negação
 - Painel de gerenciamento com filtros por status e tipo
 - Suporte multilíngue: Português (Brasil) e Inglês
@@ -50,12 +57,12 @@ Plugin local do Moodle que fornece um fluxo de solicitações para operações d
 local/solicitacoes/
 ├── amd/
 │   ├── src/
-│   │   └── user_selector.js        # Módulo AMD fonte — seletor de usuários customizado
+│   │   └── user_selector.js        # [OBSOLETO] Seletor customizado - não usado
 │   └── build/
-│       └── user_selector.min.js    # Módulo AMD minificado (produção)
+│       └── user_selector.min.js    # [OBSOLETO] Versão minificada - não usado
 ├── ajax/
 │   ├── buscar-cursos.php           # Endpoint AJAX: autocomplete de cursos
-│   ├── buscar-usuarios.php         # Endpoint AJAX: autocomplete de usuários
+│   ├── buscar-usuarios.php         # [OBSOLETO] Endpoint customizado - não usado
 │   ├── buscar-categorias.php       # Endpoint AJAX: autocomplete de categorias
 │   ├── test_db.php                 # Diagnóstico de BD (desenvolvimento)
 │   └── test_simple.php             # Teste simples (desenvolvimento)
@@ -236,23 +243,46 @@ O plugin registra três provedores de mensagem, enviados via popup e e-mail por 
 
 ---
 
-## Módulo AMD — Seletor de Usuários (`amd/`)
+## Sistema de Busca de Usuários
 
-O componente `local_solicitacoes/user_selector` substitui o `core_user/form_user_selector` nativo para evitar o erro de permissão `moodle/user:viewdetails` em usuários comuns.
+O plugin agora utiliza o **sistema nativo do Moodle** (`core_user/form_user_selector`) para busca de usuários.
 
-**Funcionamento:**
+**⚠️ Requisito de Permissão:**
+Os usuários que fazem solicitações precisam ter a permissão `moodle/user:viewdetails` para usar a busca de usuários.
 
-1. O autocomplete do Moodle Forms API chama `transport(selector, query, success, failure)`.
-2. O módulo faz um `XMLHttpRequest GET` para `ajax/buscar-usuarios.php?q=...&sesskey=...`.
-3. O endpoint valida `require_login()` + `require_sesskey()` e retorna um array JSON de usuários.
-4. `processResults()` converte cada objeto `{id, fullname, username}` para `{value, label}`.
+**Como configurar a permissão:**
+1. Vá em **Administração do Site → Usuários → Permissões → Definir papéis**
+2. Edite o papel desejado (ex: "Authenticated user")
+3. Encontre `moodle/user:viewdetails` e defina como **Permitir**
+4. Salve as alterações
 
-**Arquivos:**
-- `amd/src/user_selector.js` — código-fonte legível
-- `amd/build/user_selector.min.js` — versão minificada usada em produção
+### 🔍 **Funcionalidades da Busca de Usuários**
 
-> Após qualquer alteração no `amd/src/`, execute `grunt amd` ou acesse  
-> **Administração → Desenvolvimento → Limpar todos os caches** para recompilar.
+**Campos de Busca:**
+- ✅ **Firstname** (nome)
+- ✅ **Lastname** (sobrenome)
+- ✅ **Fullname** (nome completo)
+- ✅ **Username** (nome de usuário)
+- ✅ **Email** (endereço de e-mail)
+
+**Características:**
+- 🎯 **Busca inteligente:** não diferencia maiúsculas/minúsculas
+- 🔍 **Busca parcial:** funciona com qualquer parte do texto
+- 👥 **Seleção múltipla:** permite selecionar vários usuários simultaneamente
+- 🛡️ **Filtros automaticos:** exclui usuários deletados e não confirmados
+- 📋 **Preview completo:** mostra nome completo, username e email do usuario selecionado
+
+**Exemplo de uso:**
+- Digite "joão" → encontra usuários com firstname "João", lastname "João", ou username "joao123"
+- Digite "@gmail" → encontra todos usuários com email do Gmail
+- Digite "prof" → encontra usuários com "prof" no nome, username ou email
+
+**Arquivos não utilizados (sistema anterior):**
+- `amd/src/user_selector.js` — sistema customizado (não usado)
+- `amd/build/user_selector.min.js` — sistema customizado (não usado)  
+- `ajax/buscar-usuarios.php` — endpoint customizado (não usado)
+
+> Estes arquivos podem ser removidos se você não planeja voltar ao sistema customizado.
 
 ---
 

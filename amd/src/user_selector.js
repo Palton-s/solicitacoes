@@ -1,4 +1,9 @@
 /**
+ * ⚠️ ARQUIVO OBSOLETO - NÃO É MAIS USADO
+ * 
+ * Este módulo foi substituído pelo sistema nativo 'core_user/form_user_selector'
+ * Mantido apenas para compatibilidade ou caso seja necessário reverter
+ * 
  * Custom user selector AMD module for local_solicitacoes.
  * Replaces core_user/form_user_selector to avoid the moodle/user:viewdetails
  * capability requirement that regular users do not have.

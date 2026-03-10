@@ -1,5 +1,14 @@
 <?php
 
+// ⚠️ ARQUIVO OBSOLETO - NÃO É MAIS USADO
+// Este arquivo foi substituído pelo sistema nativo do Moodle 'core_user/form_user_selector'
+// Mantido apenas para compatibilidade ou caso seja necessário reverter
+//
+// Para usar este sistema novamente:
+// 1. Altere 'ajax' => 'core_user/form_user_selector' para 'ajax' => 'local_solicitacoes/user_selector'
+// 2. Remova o 'valuehtmlcallback' dos formulários
+// 3. Remova a exigência da permissão moodle/user:viewdetails dos usuários
+
 // Endpoint AJAX para busca de usuários
 define('AJAX_SCRIPT', true);
 
