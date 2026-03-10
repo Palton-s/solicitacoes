@@ -245,9 +245,6 @@ $PAGE->set_url(new moodle_url('/local/solicitacoes/solicitar-inscricao.php'));
 $PAGE->set_title(get_string('form_inscricao_titulo', 'local_solicitacoes'));
 $PAGE->set_heading(get_string('form_inscricao_titulo', 'local_solicitacoes'));
 
-// Carregar CSS para corrigir estilos dos campos de autocomplete
-$PAGE->requires->css(new moodle_url('/local/solicitacoes/styles/form_styles.css'));
-
 // Criar instância do formulário
 $mform = new inscricao_form();
 
