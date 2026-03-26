@@ -825,20 +825,31 @@ class solicitacoes_controller {
             $curso_record->timecreated = time();
             $DB->insert_record('local_curso_solicitacoes', $curso_record);
             
-            // Inscrever o solicitante como professor editor
-            $context = \context_course::instance($createdcourse->id);
+            // Inscrever professores como professor editor
             $role = $DB->get_record('role', ['shortname' => 'editingteacher'], '*', MUST_EXIST);
-            
+
             // Obter instância de inscrição manual
             $enrol_instance = $DB->get_record('enrol', [
                 'courseid' => $createdcourse->id,
-                'enrol' => 'manual'
+                'enrol'    => 'manual'
             ]);
-            
+
             if ($enrol_instance) {
                 $enrol_plugin = enrol_get_plugin('manual');
-                $enrol_plugin->enrol_user($enrol_instance, $solicitacao->userid, $role->id, time());
-                error_log("Usuário {$solicitacao->userid} inscrito como editingteacher no curso {$createdcourse->id}");
+
+                // Buscar professores selecionados na solicitação
+                $professores = $DB->get_records('local_usuarios_solicitacoes',
+                    ['solicitacao_id' => $solicitacao->id], '', 'usuario_id');
+
+                // Se nenhum foi salvo, usa o próprio solicitante como fallback
+                if (empty($professores)) {
+                    $professores = [(object)['usuario_id' => $solicitacao->userid]];
+                }
+
+                foreach ($professores as $prof) {
+                    $enrol_plugin->enrol_user($enrol_instance, $prof->usuario_id, $role->id, time());
+                    error_log("Usuário {$prof->usuario_id} inscrito como editingteacher no curso {$createdcourse->id}");
+                }
             }
             
             return [
