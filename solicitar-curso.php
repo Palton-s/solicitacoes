@@ -92,6 +92,36 @@ class criar_curso_form extends moodleform {
         $mform->addRule('razoes_criacao', null, 'required', null, 'client');
         $mform->addHelpButton('razoes_criacao', 'razoes_criacao_help', 'local_solicitacoes');
 
+        // Professores da disciplina (opcional)
+        $aviso_professores = '<div class="alert alert-secondary m-4" role="alert">' .
+                             get_string('aviso_professores_curso', 'local_solicitacoes') .
+                             '</div>';
+        $mform->addElement('html', $aviso_professores);
+
+        $mform->addElement('autocomplete', 'professores_busca', get_string('professores_curso', 'local_solicitacoes'), array(), array(
+            'multiple' => true,
+            'placeholder' => get_string('usuarios_busca_help', 'local_solicitacoes'),
+            'noselectionstring' => get_string('no_users_found', 'local_solicitacoes'),
+            'ajax' => 'core_user/form_user_selector',
+            'data-includecontactableprivacy' => false,
+            'data-includesuspended' => true,
+            'data-includeunenrolled' => true,
+            'data-includeenrolled' => true,
+            'data-includeall' => true,
+            'showsuggestions' => true,
+            'casesensitive' => false,
+            'valuehtmlcallback' => function($userid) {
+                global $DB;
+                if (empty($userid)) return '';
+                $user = $DB->get_record('user', ['id' => $userid], 'id, firstname, lastname, username, email');
+                if (!$user) return '';
+                $fullname = fullname($user);
+                return $fullname . ' (' . $user->username . ') - ' . $user->email;
+            }
+        ));
+        $mform->setType('professores_busca', PARAM_SEQUENCE);
+        $mform->addHelpButton('professores_busca', 'professores_curso_help', 'local_solicitacoes');
+
         // Botões de ação
         $this->add_action_buttons(true, get_string('request_submit', 'local_solicitacoes'));
     }
@@ -132,6 +162,7 @@ if ($data = $mform->get_data()) {
         $record->userid = $USER->id;                    // Campo correto: userid (não user_id)
         $record->tipo_acao = 'criar_curso';             // Campo correto: tipo_acao (não tipo)
         $record->status = 'pendente';
+        $record->papel = 'editingteacher';              // Papel dos professores da disciplina
         $record->timecreated = time();                  // Campo correto: timecreated (não data_criacao) 
         $record->timemodified = time();                 // Campo obrigatório que estava faltando
         $record->codigo_sigaa = $data->codigo_sigaa;
@@ -141,8 +172,33 @@ if ($data = $mform->get_data()) {
         $record->ano_semestre = $data->ano_semestre;
         $record->razoes_criacao = $data->razoes_criacao;
         
-        $DB->insert_record('local_solicitacoes', $record);
-        
+        $solicitacao_id = $DB->insert_record('local_solicitacoes', $record);
+
+        // Salvar professores da disciplina
+        $professores = [];
+        if (!empty($data->professores_busca)) {
+            $professores_raw = is_array($data->professores_busca)
+                ? $data->professores_busca
+                : explode(',', $data->professores_busca);
+            foreach ($professores_raw as $uid) {
+                $uid = (int)trim($uid);
+                if ($uid > 0) {
+                    $professores[] = $uid;
+                }
+            }
+        }
+        // Se nenhum professor informado, usa o próprio solicitante
+        if (empty($professores)) {
+            $professores = [$USER->id];
+        }
+        foreach ($professores as $uid) {
+            $rel = new stdClass();
+            $rel->solicitacao_id = $solicitacao_id;
+            $rel->usuario_id     = $uid;
+            $rel->timecreated    = time();
+            $DB->insert_record('local_usuarios_solicitacoes', $rel);
+        }
+
         redirect(
             new moodle_url('/local/solicitacoes/minhas-solicitacoes.php'),
             get_string('request_submitted', 'local_solicitacoes'),

@@ -50,6 +50,9 @@ $string['observacoes_help']     = 'Additional information about the request (opt
 $string['request_submit']       = 'Submit Request';
 $string['no_courses_found']     = 'No courses found';
 $string['searching_courses']    = 'Searching courses...';
+$string['professores_curso']    = 'Course Teachers (optional)';
+$string['professores_curso_help'] = 'Select the teachers to be enrolled in this course. If no teacher is specified, the requester will be enrolled as teacher. You can select multiple users.';
+$string['aviso_professores_curso'] = 'If no teacher is selected, the requester will be enrolled as teacher for this course.';
 
 $string['acao_inscricao']       = 'Enrollment';
 $string['acao_remocao']         = 'Removal';
