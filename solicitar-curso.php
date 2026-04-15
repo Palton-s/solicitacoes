@@ -23,7 +23,7 @@ if (!has_capability('local/solicitacoes:submit', $context)) {
 class criar_curso_form extends moodleform {
 
     protected function definition() {
-        global $CFG;
+        global $CFG, $DB;
         
         $mform = $this->_form;
 
@@ -92,14 +92,32 @@ class criar_curso_form extends moodleform {
         $mform->addRule('razoes_criacao', null, 'required', null, 'client');
         $mform->addHelpButton('razoes_criacao', 'razoes_criacao_help', 'local_solicitacoes');
 
-        // Professores da disciplina (opcional)
-        $aviso_professores = '<div class="alert alert-secondary m-4" role="alert">' .
-                             get_string('aviso_professores_curso', 'local_solicitacoes') .
-                             '</div>';
-        $mform->addElement('html', $aviso_professores);
+        // Professor da disciplina
+        $aviso_professor = '<div class="alert alert-info m-4" role="alert">' .
+                          get_string('aviso_professor_curso', 'local_solicitacoes') .
+                          '</div>';
+        $mform->addElement('html', $aviso_professor);
 
-        $mform->addElement('autocomplete', 'professores_busca', get_string('professores_curso', 'local_solicitacoes'), array(), array(
-            'multiple' => true,
+        // Papel no curso
+        $course_role_ids = get_roles_for_contextlevels(CONTEXT_COURSE);
+        $roles_options = array();
+
+        foreach ($course_role_ids as $roleid) {
+            $role = $DB->get_record('role', ['id' => $roleid], 'shortname, name');
+            if ($role) {
+                $roles_options[$role->shortname] = role_get_name($role);
+            }
+        }
+        
+        $mform->addElement('select', 'papel', get_string('papel_professor', 'local_solicitacoes'), $roles_options);
+        $mform->setType('papel', PARAM_TEXT);
+        $mform->setDefault('papel', 'editingteacher'); // Professor já marcado por padrão
+        $mform->addRule('papel', null, 'required', null, 'client');
+        $mform->addHelpButton('papel', 'papel_professor_help', 'local_solicitacoes');
+
+        // Campo de usuário professor (autocomplete)
+        $mform->addElement('autocomplete', 'professor_usuario', get_string('professor_usuario', 'local_solicitacoes'), array(), array(
+            'multiple' => false,
             'placeholder' => get_string('usuarios_busca_help', 'local_solicitacoes'),
             'noselectionstring' => get_string('no_users_found', 'local_solicitacoes'),
             'ajax' => 'core_user/form_user_selector',
@@ -119,8 +137,9 @@ class criar_curso_form extends moodleform {
                 return $fullname . ' (' . $user->username . ') - ' . $user->email;
             }
         ));
-        $mform->setType('professores_busca', PARAM_SEQUENCE);
-        $mform->addHelpButton('professores_busca', 'professores_curso_help', 'local_solicitacoes');
+        $mform->setType('professor_usuario', PARAM_INT);
+        $mform->addRule('professor_usuario', null, 'required', null, 'client');
+        $mform->addHelpButton('professor_usuario', 'professor_usuario_help', 'local_solicitacoes');
 
         // Botões de ação
         $this->add_action_buttons(true, get_string('request_submit', 'local_solicitacoes'));
@@ -130,6 +149,7 @@ class criar_curso_form extends moodleform {
      * Validação personalizada do formulário
      */
     public function validation($data, $files) {
+        global $DB;
         $errors = parent::validation($data, $files);
 
         // Validar se a categoria existe e o usuário tem permissão
@@ -137,6 +157,30 @@ class criar_curso_form extends moodleform {
             $category = core_course_category::get($data['category'], IGNORE_MISSING);
             if (!$category) {
                 $errors['category'] = get_string('error_invalid_category', 'local_solicitacoes');
+            }
+        }
+
+        // Validar se o usuário professor existe
+        if (!empty($data['professor_usuario'])) {
+            $user = $DB->get_record('user', ['id' => $data['professor_usuario']], 'id, deleted, confirmed');
+            if (!$user || $user->deleted || !$user->confirmed) {
+                $errors['professor_usuario'] = get_string('error_invalid_user', 'local_solicitacoes');
+            }
+        }
+
+        // Validar se o papel é válido para contexto de curso
+        if (!empty($data['papel'])) {
+            $course_role_ids = get_roles_for_contextlevels(CONTEXT_COURSE);
+            $valid_role = false;
+            foreach ($course_role_ids as $roleid) {
+                $role = $DB->get_record('role', ['id' => $roleid], 'shortname');
+                if ($role && $role->shortname === $data['papel']) {
+                    $valid_role = true;
+                    break;
+                }
+            }
+            if (!$valid_role) {
+                $errors['papel'] = get_string('error_papel_invalid', 'local_solicitacoes');
             }
         }
 
@@ -162,11 +206,12 @@ if ($data = $mform->get_data()) {
         $record->userid = $USER->id;                    // Campo correto: userid (não user_id)
         $record->tipo_acao = 'criar_curso';             // Campo correto: tipo_acao (não tipo)
         $record->status = 'pendente';
-        $record->papel = 'editingteacher';              // Papel dos professores da disciplina
+        $record->papel = $data->papel;                   // Papel selecionado para o professor
         $record->timecreated = time();                  // Campo correto: timecreated (não data_criacao) 
         $record->timemodified = time();                 // Campo obrigatório que estava faltando
         $record->codigo_sigaa = $data->codigo_sigaa;
         $record->course_shortname = $data->course_shortname;
+        $record->course_fullname = $data->course_fullname;
         $record->course_summary = $data->course_summary;
         $record->unidade_academica_id = $data->category;  // Campo correto: unidade_academica_id (não category_id)
         $record->ano_semestre = $data->ano_semestre;
@@ -174,27 +219,11 @@ if ($data = $mform->get_data()) {
         
         $solicitacao_id = $DB->insert_record('local_solicitacoes', $record);
 
-        // Salvar professores da disciplina
-        $professores = [];
-        if (!empty($data->professores_busca)) {
-            $professores_raw = is_array($data->professores_busca)
-                ? $data->professores_busca
-                : explode(',', $data->professores_busca);
-            foreach ($professores_raw as $uid) {
-                $uid = (int)trim($uid);
-                if ($uid > 0) {
-                    $professores[] = $uid;
-                }
-            }
-        }
-        // Se nenhum professor informado, usa o próprio solicitante
-        if (empty($professores)) {
-            $professores = [$USER->id];
-        }
-        foreach ($professores as $uid) {
+        // Salvar professor da disciplina (usuário selecionado)
+        if (!empty($data->professor_usuario)) {
             $rel = new stdClass();
             $rel->solicitacao_id = $solicitacao_id;
-            $rel->usuario_id     = $uid;
+            $rel->usuario_id     = $data->professor_usuario;  // Usuário selecionado como professor
             $rel->timecreated    = time();
             $DB->insert_record('local_usuarios_solicitacoes', $rel);
         }

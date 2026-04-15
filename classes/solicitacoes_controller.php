@@ -513,6 +513,7 @@ class solicitacoes_controller {
 
     /**
      * Inscreve usuários em cursos com papel específico
+     * Remove automaticamente suspensões existentes se houver
      * 
      * @param array $cursos Array de cursos
      * @param array $usuarios Array de usuários
@@ -527,6 +528,7 @@ class solicitacoes_controller {
         
         $success_count = 0;
         $error_count = 0;
+        $unsuspended_count = 0;
         
         foreach ($cursos as $curso) {
             $course = $DB->get_record('course', ['id' => $curso->id], '*', MUST_EXIST);
@@ -542,27 +544,78 @@ class solicitacoes_controller {
             
             foreach ($usuarios as $usuario) {
                 try {
-                    // Inscrever usuário
-                    $enrol_plugin->enrol_user($enrol_instance, $usuario->id, $role->id, time());
+                    // Verificar se o usuário já está inscrito no curso (incluindo inscrições suspensas)
+                    $sql = "SELECT ue.*, e.enrol as enrol_type
+                            FROM {user_enrolments} ue
+                            JOIN {enrol} e ON e.id = ue.enrolid
+                            WHERE e.courseid = :courseid
+                            AND ue.userid = :userid";
+                    
+                    $existing_enrolments = $DB->get_records_sql($sql, [
+                        'courseid' => $course->id,
+                        'userid' => $usuario->id
+                    ]);
+                    
+                    $was_suspended = false;
+                    $enrolment_removed = false;
+                    
+                    // Verificar se alguma inscrição está suspensa e remover suspensão
+                    foreach ($existing_enrolments as $existing_enrolment) {
+                        if ($existing_enrolment->status == 1) { // 1 = suspenso
+                            // Remover suspensão (ativar inscrição)
+                            $existing_enrolment->status = 0; // 0 = ativo
+                            $existing_enrolment->timemodified = time();
+                            $DB->update_record('user_enrolments', $existing_enrolment);
+                            $was_suspended = true;
+                            $unsuspended_count++;
+                            error_log("Suspensão removida: Usuário {$usuario->id} reativado no curso {$course->id}");
+                        }
+                    }
+                    
+                    // Se não havia inscrição ativa ou suspensa, fazer nova inscrição
+                    if (empty($existing_enrolments)) {
+                        $enrol_plugin->enrol_user($enrol_instance, $usuario->id, $role->id, time());
+                        error_log("Usuário {$usuario->id} inscrito no curso {$course->id} como {$papel}");
+                    } else if ($was_suspended) {
+                        // Se havia suspensão que foi removida, atualizar papel se necessário
+                        role_assign($role->id, $usuario->id, $context->id, '', 0, '', true);
+                        error_log("Papel {$papel} atribuído ao usuário {$usuario->id} no curso {$course->id} após remoção de suspensão");
+                    } else {
+                        // Usuário já está ativo no curso, apenas garantir que tem o papel correto
+                        role_assign($role->id, $usuario->id, $context->id, '', 0, '', true);
+                        error_log("Papel {$papel} reconfirmado para usuário {$usuario->id} no curso {$course->id}");
+                    }
+                    
                     $success_count++;
-                    error_log("Usuário {$usuario->id} inscrito no curso {$course->id} como {$papel}");
+                    
                 } catch (\Exception $e) {
                     $error_count++;
-                    error_log("Erro ao inscrever usuário {$usuario->id} no curso {$course->id}: " . $e->getMessage());
+                    error_log("Erro ao processar usuário {$usuario->id} no curso {$course->id}: " . $e->getMessage());
                 }
             }
         }
         
         if ($error_count > 0) {
+            $message = "Processamento parcial: $success_count sucesso(s)";
+            if ($unsuspended_count > 0) {
+                $message .= " ($unsuspended_count suspensão(ões) removida(s))";
+            }
+            $message .= ", $error_count erro(s)";
+            
             return [
                 'success' => false,
-                'message' => "Inscrição parcial: $success_count sucesso(s), $error_count erro(s)"
+                'message' => $message
             ];
+        }
+        
+        $message = "Usuários processados com sucesso! Total: $success_count";
+        if ($unsuspended_count > 0) {
+            $message .= " ($unsuspended_count suspensão(ões) removida(s) automaticamente)";
         }
         
         return [
             'success' => true,
-            'message' => "Usuários inscritos com sucesso! Total: $success_count"
+            'message' => $message
         ];
     }
 

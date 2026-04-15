@@ -53,6 +53,11 @@ $string['searching_courses']    = 'Searching courses...';
 $string['professores_curso']    = 'Course Teachers (optional)';
 $string['professores_curso_help'] = 'Select the teachers to be enrolled in this course. If no teacher is specified, the requester will be enrolled as teacher. You can select multiple users.';
 $string['aviso_professores_curso'] = 'If no teacher is selected, the requester will be enrolled as teacher for this course.';
+$string['aviso_professor_curso'] = 'Select the user who will be the teacher of this course and their role.';
+$string['papel_professor'] = 'Teacher Role';
+$string['papel_professor_help'] = 'Select the role the teacher will have in the course (recommended: Editing Teacher)';
+$string['professor_usuario'] = 'Select Teacher';
+$string['professor_usuario_help'] = 'Search and select the user who will be the teacher of this course';
 
 $string['acao_inscricao']       = 'Enrollment';
 $string['acao_remocao']         = 'Removal';
@@ -132,6 +137,7 @@ $string['error_curso_required']      = 'Please select a course.';
 $string['error_usuarios_required']   = 'Please select at least one user.';
 $string['error_papel_required']      = 'Please select a role for the enrollment.';
 $string['error_papel_invalid']       = 'The selected role is invalid.';
+$string['error_invalid_user']        = 'Invalid or inactive user.';
 
 // User registration fields
 $string['firstname']                 = 'First Name';

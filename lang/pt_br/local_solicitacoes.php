@@ -146,6 +146,7 @@ $string['error_invalid_courses']     = 'Os seguintes cursos são inválidos: {$a
 $string['error_usuarios_required']   = 'Por favor, selecione pelo menos um usuário.';
 $string['error_papel_required']      = 'Por favor, selecione um papel para a inscrição.';
 $string['error_papel_invalid']       = 'O papel selecionado é inválido.';
+$string['error_invalid_user']        = 'Usuário inválido ou inativo.';
 
 // Campos de cadastro de usuário
 $string['firstname']                 = 'Primeiro Nome';
@@ -198,6 +199,11 @@ $string['aviso_criar_curso']         = '<strong>Professor(a) Atenção!</strong>
 $string['professores_curso']         = 'Professores da Disciplina (opcional)';
 $string['professores_curso_help']    = 'Selecione os professores que serão cadastrados nesta disciplina. Se nenhum professor for informado, você (o solicitante) será cadastrado como professor. Você pode selecionar múltiplos usuários.';
 $string['aviso_professores_curso']   = 'Se nenhum professor for selecionado, o próprio solicitante será cadastrado como professor da disciplina.';
+$string['aviso_professor_curso']     = 'Selecione o usuário que será o professor desta disciplina e o papel que ele terá.';
+$string['papel_professor']           = 'Papel do Professor';
+$string['papel_professor_help']      = 'Selecione o papel que o professor terá na disciplina (recomendado: Professor Editor)';
+$string['professor_usuario']         = 'Selecionar Professor';
+$string['professor_usuario_help']    = 'Busque e selecione o usuário que será o professor desta disciplina';
 $string['error_codigo_sigaa_required'] = 'Por favor, informe o código SIGAA e a turma.';
 $string['error_codigo_sigaa_format'] = 'Formato de código SIGAA inválido. Use o padrão: ABC1234 - Turma XX';
 $string['error_course_shortname_required'] = 'Por favor, informe o nome curto da disciplina.';
