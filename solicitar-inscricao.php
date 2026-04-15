@@ -75,15 +75,7 @@ class inscricao_form extends moodleform {
         $mform->addHelpButton('curso_nome', 'curso_nome_help', 'local_solicitacoes');
 
         // Papel no curso
-        $course_role_ids = get_roles_for_contextlevels(CONTEXT_COURSE);
-        $roles_options = array('' => get_string('select_role', 'local_solicitacoes'));
-
-        foreach ($course_role_ids as $roleid) {
-            $role = $DB->get_record('role', ['id' => $roleid], 'shortname, name');
-            if ($role) {
-                $roles_options[$role->shortname] = role_get_name($role);
-            }
-        }
+        $roles_options = local_solicitacoes_get_allowed_roles_with_empty(get_string('select_role', 'local_solicitacoes'));
         
         $mform->addElement('select', 'papel', get_string('papel_label', 'local_solicitacoes'), $roles_options);
         $mform->setType('papel', PARAM_TEXT);

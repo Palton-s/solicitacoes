@@ -107,15 +107,7 @@ class cadastro_form extends moodleform {
         $mform->addHelpButton('email_novo_usuario', 'email_novo_usuario_help', 'local_solicitacoes');
 
         // Papel (role) do usuário
-        $course_role_ids = get_roles_for_contextlevels(CONTEXT_COURSE);
-        $roles_options = array('' => get_string('choose_role', 'local_solicitacoes'));
-
-        foreach ($course_role_ids as $roleid) {
-            $role = $DB->get_record('role', ['id' => $roleid], 'shortname, name');
-            if ($role) {
-                $roles_options[$role->shortname] = role_get_name($role);
-            }
-        }
+        $roles_options = local_solicitacoes_get_allowed_roles_with_empty(get_string('choose_role', 'local_solicitacoes'));
         
         $mform->addElement('select', 'papel', get_string('papel_usuario', 'local_solicitacoes'), $roles_options);
         $mform->setType('papel', PARAM_TEXT);
@@ -262,9 +254,8 @@ class cadastro_form extends moodleform {
 
         // Validar papel selecionado
         if (!empty($data['papel'])) {
-            // Verificar se o shortname do papel é válido
-            $role = $DB->get_record('role', ['shortname' => $data['papel']], 'id, shortname, name');
-            if (!$role) {
+            $allowed_roles = local_solicitacoes_get_allowed_roles();
+            if (!array_key_exists($data['papel'], $allowed_roles)) {
                 $errors['papel'] = get_string('error_invalid_role', 'local_solicitacoes');
             }
         } else {

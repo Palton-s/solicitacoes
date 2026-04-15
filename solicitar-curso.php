@@ -99,15 +99,7 @@ class criar_curso_form extends moodleform {
         $mform->addElement('html', $aviso_professor);
 
         // Papel no curso
-        $course_role_ids = get_roles_for_contextlevels(CONTEXT_COURSE);
-        $roles_options = array();
-
-        foreach ($course_role_ids as $roleid) {
-            $role = $DB->get_record('role', ['id' => $roleid], 'shortname, name');
-            if ($role) {
-                $roles_options[$role->shortname] = role_get_name($role);
-            }
-        }
+        $roles_options = local_solicitacoes_get_allowed_roles_with_empty(get_string('select_role', 'local_solicitacoes'));
         
         $mform->addElement('select', 'papel', get_string('papel_professor', 'local_solicitacoes'), $roles_options);
         $mform->setType('papel', PARAM_TEXT);
@@ -170,16 +162,8 @@ class criar_curso_form extends moodleform {
 
         // Validar se o papel é válido para contexto de curso
         if (!empty($data['papel'])) {
-            $course_role_ids = get_roles_for_contextlevels(CONTEXT_COURSE);
-            $valid_role = false;
-            foreach ($course_role_ids as $roleid) {
-                $role = $DB->get_record('role', ['id' => $roleid], 'shortname');
-                if ($role && $role->shortname === $data['papel']) {
-                    $valid_role = true;
-                    break;
-                }
-            }
-            if (!$valid_role) {
+            $allowed_roles = local_solicitacoes_get_allowed_roles();
+            if (!array_key_exists($data['papel'], $allowed_roles)) {
                 $errors['papel'] = get_string('error_papel_invalid', 'local_solicitacoes');
             }
         }

@@ -57,21 +57,8 @@ class request_form extends \moodleform {
         global $DB;
         $papeis = array('' => 'Selecione...');
         
-        // Buscar roles atribuíveis em contexto de curso
-        $roles = $DB->get_records_sql(
-            "SELECT r.id, r.shortname, r.name 
-             FROM {role} r
-             JOIN {role_context_levels} rcl ON rcl.roleid = r.id
-             WHERE rcl.contextlevel = :contextlevel
-             AND r.archetype IN ('student', 'teacher', 'editingteacher', 'manager')
-             ORDER BY r.sortorder",
-            array('contextlevel' => CONTEXT_COURSE)
-        );
-        
-        foreach ($roles as $role) {
-            // Usar role_get_name() para obter o nome traduzido corretamente
-            $papeis[$role->shortname] = role_get_name($role);
-        }
+        // Obter papéis permitidos configurados no plugin
+        $papeis = local_solicitacoes_get_allowed_roles_with_empty();
         
         $mform->addElement('select', 'papel', get_string('papel', 'local_solicitacoes'), $papeis);
         $mform->addHelpButton('papel', 'papel', 'local_solicitacoes');
@@ -93,8 +80,16 @@ class request_form extends \moodleform {
         error_log("Form validation - data received: " . print_r($data, true));
 
         // Validar papel obrigatório para inscrição
-        if ($data['tipo_acao'] == 'inscricao' && empty($data['papel'])) {
-            $errors['papel'] = 'Campo obrigatório';
+        if ($data['tipo_acao'] == 'inscricao') {
+            if (empty($data['papel'])) {
+                $errors['papel'] = get_string('error_papel_required', 'local_solicitacoes');
+            } else {
+                // Verificar se o papel está entre os permitidos
+                $allowed_roles = local_solicitacoes_get_allowed_roles();
+                if (!array_key_exists($data['papel'], $allowed_roles)) {
+                    $errors['papel'] = get_string('error_papel_invalid', 'local_solicitacoes');
+                }
+            }
         }
 
         return $errors;

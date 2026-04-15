@@ -223,6 +223,14 @@ $string['error_hidden_category_invalid'] = 'A categoria oculta configurada é in
 $string['hidden_course_category'] = 'Categoria oculta para remoção de curso';
 $string['hidden_course_category_desc'] = 'Categoria para onde os cursos serão movidos quando uma solicitação de remoção de curso for aprovada. O curso também ficará invisível.';
 
+// Configurações de papéis
+$string['general_settings'] = 'Configurações Gerais';
+$string['roles_settings'] = 'Configurações de Papéis';
+$string['allowed_roles'] = 'Papéis Permitidos no Plugin';
+$string['allowed_roles_help'] = 'Selecione os papéis de curso que estarão disponíveis em todas as páginas de solicitações do plugin. Se nenhum papel for selecionado, os papéis padrão (Estudante, Professor e Professor Editor) serão utilizados.';
+$string['select_roles_placeholder'] = 'Selecione os papéis...';
+$string['error_invalid_roles'] = 'Os seguintes papéis são inválidos: {$a}';
+
 // Página de seleção de ações
 $string['selecionar_acao_titulo']    = 'O que você deseja fazer?';
 $string['selecionar_acao_subtitulo'] = 'Escolha o tipo de solicitação que deseja enviar';

@@ -296,3 +296,52 @@ function local_solicitacoes_notify_negada($solicitacao_id) {
     
     return message_send($message);
 }
+
+/**
+ * Obtém os papéis de curso permitidos configurados no plugin.
+ * 
+ * @return array Array com shortname => name dos papéis permitidos
+ */
+function local_solicitacoes_get_allowed_roles() {
+    global $DB;
+    
+    // Obter papéis configurados
+    $allowed_roles_config = get_config('local_solicitacoes', 'allowed_roles');
+    
+    // Se não há configuração, usar papéis padrão
+    if (empty($allowed_roles_config)) {
+        $allowed_shortnames = ['student', 'teacher', 'editingteacher'];
+    } else {
+        $allowed_shortnames = explode(',', $allowed_roles_config);
+        $allowed_shortnames = array_map('trim', $allowed_shortnames); // Remove espaços
+        $allowed_shortnames = array_filter($allowed_shortnames); // Remove vazios
+    }
+    
+    // Obter todos os papéis de contexto de curso
+    $course_role_ids = get_roles_for_contextlevels(CONTEXT_COURSE);
+    $roles_options = array();
+    
+    foreach ($course_role_ids as $roleid) {
+        $role = $DB->get_record('role', ['id' => $roleid], 'shortname, name');
+        if ($role && in_array($role->shortname, $allowed_shortnames)) {
+            $roles_options[$role->shortname] = role_get_name($role);
+        }
+    }
+    
+    return $roles_options;
+}
+
+/**
+ * Obtém os papéis de curso permitidos configurados no plugin com opção vazia no início.
+ * 
+ * @param string $empty_option_text Texto para a opção vazia (padrão: 'Selecione um papel...')
+ * @return array Array com '' => texto vazio e shortname => name dos papéis permitidos
+ */
+function local_solicitacoes_get_allowed_roles_with_empty($empty_option_text = null) {
+    if ($empty_option_text === null) {
+        $empty_option_text = get_string('select_role', 'local_solicitacoes');
+    }
+    
+    $roles = local_solicitacoes_get_allowed_roles();
+    return array_merge(['' => $empty_option_text], $roles);
+}

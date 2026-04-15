@@ -193,6 +193,14 @@ $string['error_hidden_category_invalid'] = 'Configured hidden category is invali
 $string['hidden_course_category'] = 'Hidden category for course removal';
 $string['hidden_course_category_desc'] = 'Category where courses are moved when a course removal request is approved. The course is also set to hidden.';
 
+// Role settings
+$string['general_settings'] = 'General Settings';
+$string['roles_settings'] = 'Role Settings';
+$string['allowed_roles'] = 'Allowed Roles in Plugin';
+$string['allowed_roles_help'] = 'Select the course roles that will be available in all plugin request pages. If no roles are selected, default roles (Student, Teacher and Editing Teacher) will be used.';
+$string['select_roles_placeholder'] = 'Select roles...';
+$string['error_invalid_roles'] = 'The following roles are invalid: {$a}';
+
 // Action selection page
 $string['selecionar_acao_titulo']    = 'What would you like to do?';
 $string['selecionar_acao_subtitulo'] = 'Choose the type of request you want to submit';
