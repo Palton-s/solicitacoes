@@ -109,9 +109,9 @@ foreach ($requests as $r) {
     // Processar Cursos
     if ($r->tipo_acao === 'criar_curso') {
         $partes = array_filter([
-            !empty($r->codigo_sigaa)     ? trim($r->codigo_sigaa)     : null,
-            !empty($r->course_fullname)  ? trim($r->course_fullname)  : null,
-            !empty($r->ano_semestre)     ? trim($r->ano_semestre)     : null,
+            !empty($r->codigo_sigaa)      ? trim($r->codigo_sigaa)      : null,
+            !empty($r->course_shortname)  ? trim($r->course_shortname)  : null,
+            !empty($r->ano_semestre)      ? trim($r->ano_semestre)      : null,
         ]);
         $cursos_display = implode(' - ', $partes);
     } else {

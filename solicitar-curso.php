@@ -48,12 +48,6 @@ class criar_curso_form extends moodleform {
         $mform->addRule('course_shortname', null, 'required', null, 'client');
         $mform->addHelpButton('course_shortname', 'course_shortname_help', 'local_solicitacoes');
 
-        // Nome completo do curso
-        $mform->addElement('text', 'course_fullname', get_string('course_fullname', 'local_solicitacoes'), ['size' => 50]);
-        $mform->setType('course_fullname', PARAM_TEXT);
-        $mform->addRule('course_fullname', null, 'required', null, 'client');
-        $mform->addHelpButton('course_fullname', 'course_fullname_help', 'local_solicitacoes');
-
         // Categoria do curso (implementação nativa do Moodle)
         $displaylist = core_course_category::make_categories_list();
         $mform->addElement('autocomplete', 'category', get_string('unidade_academica', 'local_solicitacoes'), $displaylist, [
@@ -181,7 +175,6 @@ if ($data = $mform->get_data()) {
         $record->timemodified = time();                 // Campo obrigatório que estava faltando
         $record->codigo_sigaa = $data->codigo_sigaa;
         $record->course_shortname = $data->course_shortname;
-        $record->course_fullname = $data->course_fullname;
         $record->course_summary = $data->course_summary;
         $record->unidade_academica_id = $data->category;  // Campo correto: unidade_academica_id (não category_id)
         $record->ano_semestre = get_config('local_solicitacoes', 'ano_semestre') ?: '';

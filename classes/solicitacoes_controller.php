@@ -855,9 +855,9 @@ class solicitacoes_controller {
             // Criar objeto do novo curso
             $newcourse = new \stdClass();
             $fullname_parts = array_filter([
-                !empty($solicitacao->codigo_sigaa)    ? trim($solicitacao->codigo_sigaa)    : null,
-                !empty($solicitacao->course_fullname) ? trim($solicitacao->course_fullname) : null,
-                !empty($solicitacao->ano_semestre)    ? trim($solicitacao->ano_semestre)    : null,
+                !empty($solicitacao->codigo_sigaa)     ? trim($solicitacao->codigo_sigaa)     : null,
+                !empty($solicitacao->course_shortname) ? trim($solicitacao->course_shortname) : null,
+                !empty($solicitacao->ano_semestre)     ? trim($solicitacao->ano_semestre)     : null,
             ]);
             $newcourse->fullname        = implode(' - ', $fullname_parts);
             $newcourse->shortname       = $composed_shortname;
