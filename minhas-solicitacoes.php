@@ -107,17 +107,26 @@ if (!$requests) {
 
 foreach ($requests as $r) {
     // Processar Cursos
-    $links_cursos = [];
-    $showcourselinks = !($r->tipo_acao == 'remove_course' && $r->status == 'aprovado');
-    foreach ($r->cursos as $cid => $cname) {
-        if ($showcourselinks) {
-            $url = new moodle_url('/course/view.php', ['id' => $cid]);
-            $links_cursos[] = html_writer::link($url, format_string($cname));
-        } else {
-            $links_cursos[] = format_string($cname);
+    if ($r->tipo_acao === 'criar_curso') {
+        $partes = array_filter([
+            !empty($r->codigo_sigaa)     ? trim($r->codigo_sigaa)     : null,
+            !empty($r->course_fullname)  ? trim($r->course_fullname)  : null,
+            !empty($r->ano_semestre)     ? trim($r->ano_semestre)     : null,
+        ]);
+        $cursos_display = implode(' - ', $partes);
+    } else {
+        $links_cursos = [];
+        $showcourselinks = !($r->tipo_acao == 'remove_course' && $r->status == 'aprovado');
+        foreach ($r->cursos as $cid => $cname) {
+            if ($showcourselinks) {
+                $url = new moodle_url('/course/view.php', ['id' => $cid]);
+                $links_cursos[] = html_writer::link($url, format_string($cname));
+            } else {
+                $links_cursos[] = format_string($cname);
+            }
         }
+        $cursos_display = implode(', ', $links_cursos);
     }
-    $cursos_display = implode(', ', $links_cursos);
 
     // Processar Usuários Alvo
     // Para cadastro, mostrar dados do novo usuário ao invés de usuários existentes

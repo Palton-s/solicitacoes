@@ -176,7 +176,7 @@ class solicitacoes_controller {
             $record->course_shortname       = !empty($data->course_shortname) ? $data->course_shortname : '';
             $record->course_summary         = !empty($data->course_summary) ? $data->course_summary : '';
             $record->unidade_academica_id   = !empty($data->unidade_academica_id) ? (int)$data->unidade_academica_id : 0;
-            $record->ano_semestre           = !empty($data->ano_semestre) ? $data->ano_semestre : '';
+            $record->ano_semestre           = get_config('local_solicitacoes', 'ano_semestre') ?: '';
             $record->razoes_criacao         = !empty($data->razoes_criacao) ? $data->razoes_criacao : '';
         }
         
@@ -828,14 +828,22 @@ class solicitacoes_controller {
         require_once($CFG->dirroot . '/course/lib.php');
         
         try {
+            // Compor nome breve: codigo - shortname - semestre
+            $shortname_parts = array_filter([
+                !empty($solicitacao->codigo_sigaa)     ? trim($solicitacao->codigo_sigaa)     : null,
+                !empty($solicitacao->course_shortname) ? trim($solicitacao->course_shortname) : null,
+                !empty($solicitacao->ano_semestre)     ? trim($solicitacao->ano_semestre)     : null,
+            ]);
+            $composed_shortname = implode(' - ', $shortname_parts);
+
             // Validar se shortname já existe
-            if ($DB->record_exists('course', ['shortname' => $solicitacao->course_shortname])) {
+            if ($DB->record_exists('course', ['shortname' => $composed_shortname])) {
                 return [
                     'success' => false,
                     'message' => get_string('error_course_shortname_duplicate', 'local_solicitacoes')
                 ];
             }
-            
+
             // Validar se a categoria existe
             if (!$DB->record_exists('course_categories', ['id' => $solicitacao->unidade_academica_id])) {
                 return [
@@ -843,11 +851,16 @@ class solicitacoes_controller {
                     'message' => 'Categoria/Unidade acadêmica não encontrada.'
                 ];
             }
-            
+
             // Criar objeto do novo curso
             $newcourse = new \stdClass();
-            $newcourse->fullname        = $solicitacao->codigo_sigaa; // Nome completo será o código SIGAA
-            $newcourse->shortname       = $solicitacao->course_shortname;
+            $fullname_parts = array_filter([
+                !empty($solicitacao->codigo_sigaa)    ? trim($solicitacao->codigo_sigaa)    : null,
+                !empty($solicitacao->course_fullname) ? trim($solicitacao->course_fullname) : null,
+                !empty($solicitacao->ano_semestre)    ? trim($solicitacao->ano_semestre)    : null,
+            ]);
+            $newcourse->fullname        = implode(' - ', $fullname_parts);
+            $newcourse->shortname       = $composed_shortname;
             $newcourse->summary         = !empty($solicitacao->course_summary) ? $solicitacao->course_summary : '';
             $newcourse->summaryformat   = FORMAT_HTML;
             $newcourse->category        = $solicitacao->unidade_academica_id;

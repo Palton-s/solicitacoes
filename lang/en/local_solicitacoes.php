@@ -195,6 +195,9 @@ $string['hidden_course_category_desc'] = 'Category where courses are moved when 
 
 // Role settings
 $string['general_settings'] = 'General Settings';
+$string['allowed_categories_courses'] = 'Allowed categories for course selection';
+$string['allowed_categories_courses_help'] = 'Select the categories (and their subcategories) whose courses will be available for selection in request forms. If no categories are selected, all courses accessible to the user will be shown.';
+$string['select_categories_placeholder'] = 'Select categories...';
 $string['roles_settings'] = 'Role Settings';
 $string['allowed_roles'] = 'Allowed Roles in Plugin';
 $string['allowed_roles_help'] = 'Select the course roles that will be available in all plugin request pages. If no roles are selected, default roles (Student, Teacher and Editing Teacher) will be used.';

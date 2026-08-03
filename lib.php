@@ -298,6 +298,47 @@ function local_solicitacoes_notify_negada($solicitacao_id) {
 }
 
 /**
+ * Retorna condição SQL e params para filtrar cursos pelas categorias permitidas nas configurações.
+ * A query que usa esta função deve fazer JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = CONTEXT_COURSE.
+ * Retorna ['1=1', []] se nenhuma categoria estiver configurada (sem restrição).
+ */
+function local_solicitacoes_get_allowed_categories_sql(string $ctx_alias = 'ctx'): array {
+    global $DB;
+
+    $config = get_config('local_solicitacoes', 'allowed_categories');
+    if (empty($config)) {
+        return ['1=1', []];
+    }
+
+    $cat_ids = array_values(array_filter(array_map('intval', explode(',', $config))));
+    if (empty($cat_ids)) {
+        return ['1=1', []];
+    }
+
+    list($in_sql, $in_params) = $DB->get_in_or_equal($cat_ids, SQL_PARAMS_NAMED, 'allowedcatid');
+    $cat_contexts = $DB->get_records_sql(
+        "SELECT ctx.path FROM {context} ctx
+         WHERE ctx.contextlevel = :ctxcatlevel AND ctx.instanceid $in_sql",
+        array_merge(['ctxcatlevel' => CONTEXT_COURSECAT], $in_params)
+    );
+
+    if (empty($cat_contexts)) {
+        return ['1=0', []];
+    }
+
+    $conditions = [];
+    $params = [];
+    $i = 0;
+    foreach ($cat_contexts as $catctx) {
+        $params["allowedcatpath_{$i}"] = $catctx->path . '/%';
+        $conditions[] = "{$ctx_alias}.path LIKE :allowedcatpath_{$i}";
+        $i++;
+    }
+
+    return ['(' . implode(' OR ', $conditions) . ')', $params];
+}
+
+/**
  * Obtém os papéis de curso permitidos configurados no plugin.
  * 
  * @return array Array com shortname => name dos papéis permitidos

@@ -65,20 +65,6 @@ class criar_curso_form extends moodleform {
         $mform->addRule('category', null, 'required', null, 'client');
         $mform->addHelpButton('category', 'unidade_academica_help', 'local_solicitacoes');
 
-        // Ano/Semestre
-        $semestre_options = [
-            '' => get_string('select_option', 'local_solicitacoes'),
-            '2024.1' => '2024.1',  
-            '2024.2' => '2024.2',
-            '2025.1' => '2025.1',
-            '2025.2' => '2025.2', 
-            '2026.1' => '2026.1',
-            '2026.2' => '2026.2',
-        ];
-        $mform->addElement('select', 'ano_semestre', get_string('ano_semestre', 'local_solicitacoes'), $semestre_options);
-        $mform->addRule('ano_semestre', null, 'required', null, 'client');
-        $mform->addHelpButton('ano_semestre', 'ano_semestre_help', 'local_solicitacoes');
-
         // Sumário do curso
         $mform->addElement('textarea', 'course_summary', get_string('course_summary', 'local_solicitacoes'), 
             ['wrap' => 'virtual', 'rows' => 4, 'cols' => 60]);
@@ -198,7 +184,7 @@ if ($data = $mform->get_data()) {
         $record->course_fullname = $data->course_fullname;
         $record->course_summary = $data->course_summary;
         $record->unidade_academica_id = $data->category;  // Campo correto: unidade_academica_id (não category_id)
-        $record->ano_semestre = $data->ano_semestre;
+        $record->ano_semestre = get_config('local_solicitacoes', 'ano_semestre') ?: '';
         $record->razoes_criacao = $data->razoes_criacao;
         
         $solicitacao_id = $DB->insert_record('local_solicitacoes', $record);

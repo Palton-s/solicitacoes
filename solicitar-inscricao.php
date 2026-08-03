@@ -48,6 +48,8 @@ if (!has_capability('local/solicitacoes:submit', $context)) {
  */
 class inscricao_form extends moodleform {
 
+    private $available_courses_cache = null;
+
     protected function definition() {
         global $CFG, $DB;
         
@@ -127,48 +129,73 @@ class inscricao_form extends moodleform {
      */
     private function get_available_courses() {
         global $DB, $USER;
-        
-        $cursos_options = array('' => get_string('searching_courses', 'local_solicitacoes'));
-        
+
+        if ($this->available_courses_cache !== null) {
+            return $this->available_courses_cache;
+        }
+
+        $cursos_options = array();
+
         try {
             $system_context = context_system::instance();
+            [$cat_cond, $cat_params] = local_solicitacoes_get_allowed_categories_sql('ctx');
 
-            // Admins e usuários com papel no contexto do sistema (ex: gerentes) veem tudo
             if (is_siteadmin() || $DB->record_exists('role_assignments', [
                 'userid'    => $USER->id,
                 'contextid' => $system_context->id,
             ])) {
-                $sql = "SELECT id, fullname, shortname 
-                        FROM {course} 
-                        WHERE id > 1
-                        ORDER BY fullname ASC";
-                $cursos = $DB->get_records_sql($sql);
+                $sql = "SELECT c.id, c.fullname, c.shortname
+                        FROM {course} c
+                        JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = :ctxcourse
+                        WHERE c.id > 1 AND $cat_cond
+                        ORDER BY c.fullname ASC";
+                $cursos = $DB->get_records_sql($sql, array_merge(['ctxcourse' => CONTEXT_COURSE], $cat_params));
             } else {
-                // 1. Cursos onde o usuário está matriculado (inclui ocultos acessíveis)
+                // 1. Cursos onde o usuário está matriculado
                 $cursos = enrol_get_users_courses($USER->id, true);
 
-                // 2. Cursos pertencentes a categorias onde o usuário tem papel (ocultos inclusive)
-                $sql_cat = "SELECT DISTINCT c.id, c.fullname, c.shortname 
-                            FROM {course} c
-                            JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = :ctxcourse
-                            WHERE c.id != 1
-                            AND EXISTS (
-                                SELECT 1 FROM {role_assignments} ra
-                                JOIN {context} catctx ON catctx.id = ra.contextid
-                                WHERE ra.userid = :userid
-                                AND catctx.contextlevel = :ctxcat
-                                AND ctx.path LIKE " . $DB->sql_concat('catctx.path', "'/%'") . "
-                            )
-                            ORDER BY c.fullname ASC";
+                // 2. Buscar paths das categorias onde o usuário tem papel (query separada, usa índice em userid)
+                $role_cat_paths = $DB->get_records_sql(
+                    "SELECT ctx.id, ctx.path
+                     FROM {role_assignments} ra
+                     JOIN {context} ctx ON ctx.id = ra.contextid
+                     WHERE ra.userid = :userid AND ctx.contextlevel = :ctxcat",
+                    ['userid' => $USER->id, 'ctxcat' => CONTEXT_COURSECAT]
+                );
 
-                $cat_courses = $DB->get_records_sql($sql_cat, [
-                    'ctxcourse' => CONTEXT_COURSE,
-                    'userid'    => $USER->id,
-                    'ctxcat'    => CONTEXT_COURSECAT,
-                ]);
+                // 3. Cursos dessas categorias com padrões fixos (sargable)
+                if (!empty($role_cat_paths)) {
+                    $path_conditions = [];
+                    $params = ['ctxcourse' => CONTEXT_COURSE];
+                    $i = 0;
+                    foreach ($role_cat_paths as $catctx) {
+                        $params["catpath_{$i}"] = $catctx->path . '/%';
+                        $path_conditions[] = "ctx.path LIKE :catpath_{$i}";
+                        $i++;
+                    }
 
-                // Combinar (chaves são IDs de curso — sem duplicatas)
-                $cursos = $cursos + $cat_courses;
+                    $sql_cat = "SELECT DISTINCT c.id, c.fullname, c.shortname
+                                FROM {course} c
+                                JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = :ctxcourse
+                                WHERE c.id != 1
+                                AND (" . implode(' OR ', $path_conditions) . ")
+                                ORDER BY c.fullname ASC";
+                    $cursos = $cursos + $DB->get_records_sql($sql_cat, $params);
+                }
+
+                // 4. Filtrar pela categoria permitida nas configurações
+                if (!empty($cursos) && $cat_cond !== '1=1') {
+                    $ids = array_keys($cursos);
+                    [$id_sql, $id_params] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED, 'crsid');
+                    $cursos = $DB->get_records_sql(
+                        "SELECT c.id, c.fullname, c.shortname
+                         FROM {course} c
+                         JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = :ctxcourse
+                         WHERE c.id $id_sql AND $cat_cond
+                         ORDER BY c.fullname ASC",
+                        array_merge(['ctxcourse' => CONTEXT_COURSE], $id_params, $cat_params)
+                    );
+                }
             }
 
             foreach ($cursos as $curso) {
@@ -177,7 +204,8 @@ class inscricao_form extends moodleform {
         } catch (Exception $e) {
             error_log("Erro ao buscar cursos: " . $e->getMessage());
         }
-        
+
+        $this->available_courses_cache = $cursos_options;
         return $cursos_options;
     }
 

@@ -225,6 +225,9 @@ $string['hidden_course_category_desc'] = 'Categoria para onde os cursos serão m
 
 // Configurações de papéis
 $string['general_settings'] = 'Configurações Gerais';
+$string['allowed_categories_courses'] = 'Categorias permitidas para seleção de cursos';
+$string['allowed_categories_courses_help'] = 'Selecione as categorias (e suas subcategorias) cujos cursos estarão disponíveis para seleção nos formulários de solicitação. Se nenhuma categoria for selecionada, todos os cursos acessíveis ao usuário serão exibidos.';
+$string['select_categories_placeholder'] = 'Selecione as categorias...';
 $string['roles_settings'] = 'Configurações de Papéis';
 $string['allowed_roles'] = 'Papéis Permitidos no Plugin';
 $string['allowed_roles_help'] = 'Selecione os papéis de curso que estarão disponíveis em todas as páginas de solicitações do plugin. Se nenhum papel for selecionado, os papéis padrão (Estudante, Professor e Professor Editor) serão utilizados.';

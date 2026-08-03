@@ -28,6 +28,21 @@ class local_solicitacoes_config_form extends moodleform {
         $mform->setType('hidden_course_category', PARAM_INT);
         $mform->addHelpButton('hidden_course_category', 'hidden_course_category', 'local_solicitacoes');
 
+        // Ano/Semestre padrão para criação de cursos
+        $mform->addElement('text', 'ano_semestre', get_string('ano_semestre', 'local_solicitacoes'), ['size' => 10]);
+        $mform->setType('ano_semestre', PARAM_TEXT);
+        $mform->addHelpButton('ano_semestre', 'ano_semestre', 'local_solicitacoes');
+
+        // Categorias permitidas para seleção de cursos
+        $all_categories = core_course_category::make_categories_list();
+        $mform->addElement('autocomplete', 'allowed_categories', get_string('allowed_categories_courses', 'local_solicitacoes'), $all_categories, [
+            'multiple' => true,
+            'placeholder' => get_string('select_categories_placeholder', 'local_solicitacoes'),
+            'noselectionstring' => get_string('select_categories_placeholder', 'local_solicitacoes'),
+        ]);
+        $mform->setType('allowed_categories', PARAM_RAW);
+        $mform->addHelpButton('allowed_categories', 'allowed_categories_courses', 'local_solicitacoes');
+
         // Seção de papéis permitidos
         $mform->addElement('header', 'roles_settings', get_string('roles_settings', 'local_solicitacoes'));
 
@@ -108,9 +123,17 @@ if (!empty($current_allowed_roles)) {
 }
 error_log("DEBUG Configurações - allowed_roles_array para form: " . print_r($allowed_roles_array, true));
 
+$allowed_categories_config = get_config('local_solicitacoes', 'allowed_categories');
+$allowed_categories_array = [];
+if (!empty($allowed_categories_config)) {
+    $allowed_categories_array = array_filter(array_map('intval', explode(',', $allowed_categories_config)));
+}
+
 $form_data = [
     'hidden_course_category' => (int)get_config('local_solicitacoes', 'hidden_course_category'),
-    'allowed_roles' => $allowed_roles_array
+    'allowed_roles'          => $allowed_roles_array,
+    'allowed_categories'     => $allowed_categories_array,
+    'ano_semestre'           => get_config('local_solicitacoes', 'ano_semestre'),
 ];
 error_log("DEBUG Configurações - form_data completo: " . print_r($form_data, true));
 $form->set_data($form_data);
@@ -125,6 +148,14 @@ if ($data = $form->get_data()) {
     
     // Salvar categoria oculta
     set_config('hidden_course_category', (int)$data->hidden_course_category, 'local_solicitacoes');
+    set_config('ano_semestre', trim($data->ano_semestre ?? ''), 'local_solicitacoes');
+
+    $allowed_categories = '';
+    if (!empty($data->allowed_categories)) {
+        $cats = is_array($data->allowed_categories) ? $data->allowed_categories : [$data->allowed_categories];
+        $allowed_categories = implode(',', array_filter(array_map('intval', $cats)));
+    }
+    set_config('allowed_categories', $allowed_categories, 'local_solicitacoes');
 
     // Salvar papéis permitidos
     $allowed_roles = '';

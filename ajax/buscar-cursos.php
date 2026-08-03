@@ -31,18 +31,27 @@ try {
     }
     
     global $DB;
-    
+
+    require_once(__DIR__ . '/../lib.php');
+
     // Escape da query para SQL LIKE
     $searchterm = '%' . str_replace(array('%', '_'), array('\\%', '\\_'), $query) . '%';
-    
-    // SQL para buscar cursos reais do Moodle com filtro
+
+    // Filtro de categorias configuradas no plugin
+    [$cat_cond, $cat_params] = local_solicitacoes_get_allowed_categories_sql('ctx');
+
     $sql = "SELECT c.id, c.fullname, c.shortname, c.visible
-            FROM {course} c 
-            WHERE (c.fullname LIKE ? OR c.shortname LIKE ?)
-            AND c.id > ?
+            FROM {course} c
+            JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = :ctxcourse
+            WHERE (c.fullname LIKE :term1 OR c.shortname LIKE :term2)
+            AND c.id > 1
+            AND $cat_cond
             ORDER BY c.visible DESC, c.fullname ASC";
 
-    $params = array($searchterm, $searchterm, 1);
+    $params = array_merge(
+        ['ctxcourse' => CONTEXT_COURSE, 'term1' => $searchterm, 'term2' => $searchterm],
+        $cat_params
+    );
     
     // Verificar se $DB está disponível
     if (!isset($DB)) {
@@ -56,7 +65,7 @@ try {
         error_log("Buscar Cursos - Params: " . print_r($params, true));
         
         // Executar consulta no banco com limite
-        $courses = $DB->get_records_sql($sql, $params, 0, $limit);
+        $courses = $DB->get_records_sql($sql, $params, 0, (int)$limit);
         
         error_log("Buscar Cursos - Cursos encontrados: " . count($courses));
         
