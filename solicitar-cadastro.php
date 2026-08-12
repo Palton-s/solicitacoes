@@ -8,7 +8,7 @@ require_login();
 // Forçar carregamento de strings problemáticas
 $forced_strings = [
     'form_cadastro_descricao' => 'Use este formulário para solicitar o cadastro de um novo usuário no sistema com um papel específico.',
-    'observacoes_placeholder' => 'Digite observações adicionais sobre esta solicitação (opcional)...'
+    'observacoes_placeholder' => 'descreva detalhadamente o motivo da sua solicitação'
 ];
 
 // Adicionar strings ao cache temporariamente

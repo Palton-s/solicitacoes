@@ -9,7 +9,7 @@ require_login();
 $forced_strings = [
     'form_inscricao_descricao' => 'Você está solicitando inscrição de usuários em uma disciplina. Selecione o papel apropriado para os usuários.',
     'no_users_found' => 'Nenhum usuário encontrado',
-    'observacoes_placeholder' => 'Digite observações adicionais sobre esta solicitação (opcional)...'
+    'observacoes_placeholder' => 'descreva detalhadamente o motivo da sua solicitação'
 ];
 
 // Adicionar strings ao cache temporariamente

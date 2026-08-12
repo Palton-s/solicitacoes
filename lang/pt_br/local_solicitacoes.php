@@ -45,9 +45,9 @@ $string['papel_help']           = 'Selecione o papel que os usuários devem ter 
 $string['papel_label']          = 'Papel no Curso';
 $string['papel_help_dinamico']  = 'Selecione o papel que os usuários terão no curso';
 $string['select_role']          = 'Selecione um papel...';
-$string['observacoes']          = 'Observações';
-$string['observacoes_help']     = 'Informações adicionais sobre a solicitação (opcional).';
-$string['observacoes_placeholder'] = 'Digite observações adicionais sobre esta solicitação (opcional)...';
+$string['observacoes']          = 'Justificativa';
+$string['observacoes_help']     = 'Descreva o motivo da sua solicitação. Quanto mais detalhes você fornecer, mais rápido será o processamento.';
+$string['observacoes_placeholder'] = 'descreva detalhadamente o motivo da sua solicitação';
 $string['request_submit']       = 'Enviar Solicitação';
 // Strings de interface do usuário
 $string['no_courses_found']     = 'Nenhum curso encontrado';
@@ -179,6 +179,19 @@ $string['usuario_criado']            = 'Usuário {$a} criado com sucesso.';
 
 // Campos de criação de curso
 $string['acao_criar_curso']          = 'Criação de Curso';
+
+// Novos campos separados para criação de disciplina (v1.5.0)
+$string['codigo_disciplina']         = 'Código da Disciplina';
+$string['codigo_disciplina_help']    = 'Código da disciplina no SIGAA. Deve conter 2 a 10 letras maiúsculas seguidas de exatamente 4 dígitos. Exemplos: CCA0081, NUT0028, ENAP001. O campo aceita apenas letras maiúsculas e números — qualquer outro caractere é ignorado automaticamente.';
+$string['nome_disciplina']           = 'Nome da Disciplina';
+$string['nome_disciplina_help']      = 'Nome completo da disciplina conforme consta no SIGAA. Exemplo: "Estrutura e Organização do Estado".';
+$string['turma']                     = 'Turma';
+$string['turma_help']                = 'Identificação da turma. O campo já começa com "Turma ", basta acrescentar o número ou letra da turma. Exemplos: "Turma 01", "Turma A", "Turma 02".';
+$string['error_codigo_disciplina_required'] = 'Por favor, informe o código da disciplina.';
+$string['error_codigo_disciplina_invalid']  = 'Código inválido. Use 2 a 10 letras maiúsculas seguidas de exatamente 4 dígitos (ex: CCA0081, NUT0028).';
+$string['error_nome_disciplina_required']   = 'Por favor, informe o nome da disciplina.';
+$string['error_turma_required']             = 'Por favor, informe a turma.';
+
 $string['codigo_sigaa']              = 'Código SIGAA - Turma (Ex.: NUT0028 - Turma 01)';
 $string['codigo_sigaa_help']         = 'Informe o código SIGAA seguido da turma. Exemplo: "NUT0028 - Turma 01", "NUT0028 - Turma 02"...';
 $string['course_shortname']          = 'Nome curto da disciplina (Apelido_2026.1)';
@@ -202,8 +215,8 @@ $string['aviso_professores_curso']   = 'Se nenhum professor for selecionado, o p
 $string['aviso_professor_curso']     = 'Selecione o usuário que será o professor desta disciplina e o papel que ele terá.';
 $string['papel_professor']           = 'Papel do Professor';
 $string['papel_professor_help']      = 'Selecione o papel que o professor terá na disciplina (recomendado: Professor Editor)';
-$string['professor_usuario']         = 'Selecionar Professor';
-$string['professor_usuario_help']    = 'Busque e selecione o usuário que será o professor desta disciplina';
+$string['professor_usuario']         = 'Selecionar Professores';
+$string['professor_usuario_help']    = 'Busque e selecione os usuários que serão professores desta disciplina. Você pode selecionar múltiplos professores.';
 $string['error_codigo_sigaa_required'] = 'Por favor, informe o código SIGAA e a turma.';
 $string['error_codigo_sigaa_format'] = 'Formato de código SIGAA inválido. Use o padrão: ABC1234 - Turma XX';
 $string['error_course_shortname_required'] = 'Por favor, informe o nome curto da disciplina.';

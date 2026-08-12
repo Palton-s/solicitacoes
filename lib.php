@@ -24,6 +24,126 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+// ─── Utilitário de strings seguro ────────────────────────────────────────────
+
+/**
+ * Dicionário completo de strings padrão em português para o plugin.
+ * Usado como fallback quando get_string() retorna [[key]] (cache desatualizado).
+ */
+function local_solicitacoes_str_defaults(): array {
+    return [
+        // Geral
+        'pluginname'              => 'Solicitações de Gerenciamento de Curso',
+        'menu_settings'           => 'Configurações de Solicitações',
+        'menu_manage'             => 'Gerenciar Solicitações',
+        'request_form_title'      => 'Solicitação de Gerenciamento de Curso',
+        'request_submit'          => 'Enviar Solicitação',
+        'back_to_list'            => 'Voltar para lista',
+        'details'                 => 'Detalhes da Solicitação',
+        'my_requests'             => 'Minhas Solicitações',
+        'access_all_requests'     => 'Acessar todas as solicitações',
+        'thankyou_new_request'    => 'Nova Solicitação',
+        'no_requests'             => 'Nenhuma solicitação encontrada.',
+        // Tabela de solicitações
+        'user'                    => 'Solicitante',
+        'action_type'             => 'Ação',
+        'course'                  => 'Curso',
+        'target_users'            => 'Usuários',
+        'role'                    => 'Papel',
+        'created_at'              => 'Criado em',
+        'status'                  => 'Status',
+        'actions'                 => 'Ações',
+        'approve'                 => 'Aprovar',
+        'deny'                    => 'Negar',
+        'view'                    => 'Ver',
+        'delete'                  => 'Excluir',
+        'confirm_delete'          => 'Tem certeza que deseja excluir esta solicitação?',
+        'success_delete'          => 'Solicitação excluída com sucesso.',
+        'success_update'          => 'Status atualizado.',
+        // Status
+        'status_pendente'         => 'Pendente',
+        'status_aprovado'         => 'Aprovado',
+        'status_negado'           => 'Negado',
+        // Tipos de ação
+        'acao_inscricao'          => 'Inscrição',
+        'acao_remocao'            => 'Remoção',
+        'acao_suspensao'          => 'Suspensão',
+        'acao_cadastro'           => 'Cadastro de Usuário',
+        'acao_criar_curso'        => 'Criação de Curso',
+        'acao_remover_curso'      => 'Remover Curso',
+        // Campos de formulário comuns
+        'observacoes'             => 'Justificativa',
+        'observacoes_help'        => 'Descreva o motivo da sua solicitação.',
+        'observacoes_placeholder' => 'descreva detalhadamente o motivo da sua solicitação',
+        'papel'                   => 'Papel no Curso',
+        'papel_help'              => 'Selecione o papel que os usuários devem ter no curso.',
+        'select_role'             => 'Selecione um papel...',
+        'curso_nome'              => 'Selecionar Curso',
+        'curso_nome_help'         => 'Digite o nome do curso e selecione da lista.',
+        'usuarios_busca'          => 'Selecionar Usuários',
+        'usuarios_busca_help'     => 'Digite o nome, CPF ou e-mail para buscar.',
+        // Campos de criação de curso
+        'codigo_disciplina'       => 'Código da Disciplina',
+        'nome_disciplina'         => 'Nome da Disciplina',
+        'turma'                   => 'Turma',
+        'ano_semestre'            => 'Ano/Semestre',
+        'unidade_academica'       => 'Unidade Acadêmica',
+        'course_summary'          => 'Sumário',
+        'razoes_criacao'          => 'Razões para criar a disciplina',
+        'codigo_sigaa'            => 'Código SIGAA',
+        'course_shortname'        => 'Nome curto da disciplina',
+        'professor_usuario'       => 'Selecionar Professores',
+        'papel_professor'         => 'Papel do Professor',
+        // Campos de cadastro de usuário
+        'firstname'               => 'Primeiro Nome',
+        'lastname'                => 'Sobrenome',
+        'cpf'                     => 'CPF',
+        'email_novo_usuario'      => 'E-mail',
+        'novo_usuario'            => 'Novo usuário',
+        // Observação / similaridade
+        'observacao_column'       => 'Observação',
+        'disciplinas_similares'   => 'Disciplinas similares já criadas:',
+        // Página de seleção de ação
+        'selecionar_acao_titulo'    => 'O que você deseja fazer?',
+        'selecionar_acao_subtitulo' => 'Escolha o tipo de solicitação que deseja enviar',
+        // Ações em massa / bulk
+        'back'                    => 'Voltar',
+        'approve_selected'        => 'Aprovar selecionadas',
+        'bulk_hint'               => 'Selecione solicitações pendentes para aprovar em massa.',
+        'select_all'              => 'Selecionar todas',
+        // Negação
+        'motivo_negacao'          => 'Motivo da Negação',
+        'motivo_negacao_label'    => 'Informe o motivo da negação',
+        'deny_request_title'      => 'Negar Solicitação',
+        'confirm_deny'            => 'Confirmar Negação',
+        // Histórico / detalhes
+        'handled_by'              => 'Tratada por',
+        'last_modified'           => 'Última modificação',
+        'requester'               => 'Solicitante',
+    ];
+}
+
+/**
+ * Versão segura de get_string() com fallback em português.
+ *
+ * Evita que strings apareçam como [[key]] quando o cache do Moodle
+ * estiver desatualizado. Funciona em todos os contextos PHP do plugin.
+ *
+ * @param string     $key Chave da string
+ * @param mixed|null $a   Parâmetros de substituição (passados para get_string)
+ * @return string
+ */
+function local_solicitacoes_str(string $key, $a = null): string {
+    $result = get_string($key, 'local_solicitacoes', $a);
+    if (strpos($result, '[[') === 0) {
+        $defaults = local_solicitacoes_str_defaults();
+        return $defaults[$key] ?? $key;
+    }
+    return $result;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 /**
  * Verifica se o usuário pode enviar solicitações.
  *
@@ -103,7 +223,38 @@ function local_solicitacoes_can_view_request($requestid, $userid = null, $contex
  */
 function local_solicitacoes_extend_navigation(global_navigation $navigation) {
     global $PAGE;
-    
+
+    // ── JS safety-net: substitui qualquer [[key]] visível na página ───────────
+    // Só carrega nas páginas do próprio plugin para não impactar o resto do Moodle.
+    $page_path = $PAGE->url->get_path();
+    if (strpos($page_path, '/local/solicitacoes/') !== false) {
+        $fb_json = json_encode(local_solicitacoes_str_defaults(), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
+        $PAGE->requires->js_init_code(
+            "(function(){
+                var fb = $fb_json;
+                function fix(el){
+                    var nodes = el.childNodes;
+                    for(var i=0;i<nodes.length;i++){
+                        var n=nodes[i];
+                        if(n.nodeType===3 && n.textContent.indexOf('[[')!==-1){
+                            n.textContent=n.textContent.replace(/\\[\\[([^\\]]+)\\]\\]/g,function(m,k){
+                                return fb[k.trim()]||m;
+                            });
+                        } else if(n.nodeType===1){ fix(n); }
+                    }
+                }
+                document.addEventListener('DOMContentLoaded',function(){fix(document.body);});
+                var obs=new MutationObserver(function(ms){
+                    ms.forEach(function(m){m.addedNodes.forEach(function(n){if(n.nodeType===1)fix(n);});});
+                });
+                document.addEventListener('DOMContentLoaded',function(){
+                    obs.observe(document.body,{childList:true,subtree:true});
+                });
+            }());",
+            true
+        );
+    }
+
     $context = context_system::instance();
     
     // Adicionar link no menu apenas para usuários com permissões
@@ -385,4 +536,73 @@ function local_solicitacoes_get_allowed_roles_with_empty($empty_option_text = nu
     
     $roles = local_solicitacoes_get_allowed_roles();
     return array_merge(['' => $empty_option_text], $roles);
+}
+
+/**
+ * Gera o nome breve (shortname) do curso a partir dos campos da solicitação.
+ *
+ * Formato: CODIGO_INICIAIS_T_TURMA_ANO_SEMESTRE
+ * Exemplo: CCA0081 - Estrutura e Organização do Estado - Turma 01 - 2026/1
+ *          → CCA0081_EOOE_T_01_2026_1
+ *
+ * Palavras funcionais (artigos, preposições) são ignoradas ao calcular as iniciais.
+ * Se o shortname gerado já existir no Moodle, acrescenta underscores extras até
+ * encontrar um que seja único.
+ *
+ * @param string $codigo       Código da disciplina (ex: CCA0081)
+ * @param string $nome         Nome da disciplina   (ex: Estrutura e Organização do Estado)
+ * @param string $turma        Identificação da turma (ex: Turma 01)
+ * @param string $ano_semestre Ano/semestre (ex: 2026/1)
+ * @return string Nome breve único para o curso
+ */
+function local_solicitacoes_generate_shortname(string $codigo, string $nome, string $turma, string $ano_semestre): string {
+    global $DB;
+
+    // ── Iniciais do nome da disciplina ─────────────────────────────────────────
+    // Ignora artigos e preposições comuns em português e inglês
+    static $skip_words = [
+        'e', 'ou', 'de', 'da', 'do', 'das', 'dos', 'des',
+        'a', 'o', 'as', 'os', 'um', 'uma', 'uns', 'umas',
+        'em', 'no', 'na', 'nos', 'nas', 'ao', 'aos', 'à', 'às',
+        'por', 'para', 'com', 'sem', 'sob', 'sobre', 'entre',
+        'the', 'of', 'and', 'in', 'to', 'for',
+    ];
+    $words    = preg_split('/\s+/u', trim($nome));
+    $initials = '';
+    foreach ($words as $word) {
+        $clean = mb_strtolower(trim($word), 'UTF-8');
+        if ($clean !== '' && !in_array($clean, $skip_words)) {
+            $initials .= mb_strtoupper(mb_substr($word, 0, 1, 'UTF-8'), 'UTF-8');
+        }
+    }
+    if ($initials === '') {
+        $initials = 'X'; // fallback para nome totalmente composto de palavras funcionais
+    }
+
+    // ── Número/letra da turma (remove o prefixo "Turma") ──────────────────────
+    $turma_id = trim(preg_replace('/^Turma\s*/iu', '', trim($turma)));
+    $turma_id = preg_replace('/\s+/', '', $turma_id); // ex: "01", "A", "02A"
+    if ($turma_id === '') {
+        $turma_id = '0';
+    }
+
+    // ── Ano e semestre ─────────────────────────────────────────────────────────
+    $pos  = strpos($ano_semestre, '/');
+    $year = $pos !== false ? substr($ano_semestre, 0, $pos) : $ano_semestre;
+    $sem  = $pos !== false ? substr($ano_semestre, $pos + 1) : '';
+    $year = preg_replace('/[^0-9]/', '', $year);
+    $sem  = preg_replace('/[^0-9]/', '', $sem);
+
+    // ── Monta o shortname base ─────────────────────────────────────────────────
+    // Formato: CCA0081_EOOE_T_01_2026_1
+    $parts = array_filter([$codigo, $initials, 'T', $turma_id, $year, $sem], fn($p) => $p !== '');
+    $base  = implode('_', $parts);
+
+    // ── Garante unicidade: adiciona underscores se já existir ──────────────────
+    $shortname = $base;
+    while ($DB->record_exists('course', ['shortname' => $shortname])) {
+        $shortname .= '_';
+    }
+
+    return $shortname;
 }

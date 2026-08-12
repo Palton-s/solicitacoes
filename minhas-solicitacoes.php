@@ -1,5 +1,6 @@
 <?php
 require('../../config.php');
+require_once(__DIR__ . '/lib.php');
 
 require_login();
 
@@ -92,11 +93,24 @@ $recordset->close();
 
 // Preparar dados para o template
 $template_data = [
-    'filters' => $filter_tabs,
-    'has_requests' => !empty($requests),
-    'requests' => [],
-    'can_manage' => has_capability('local/solicitacoes:manage', $context),
-    'new_request_url' => (new moodle_url('/local/solicitacoes/selecionar-acao.php'))->out(false),
+    'filters'          => $filter_tabs,
+    'has_requests'     => !empty($requests),
+    'requests'         => [],
+    'can_manage'       => has_capability('local/solicitacoes:manage', $context),
+    'new_request_url'  => (new moodle_url('/local/solicitacoes/selecionar-acao.php'))->out(false),
+    // Strings da tabela (passadas do PHP para evitar [[key]] no template)
+    'str_my_requests'          => local_solicitacoes_str('my_requests'),
+    'str_thankyou_new_request' => local_solicitacoes_str('thankyou_new_request'),
+    'str_access_all_requests'  => local_solicitacoes_str('access_all_requests'),
+    'str_action_type'          => local_solicitacoes_str('action_type'),
+    'str_course'               => local_solicitacoes_str('course'),
+    'str_target_users'         => local_solicitacoes_str('target_users'),
+    'str_role'                 => local_solicitacoes_str('role'),
+    'str_created_at'           => local_solicitacoes_str('created_at'),
+    'str_status'               => local_solicitacoes_str('status'),
+    'str_actions'              => local_solicitacoes_str('actions'),
+    'str_view'                 => local_solicitacoes_str('view'),
+    'str_no_requests'          => local_solicitacoes_str('no_requests'),
 ];
 
 if (!$requests) {
@@ -108,11 +122,20 @@ if (!$requests) {
 foreach ($requests as $r) {
     // Processar Cursos
     if ($r->tipo_acao === 'criar_curso') {
-        $partes = array_filter([
-            !empty($r->codigo_sigaa)      ? trim($r->codigo_sigaa)      : null,
-            !empty($r->course_shortname)  ? trim($r->course_shortname)  : null,
-            !empty($r->ano_semestre)      ? trim($r->ano_semestre)      : null,
-        ]);
+        if (!empty($r->codigo_disciplina)) {
+            $partes = array_filter([
+                trim($r->codigo_disciplina),
+                !empty($r->nome_disciplina) ? trim($r->nome_disciplina) : null,
+                !empty($r->turma)           ? trim($r->turma)           : null,
+                !empty($r->ano_semestre)    ? trim($r->ano_semestre)    : null,
+            ]);
+        } else {
+            $partes = array_filter([
+                !empty($r->codigo_sigaa)     ? trim($r->codigo_sigaa)     : null,
+                !empty($r->course_shortname) ? trim($r->course_shortname) : null,
+                !empty($r->ano_semestre)     ? trim($r->ano_semestre)     : null,
+            ]);
+        }
         $cursos_display = implode(' - ', $partes);
     } else {
         $links_cursos = [];
@@ -180,6 +203,7 @@ foreach ($requests as $r) {
 
     // Preparar dados para o template
     $request_data = [
+        'request_id' => $r->id,
         'acao_label' => $acao_label,
         'cursos_display' => $cursos_display,
         'usuarios_display' => $usuarios_display,

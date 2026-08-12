@@ -1,5 +1,6 @@
 <?php
 require('../../config.php');
+require_once(__DIR__ . '/lib.php');
 
 require_login();
 
@@ -44,9 +45,10 @@ $actions = [
 ];
 
 $template_data = [
-    'subtitle' => get_string('selecionar_acao_subtitulo', 'local_solicitacoes'),
-    'actions' => $actions,
-    'minhas_solicitacoes_url' => (new moodle_url('/local/solicitacoes/minhas-solicitacoes.php'))->out(false)
+    'subtitle'                => local_solicitacoes_str('selecionar_acao_subtitulo'),
+    'actions'                 => $actions,
+    'minhas_solicitacoes_url' => (new moodle_url('/local/solicitacoes/minhas-solicitacoes.php'))->out(false),
+    'str_my_requests'         => local_solicitacoes_str('my_requests'),
 ];
 
 echo $OUTPUT->render_from_template('local_solicitacoes/selecionar_acao', $template_data);

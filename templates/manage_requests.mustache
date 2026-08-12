@@ -1,7 +1,8 @@
 {{!
     This file is part of Moodle - http://moodle.org/
 
-    Template para gerenciamento de solicitações
+    Template para gerenciamento de solicitações.
+    Strings passadas via PHP (sem {{#str}}) para evitar [[key]] por cache desatualizado.
 }}
 
 <div class="">
@@ -16,60 +17,156 @@
     </nav>
 </div>
 
-<div id="page-content">
+{{! Link Voltar }}
+{{#back_url}}
+<div class="mb-3">
+    <a href="{{back_url}}" class="btn btn-secondary btn-sm">← {{str_back}}</a>
+</div>
+{{/back_url}}
 
+<div id="page-content">
     <div id="region-main-box">
         <section id="region-main" class="p-4" style="background-color: transparent;">
 
             {{#has_requests}}
 
-            <div class="table-responsive" style="background-color: #fff;">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>{{#str}}user, local_solicitacoes{{/str}}</th>
-                            <th>{{#str}}action_type, local_solicitacoes{{/str}}</th>
-                            <th>{{#str}}course, local_solicitacoes{{/str}}</th>
-                            <th>{{#str}}target_users, local_solicitacoes{{/str}}</th>
-                            <th>{{#str}}role, local_solicitacoes{{/str}}</th>
-                            <th>{{observacao_header}}</th>
-                            <th>{{#str}}created_at, local_solicitacoes{{/str}}</th>
-                            <th>{{#str}}status, local_solicitacoes{{/str}}</th>
-                            <th>{{#str}}actions, local_solicitacoes{{/str}}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {{#requests}}
-                        <tr>
-                            <td>{{{solicitante_link}}}</td>
-                            <td>{{acao_label}}</td>
-                            <td>{{{cursos_display}}}</td>
-                            <td>{{{usuarios_display}}}</td>
-                            <td>{{papel_display}}</td>
-                            <td>{{{observacao_display}}}</td>
-                            <td>{{created_date}}</td>
-                            <td>
-                                <span class="badge {{status_badge_class}}">{{status_label}}</span>
-                            </td>
-                            <td>
-                                {{#show_approve}}
-                                <a href="{{approve_url}}" class="btn btn-sm btn-primary">{{#str}}approve, local_solicitacoes{{/str}}</a>
-                                {{/show_approve}}
-                                {{#show_reject}}
-                                <a href="{{reject_url}}" class="btn btn-sm">{{#str}}deny, local_solicitacoes{{/str}}</a>
-                                {{/show_reject}}
-                                <a href="{{view_url}}" class="btn btn-sm">{{#str}}view, local_solicitacoes{{/str}}</a>
-                                <a href="{{delete_url}}" class="btn btn-sm" onclick="return confirm('{{confirm_delete_msg}}');">{{#str}}delete, local_solicitacoes{{/str}}</a>
-                            </td>
-                        </tr>
-                        {{/requests}}
-                    </tbody>
-                </table>
-            </div>
+            <form id="sol-bulk-form" method="post" action="{{form_action_url}}">
+                <input type="hidden" name="sesskey"  value="{{sesskey}}">
+                <input type="hidden" name="filter"   value="{{current_filter}}">
+                <input type="hidden" name="action"   value="bulk_approve">
+
+                {{! ── Barra de ação em massa ─────────────────────────────────── }}
+                <div class="d-flex align-items-center mb-2" style="gap:.75rem; min-height:2.25rem;">
+                    <button type="submit" id="sol-btn-bulk"
+                            class="btn btn-success btn-sm"
+                            disabled
+                            style="white-space:nowrap;">
+                        ✓ {{str_approve_selected}} (<span id="sol-sel-count">0</span>)
+                    </button>
+                    <small class="text-muted" id="sol-sel-hint">
+                        {{str_bulk_hint}}
+                    </small>
+                </div>
+
+                <div class="table-responsive" style="background-color: #fff;">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width:2.5rem; vertical-align:middle; text-align:center;">
+                                    <input type="checkbox" id="sol-select-all"
+                                           title="{{str_select_all}}"
+                                           style="cursor:pointer; width:1rem; height:1rem;">
+                                </th>
+                                <th>{{str_user}}</th>
+                                <th>{{str_action_type}}</th>
+                                <th>{{str_course}}</th>
+                                <th>{{str_target_users}}</th>
+                                <th>{{str_role}}</th>
+                                <th>{{observacao_header}}</th>
+                                <th>{{str_created_at}}</th>
+                                <th>{{str_status}}</th>
+                                <th>{{str_actions}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#requests}}
+                            <tr>
+                                <td style="vertical-align:middle; text-align:center;">
+                                    {{#show_checkbox}}
+                                    <input type="checkbox"
+                                           class="sol-req-cb"
+                                           name="selected_ids[]"
+                                           value="{{request_id}}"
+                                           style="cursor:pointer; width:1rem; height:1rem;">
+                                    {{/show_checkbox}}
+                                </td>
+                                <td>{{{solicitante_link}}}</td>
+                                <td>
+                                    <small class="text-muted" style="font-family:monospace; letter-spacing:.03em;">#{{request_id}}</small>
+                                    <div>{{acao_label}}</div>
+                                </td>
+                                <td>{{{cursos_display}}}</td>
+                                <td>{{{usuarios_display}}}</td>
+                                <td>{{papel_display}}</td>
+                                <td>{{{observacao_display}}}</td>
+                                <td>{{created_date}}</td>
+                                <td>
+                                    <span class="badge {{status_badge_class}}">{{status_label}}</span>
+                                </td>
+                                <td>
+                                    {{#show_approve}}
+                                    <a href="{{approve_url}}" class="btn btn-sm btn-primary">{{str_approve}}</a>
+                                    {{/show_approve}}
+                                    {{#show_reject}}
+                                    <a href="{{reject_url}}" class="btn btn-sm">{{str_deny}}</a>
+                                    {{/show_reject}}
+                                    <a href="{{view_url}}" class="btn btn-sm">{{str_view}}</a>
+                                    <a href="{{delete_url}}" class="btn btn-sm" onclick="return confirm('{{str_confirm_delete}}');">{{str_delete}}</a>
+                                </td>
+                            </tr>
+                            {{/requests}}
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+
+            <script>
+            (function () {
+                'use strict';
+
+                var form      = document.getElementById('sol-bulk-form');
+                var selectAll = document.getElementById('sol-select-all');
+                var btnBulk   = document.getElementById('sol-btn-bulk');
+                var countEl   = document.getElementById('sol-sel-count');
+                var hintEl    = document.getElementById('sol-sel-hint');
+
+                if (!form || !selectAll) return;
+
+                function getCbs()     { return form.querySelectorAll('.sol-req-cb'); }
+                function getChecked() { return form.querySelectorAll('.sol-req-cb:checked'); }
+
+                function updateUI() {
+                    var total   = getCbs().length;
+                    var checked = getChecked().length;
+
+                    countEl.textContent = checked;
+                    btnBulk.disabled    = (checked === 0);
+
+                    hintEl.textContent = checked === 0
+                        ? '{{str_bulk_hint}}'
+                        : checked + ' solicitação(ões) selecionada(s)';
+
+                    selectAll.indeterminate = (checked > 0 && checked < total);
+                    selectAll.checked       = (total > 0 && checked === total);
+                }
+
+                selectAll.addEventListener('change', function () {
+                    getCbs().forEach(function (cb) { cb.checked = selectAll.checked; });
+                    updateUI();
+                });
+
+                form.addEventListener('change', function (e) {
+                    if (e.target && e.target.classList.contains('sol-req-cb')) {
+                        updateUI();
+                    }
+                });
+
+                form.addEventListener('submit', function (e) {
+                    var n = getChecked().length;
+                    if (n === 0) { e.preventDefault(); return; }
+                    if (!window.confirm('Aprovar ' + n + ' solicitação(ões) selecionada(s)?\n\nEsta ação não pode ser desfeita.')) {
+                        e.preventDefault();
+                    }
+                });
+
+                updateUI();
+            }());
+            </script>
+
             {{/has_requests}}
 
             {{^has_requests}}
-            <p>{{#str}}no_requests, local_solicitacoes{{/str}}</p>
+            <p>{{str_no_requests}}</p>
             {{/has_requests}}
 
         </section>

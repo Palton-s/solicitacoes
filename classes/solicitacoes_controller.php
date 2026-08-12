@@ -172,12 +172,18 @@ class solicitacoes_controller {
         
         // Adicionar campos de criação de curso se aplicável
         if ($data->tipo_acao == 'criar_curso') {
-            $record->codigo_sigaa           = !empty($data->codigo_sigaa) ? $data->codigo_sigaa : '';
-            $record->course_shortname       = !empty($data->course_shortname) ? $data->course_shortname : '';
-            $record->course_summary         = !empty($data->course_summary) ? $data->course_summary : '';
-            $record->unidade_academica_id   = !empty($data->unidade_academica_id) ? (int)$data->unidade_academica_id : 0;
-            $record->ano_semestre           = get_config('local_solicitacoes', 'ano_semestre') ?: '';
-            $record->razoes_criacao         = !empty($data->razoes_criacao) ? $data->razoes_criacao : '';
+            // Campos novos (v1.5.0)
+            $codigo_raw = !empty($data->codigo_disciplina) ? $data->codigo_disciplina : '';
+            $record->codigo_disciplina    = strtoupper(preg_replace('/[^A-Z0-9]/', '', strtoupper(trim($codigo_raw))));
+            $record->nome_disciplina      = !empty($data->nome_disciplina) ? trim($data->nome_disciplina) : '';
+            $record->turma                = !empty($data->turma) ? trim($data->turma) : '';
+            // Campos legados (compat — usa novos se disponíveis)
+            $record->codigo_sigaa         = $record->codigo_disciplina ?: (!empty($data->codigo_sigaa) ? $data->codigo_sigaa : '');
+            $record->course_shortname     = $record->nome_disciplina   ?: (!empty($data->course_shortname) ? $data->course_shortname : '');
+            $record->course_summary       = !empty($data->course_summary) ? $data->course_summary : '';
+            $record->unidade_academica_id = !empty($data->unidade_academica_id) ? (int)$data->unidade_academica_id : 0;
+            $record->ano_semestre         = get_config('local_solicitacoes', 'ano_semestre') ?: '';
+            $record->razoes_criacao       = !empty($data->razoes_criacao) ? $data->razoes_criacao : '';
         }
         
         return $record;
@@ -472,7 +478,7 @@ class solicitacoes_controller {
 
             // Para remoção de curso, não precisa de usuários relacionados.
             if ($solicitacao->tipo_acao == 'remove_course') {
-                return self::archive_courses($cursos);
+                return self::archive_courses($cursos, $solicitacao_id);
             }
             
             // Para cadastro, não precisa buscar usuários existentes
@@ -499,7 +505,7 @@ class solicitacoes_controller {
                     return self::suspend_users($cursos, $usuarios);
 
                 case 'remove_course':
-                    return self::archive_courses($cursos);
+                    return self::archive_courses($cursos, $solicitacao_id);
                     
                 default:
                     return ['success' => false, 'message' => 'Tipo de ação desconhecido: ' . $solicitacao->tipo_acao];
@@ -787,10 +793,13 @@ class solicitacoes_controller {
                 ];
             }
             
+            // Registrar ID da solicitação no campo personalizado do usuário
+            self::append_usuario_obs($newuserid, $solicitacao->id);
+
             // Criar array com o novo usuário para o método de inscrição
             $usuario = $DB->get_record('user', ['id' => $newuserid]);
             $usuarios = [$usuario];
-            
+
             // Inscrever o usuário nos cursos com o papel especificado
             $enrol_result = self::enrol_users($cursos, $usuarios, $solicitacao->papel);
             
@@ -828,20 +837,43 @@ class solicitacoes_controller {
         require_once($CFG->dirroot . '/course/lib.php');
         
         try {
-            // Compor nome breve: codigo - shortname - semestre
-            $shortname_parts = array_filter([
-                !empty($solicitacao->codigo_sigaa)     ? trim($solicitacao->codigo_sigaa)     : null,
-                !empty($solicitacao->course_shortname) ? trim($solicitacao->course_shortname) : null,
-                !empty($solicitacao->ano_semestre)     ? trim($solicitacao->ano_semestre)     : null,
-            ]);
-            $composed_shortname = implode(' - ', $shortname_parts);
+            // ── Fullname legível: Código - Nome - Turma - Semestre ────────────────
+            if (!empty($solicitacao->codigo_disciplina)) {
+                $fullname_parts = array_filter([
+                    trim($solicitacao->codigo_disciplina),
+                    !empty($solicitacao->nome_disciplina) ? trim($solicitacao->nome_disciplina) : null,
+                    !empty($solicitacao->turma)           ? trim($solicitacao->turma)           : null,
+                    !empty($solicitacao->ano_semestre)    ? trim($solicitacao->ano_semestre)    : null,
+                ]);
+            } else {
+                // Registros antigos (compat)
+                $fullname_parts = array_filter([
+                    !empty($solicitacao->codigo_sigaa)     ? trim($solicitacao->codigo_sigaa)     : null,
+                    !empty($solicitacao->course_shortname) ? trim($solicitacao->course_shortname) : null,
+                    !empty($solicitacao->ano_semestre)     ? trim($solicitacao->ano_semestre)     : null,
+                ]);
+            }
+            $fullname = implode(' - ', $fullname_parts);
 
-            // Validar se shortname já existe
-            if ($DB->record_exists('course', ['shortname' => $composed_shortname])) {
-                return [
-                    'success' => false,
-                    'message' => get_string('error_course_shortname_duplicate', 'local_solicitacoes')
-                ];
+            // ── Shortname compacto gerado automaticamente ────────────────────────
+            // Formato: CODIGO_INICIAIS_T_TURMA_ANO_SEMESTRE  ex: CCA0081_EOOE_T_01_2026_1
+            // Unicidade garantida pela função (adiciona _ extras se já existir)
+            if (!empty($solicitacao->codigo_disciplina)) {
+                $shortname = local_solicitacoes_generate_shortname(
+                    $solicitacao->codigo_disciplina,
+                    $solicitacao->nome_disciplina ?? '',
+                    $solicitacao->turma           ?? '',
+                    $solicitacao->ano_semestre    ?? ''
+                );
+            } else {
+                // Legado: usa o fullname composto e verifica duplicado da forma antiga
+                $shortname = $fullname;
+                if ($DB->record_exists('course', ['shortname' => $shortname])) {
+                    return [
+                        'success' => false,
+                        'message' => get_string('error_course_shortname_duplicate', 'local_solicitacoes')
+                    ];
+                }
             }
 
             // Validar se a categoria existe
@@ -854,13 +886,8 @@ class solicitacoes_controller {
 
             // Criar objeto do novo curso
             $newcourse = new \stdClass();
-            $fullname_parts = array_filter([
-                !empty($solicitacao->codigo_sigaa)     ? trim($solicitacao->codigo_sigaa)     : null,
-                !empty($solicitacao->course_shortname) ? trim($solicitacao->course_shortname) : null,
-                !empty($solicitacao->ano_semestre)     ? trim($solicitacao->ano_semestre)     : null,
-            ]);
-            $newcourse->fullname        = implode(' - ', $fullname_parts);
-            $newcourse->shortname       = $composed_shortname;
+            $newcourse->fullname        = $fullname;
+            $newcourse->shortname       = $shortname;
             $newcourse->summary         = !empty($solicitacao->course_summary) ? $solicitacao->course_summary : '';
             $newcourse->summaryformat   = FORMAT_HTML;
             $newcourse->category        = $solicitacao->unidade_academica_id;
@@ -883,7 +910,10 @@ class solicitacoes_controller {
             
             // Criar 6 tópicos por padrão (além da seção 0 geral)
             course_create_sections_if_missing($createdcourse, range(0, 6));
-            
+
+            // Registrar ID da solicitação no campo personalizado do curso
+            self::append_curso_processo_sei($createdcourse->id, $solicitacao->id);
+
             // Salvar relação do curso criado com a solicitação
             $curso_record = new \stdClass();
             $curso_record->solicitacao_id = $solicitacao->id;
@@ -932,13 +962,100 @@ class solicitacoes_controller {
         }
     }
 
+    // ─── Helpers: campos personalizados ──────────────────────────────────────────
+
+    /**
+     * Concatena " #<solicitacao_id>" no campo personalizado de curso 'customfield_processo_sei'.
+     * Se o campo não existir no Moodle, a operação é ignorada silenciosamente.
+     *
+     * @param int $courseid       ID do curso no Moodle
+     * @param int $solicitacao_id ID da solicitação
+     */
+    private static function append_curso_processo_sei(int $courseid, int $solicitacao_id): void {
+        global $DB;
+        try {
+            $field = $DB->get_record('customfield_field', ['shortname' => 'processo_sei'], 'id');
+            if (!$field) {
+                error_log("local_solicitacoes: campo customfield 'processo_sei' não encontrado. Nenhum dado gravado.");
+                return;
+            }
+            $tag = ' #' . $solicitacao_id;
+            $existing = $DB->get_record('customfield_data', [
+                'fieldid'    => $field->id,
+                'instanceid' => $courseid,
+            ]);
+            if ($existing) {
+                $existing->value        = rtrim($existing->value ?? '') . $tag;
+                $existing->charvalue    = \core_text::substr(ltrim($existing->value), 0, 1333);
+                $existing->timemodified = time();
+                $DB->update_record('customfield_data', $existing);
+            } else {
+                $coursecontext = \context_course::instance($courseid);
+                $data               = new \stdClass();
+                $data->fieldid      = $field->id;
+                $data->instanceid   = $courseid;
+                $data->contextid    = $coursecontext->id;
+                $data->value        = $tag;
+                $data->charvalue    = \core_text::substr(ltrim($tag), 0, 1333);
+                $data->valueformat  = 0;
+                $data->timecreated  = time();
+                $data->timemodified = time();
+                $DB->insert_record('customfield_data', $data);
+            }
+            error_log("local_solicitacoes: customfield_processo_sei do curso {$courseid} atualizado com solicitação #{$solicitacao_id}.");
+        } catch (\Exception $e) {
+            error_log("local_solicitacoes: erro ao gravar customfield_processo_sei: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Concatena "usuario criado #<solicitacao_id>" no campo de perfil de usuário 'Obs'.
+     * Se o campo não existir no Moodle, a operação é ignorada silenciosamente.
+     *
+     * @param int $userid         ID do usuário no Moodle
+     * @param int $solicitacao_id ID da solicitação
+     */
+    private static function append_usuario_obs(int $userid, int $solicitacao_id): void {
+        global $DB;
+        try {
+            $field = $DB->get_record('user_info_field', ['shortname' => 'Obs'], 'id');
+            if (!$field) {
+                error_log("local_solicitacoes: campo de perfil 'Obs' não encontrado. Nenhum dado gravado.");
+                return;
+            }
+            $tag      = 'usuario criado #' . $solicitacao_id;
+            $existing = $DB->get_record('user_info_data', [
+                'userid'  => $userid,
+                'fieldid' => $field->id,
+            ]);
+            if ($existing) {
+                $sep             = ($existing->data !== '' && $existing->data !== null) ? ' | ' : '';
+                $existing->data  = rtrim($existing->data ?? '') . $sep . $tag;
+                $DB->update_record('user_info_data', $existing);
+            } else {
+                $data             = new \stdClass();
+                $data->userid     = $userid;
+                $data->fieldid    = $field->id;
+                $data->data       = $tag;
+                $data->dataformat = 0;
+                $DB->insert_record('user_info_data', $data);
+            }
+            error_log("local_solicitacoes: profile_field_Obs do usuário {$userid} atualizado com solicitação #{$solicitacao_id}.");
+        } catch (\Exception $e) {
+            error_log("local_solicitacoes: erro ao gravar profile_field_Obs: " . $e->getMessage());
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+
     /**
      * Move cursos para categoria oculta configurada e os torna invisíveis.
      *
-     * @param array $cursos Array de cursos relacionados à solicitação
+     * @param array $cursos        Array de cursos relacionados à solicitação
+     * @param int   $solicitacao_id ID da solicitação (para registro em campo personalizado)
      * @return array Array com 'success' e 'message'
      */
-    private static function archive_courses($cursos) {
+    private static function archive_courses($cursos, int $solicitacao_id = 0) {
         global $DB, $CFG;
         require_once($CFG->dirroot . '/course/lib.php');
 
@@ -968,6 +1085,12 @@ class solicitacoes_controller {
                 $course->timemodified = time();
 
                 update_course($course);
+
+                // Registrar ID da solicitação no campo personalizado do curso
+                if ($solicitacao_id > 0) {
+                    self::append_curso_processo_sei($curso->id, $solicitacao_id);
+                }
+
                 $successcount++;
             } catch (\Exception $e) {
                 $errorcount++;

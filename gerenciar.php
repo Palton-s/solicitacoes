@@ -92,6 +92,65 @@ if ($action === 'delete' && $id) {
     }
 }
 
+// Ação: Aprovação em massa
+if ($action === 'bulk_approve') {
+    require_sesskey();
+    $selected_ids = optional_param_array('selected_ids', [], PARAM_INT);
+    $selected_ids = array_values(array_filter(array_map('intval', $selected_ids)));
+
+    if (empty($selected_ids)) {
+        redirect(
+            new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]),
+            'Nenhuma solicitação selecionada.',
+            null,
+            \core\output\notification::NOTIFY_WARNING
+        );
+    }
+
+    $success_count = 0;
+    $error_count   = 0;
+    $error_msgs    = [];
+
+    foreach ($selected_ids as $req_id) {
+        $req = $DB->get_record('local_solicitacoes', ['id' => $req_id], '*');
+        if (!$req || $req->status !== 'pendente') {
+            continue; // ignora registros não-pendentes ou inexistentes
+        }
+
+        $resultado = \local_solicitacoes\solicitacoes_controller::execute_request_action($req_id);
+        if (!$resultado['success']) {
+            $error_count++;
+            $error_msgs[] = '#' . $req_id . ': ' . $resultado['message'];
+            continue;
+        }
+
+        $req->status       = 'aprovado';
+        $req->timemodified = time();
+        $req->adminid      = $USER->id;
+        $DB->update_record('local_solicitacoes', $req);
+        local_solicitacoes_notify_aprovada($req_id);
+        $success_count++;
+    }
+
+    if ($error_count === 0 && $success_count > 0) {
+        $msg_type = \core\output\notification::NOTIFY_SUCCESS;
+        $msg      = $success_count . ' solicitação(ões) aprovada(s) com sucesso.';
+    } elseif ($success_count === 0) {
+        $msg_type = \core\output\notification::NOTIFY_ERROR;
+        $msg      = 'Erro ao aprovar: ' . implode('; ', $error_msgs);
+    } else {
+        $msg_type = \core\output\notification::NOTIFY_WARNING;
+        $msg      = $success_count . ' aprovada(s), ' . $error_count . ' com erro(s): ' . implode('; ', $error_msgs);
+    }
+
+    redirect(
+        new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]),
+        $msg,
+        null,
+        $msg_type
+    );
+}
+
 // Preparar dados para abas de filtro
 $filter_tabs = [];
 $filter_options = ['pendente' => 'Pendentes', 'aprovado' => 'Aprovadas', 'negado' => 'Negadas', 'all' => 'Todas'];
@@ -175,15 +234,38 @@ foreach ($requests as $r) {
     }
 }
 
+// Link "Voltar" para a coordenação de cursos
+$back_url = (new moodle_url('/course/view.php', ['id' => 1776]))->out(false);
+
 // Preparar dados para o template
 $template_data = [
     'filters'          => $filter_tabs,
     'has_requests'     => !empty($requests),
-    'observacao_header' => (function() {
-        $s = get_string('observacao_column', 'local_solicitacoes');
-        return (strpos($s, '[[') === 0) ? 'Observação' : $s;
-    })(),
-    'requests'         => []
+    'observacao_header' => local_solicitacoes_str('observacao_column'),
+    'form_action_url'  => (new moodle_url('/local/solicitacoes/gerenciar.php'))->out(false),
+    'sesskey'          => sesskey(),
+    'current_filter'   => $filter,
+    'back_url'         => $back_url,
+    // Strings da tabela (passadas do PHP para evitar [[key]] no template)
+    'str_back'             => local_solicitacoes_str('back'),
+    'str_approve_selected' => local_solicitacoes_str('approve_selected'),
+    'str_bulk_hint'        => local_solicitacoes_str('bulk_hint'),
+    'str_select_all'       => local_solicitacoes_str('select_all'),
+    'str_user'             => local_solicitacoes_str('user'),
+    'str_action_type'      => local_solicitacoes_str('action_type'),
+    'str_course'           => local_solicitacoes_str('course'),
+    'str_target_users'     => local_solicitacoes_str('target_users'),
+    'str_role'             => local_solicitacoes_str('role'),
+    'str_created_at'       => local_solicitacoes_str('created_at'),
+    'str_status'           => local_solicitacoes_str('status'),
+    'str_actions'          => local_solicitacoes_str('actions'),
+    'str_approve'          => local_solicitacoes_str('approve'),
+    'str_deny'             => local_solicitacoes_str('deny'),
+    'str_view'             => local_solicitacoes_str('view'),
+    'str_delete'           => local_solicitacoes_str('delete'),
+    'str_no_requests'      => local_solicitacoes_str('no_requests'),
+    'str_confirm_delete'   => local_solicitacoes_str('confirm_delete'),
+    'requests'             => []
 ];
 
 
@@ -197,11 +279,20 @@ if (!$requests) {
 foreach ($requests as $r) {
     // 1. Processar Cursos (Transformar dicionário em links)
     if ($r->tipo_acao === 'criar_curso') {
-        $partes = array_filter([
-            !empty($r->codigo_sigaa)      ? trim($r->codigo_sigaa)      : null,
-            !empty($r->course_shortname)  ? trim($r->course_shortname)  : null,
-            !empty($r->ano_semestre)      ? trim($r->ano_semestre)      : null,
-        ]);
+        if (!empty($r->codigo_disciplina)) {
+            $partes = array_filter([
+                trim($r->codigo_disciplina),
+                !empty($r->nome_disciplina) ? trim($r->nome_disciplina) : null,
+                !empty($r->turma)           ? trim($r->turma)           : null,
+                !empty($r->ano_semestre)    ? trim($r->ano_semestre)    : null,
+            ]);
+        } else {
+            $partes = array_filter([
+                !empty($r->codigo_sigaa)     ? trim($r->codigo_sigaa)     : null,
+                !empty($r->course_shortname) ? trim($r->course_shortname) : null,
+                !empty($r->ano_semestre)     ? trim($r->ano_semestre)     : null,
+            ]);
+        }
         $cursos_display = implode(' - ', $partes);
     } else {
         $links_cursos = [];
@@ -272,7 +363,8 @@ foreach ($requests as $r) {
     // Coluna Observação: para criar_curso, lista disciplinas com nome similar (>= 90%)
     $observacao_display = '';
     if ($r->tipo_acao === 'criar_curso' && !empty($allowed_courses_for_similarity)) {
-        $search = strtolower(trim($r->course_shortname ?? ''));
+        // Usa nome_disciplina (novos registros) ou course_shortname (legado) como texto de busca
+        $search = strtolower(trim($r->nome_disciplina ?? $r->course_shortname ?? ''));
         if ($search !== '') {
             $similares = [];
             foreach ($allowed_courses_for_similarity as $existing) {
@@ -302,8 +394,10 @@ foreach ($requests as $r) {
 
     // Preparar dados para o template
     $baseurl = new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]);
-    
+
     $request_data = [
+        'request_id'   => $r->id,
+        'show_checkbox' => ($r->status === 'pendente'),
         'solicitante_link' => $solicitante_nome,
         'acao_label' => $acao_label,
         'cursos_display' => $cursos_display,

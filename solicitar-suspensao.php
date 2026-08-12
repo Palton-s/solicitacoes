@@ -9,7 +9,7 @@ require_login();
 $forced_strings = [
     'form_suspensao_descricao' => 'Use este formulário para solicitar a suspensão temporária de usuários em um ou mais cursos.',
     'no_users_found' => 'Nenhum usuário encontrado',
-    'observacoes_placeholder' => 'Digite observações adicionais sobre esta solicitação (opcional)...'
+    'observacoes_placeholder' => 'descreva detalhadamente o motivo da sua solicitação'
 ];
 
 // Adicionar strings ao cache temporariamente

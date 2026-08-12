@@ -45,8 +45,9 @@ $string['papel_help']           = 'Select the role users should have in the cour
 $string['papel_label']          = 'Course Role';
 $string['papel_help_dinamico']  = 'Select the role users will have in the course';
 $string['select_role']          = 'Select a role...';
-$string['observacoes']          = 'Comments';
-$string['observacoes_help']     = 'Additional information about the request (optional).';
+$string['observacoes']          = 'Justification';
+$string['observacoes_help']     = 'Describe the reason for your request. The more details you provide, the faster it will be processed.';
+$string['observacoes_placeholder'] = 'describe in detail the reason for your request';
 $string['request_submit']       = 'Submit Request';
 $string['no_courses_found']     = 'No courses found';
 $string['searching_courses']    = 'Searching courses...';
@@ -56,8 +57,8 @@ $string['aviso_professores_curso'] = 'If no teacher is selected, the requester w
 $string['aviso_professor_curso'] = 'Select the user who will be the teacher of this course and their role.';
 $string['papel_professor'] = 'Teacher Role';
 $string['papel_professor_help'] = 'Select the role the teacher will have in the course (recommended: Editing Teacher)';
-$string['professor_usuario'] = 'Select Teacher';
-$string['professor_usuario_help'] = 'Search and select the user who will be the teacher of this course';
+$string['professor_usuario'] = 'Select Teachers';
+$string['professor_usuario_help'] = 'Search and select the users who will be the teachers of this course. You can select multiple teachers.';
 
 $string['acao_inscricao']       = 'Enrollment';
 $string['acao_remocao']         = 'Removal';
@@ -163,6 +164,19 @@ $string['usuario_criado']            = 'User {$a} created successfully.';
 
 // Course creation fields
 $string['acao_criar_curso']          = 'Course Creation';
+
+// New split fields for course creation (v1.5.0)
+$string['codigo_disciplina']         = 'Course Code';
+$string['codigo_disciplina_help']    = 'Course code in SIGAA. Must contain 2 to 10 uppercase letters followed by exactly 4 digits. Examples: CCA0081, NUT0028. The field only accepts uppercase letters and digits — any other character is automatically removed.';
+$string['nome_disciplina']           = 'Course Name';
+$string['nome_disciplina_help']      = 'Full name of the course as listed in SIGAA. Example: "Constitutional Law".';
+$string['turma']                     = 'Class';
+$string['turma_help']                = 'Class identifier. The field is pre-filled with "Turma " — just add the class number or letter. Examples: "Turma 01", "Turma A".';
+$string['error_codigo_disciplina_required'] = 'Please enter the course code.';
+$string['error_codigo_disciplina_invalid']  = 'Invalid code. Use 2 to 10 uppercase letters followed by exactly 4 digits (e.g., CCA0081, NUT0028).';
+$string['error_nome_disciplina_required']   = 'Please enter the course name.';
+$string['error_turma_required']             = 'Please enter the class.';
+
 $string['codigo_sigaa']              = 'SIGAA Code - Class (e.g., NUT0028 - Class 01)';
 $string['codigo_sigaa_help']         = 'Enter the SIGAA code followed by the class. Example: "NUT0028 - Class 01", "NUT0028 - Class 02"...';
 $string['course_shortname']          = 'Course Short Name (Nickname_2026.1)';

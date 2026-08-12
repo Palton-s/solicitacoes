@@ -161,7 +161,13 @@ $header_color = $status_colors[$request->status] ?? '#6c757d';
 echo html_writer::start_div('card-header d-flex align-items-center justify-content-between py-3', [
     'style' => 'background:' . $header_color . '; color:#fff; border-bottom:none;'
 ]);
-echo html_writer::tag('h4', s($acao_label), ['class' => 'mb-0', 'style' => 'color:#fff;']);
+echo html_writer::tag('h4',
+    s($acao_label) . '&nbsp;&nbsp;' . html_writer::tag('code',
+        '#' . $request->id,
+        ['style' => 'color:rgba(255,255,255,.8); font-size:.8rem; font-weight:normal; vertical-align:middle;']
+    ),
+    ['class' => 'mb-0', 'style' => 'color:#fff;']
+);
 echo html_writer::tag('span', s($badge_label), [
     'class' => 'badge badge-pill',
     'style' => 'background:rgba(0,0,0,.25); font-size:.9rem; color:#fff;'
@@ -184,15 +190,43 @@ function dl_row(string $label, string $value): string {
     return $dt . $dd;
 }
 
+// Protocolo (ID) sempre como primeira linha
+echo dl_row(
+    'Protocolo',
+    html_writer::tag('code', '#' . $request->id,
+        ['style' => 'font-size:1em; letter-spacing:.04em;'])
+);
+
 if ($request->tipo_acao === 'criar_curso') {
-    echo dl_row(
-        get_string('codigo_sigaa', 'local_solicitacoes'),
-        html_writer::tag('strong', s($request->codigo_sigaa))
-    );
-    echo dl_row(
-        get_string('course_shortname', 'local_solicitacoes'),
-        s($request->course_shortname)
-    );
+    if (!empty($request->codigo_disciplina)) {
+        // Registro novo: exibe campos separados
+        echo dl_row(
+            get_string('codigo_disciplina', 'local_solicitacoes'),
+            html_writer::tag('strong',
+                html_writer::tag('code', s($request->codigo_disciplina),
+                    ['style' => 'font-size:1.05em; letter-spacing:.05em;'])
+            )
+        );
+        echo dl_row(
+            get_string('nome_disciplina', 'local_solicitacoes'),
+            s($request->nome_disciplina)
+        );
+        if (!empty($request->turma)) {
+            echo dl_row(get_string('turma', 'local_solicitacoes'), s($request->turma));
+        }
+    } else {
+        // Registro antigo (legado): exibe campos originais
+        echo dl_row(
+            get_string('codigo_sigaa', 'local_solicitacoes'),
+            html_writer::tag('strong', s($request->codigo_sigaa))
+        );
+        if (!empty($request->course_shortname)) {
+            echo dl_row(
+                get_string('course_shortname', 'local_solicitacoes'),
+                s($request->course_shortname)
+            );
+        }
+    }
     if ($categoria_nome !== '') {
         echo dl_row(get_string('unidade_academica', 'local_solicitacoes'), s($categoria_nome));
     }

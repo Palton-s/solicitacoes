@@ -36,17 +36,36 @@ class criar_curso_form extends moodleform {
                       '</div>';
         $mform->addElement('html', $aviso_html);
 
-        // Código SIGAA
-        $mform->addElement('text', 'codigo_sigaa', get_string('codigo_sigaa', 'local_solicitacoes'), ['size' => 30]);
-        $mform->setType('codigo_sigaa', PARAM_TEXT);
-        $mform->addRule('codigo_sigaa', null, 'required', null, 'client');
-        $mform->addHelpButton('codigo_sigaa', 'codigo_sigaa_help', 'local_solicitacoes');
+        // Código da disciplina (ex: CCA0081)
+        $mform->addElement('text', 'codigo_disciplina', get_string('codigo_disciplina', 'local_solicitacoes'), [
+            'size'        => 15,
+            'maxlength'   => 14,
+            'placeholder' => 'Ex: CCA0081',
+            'style'       => 'text-transform:uppercase; letter-spacing:.05em; font-family:monospace;',
+            'oninput'     => "this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');",
+        ]);
+        $mform->setType('codigo_disciplina', PARAM_TEXT);
+        $mform->addRule('codigo_disciplina', null, 'required', null, 'client');
+        $mform->addHelpButton('codigo_disciplina', 'codigo_disciplina_help', 'local_solicitacoes');
 
-        // Course shortname
-        $mform->addElement('text', 'course_shortname', get_string('course_shortname', 'local_solicitacoes'), ['size' => 30]);
-        $mform->setType('course_shortname', PARAM_TEXT);
-        $mform->addRule('course_shortname', null, 'required', null, 'client');
-        $mform->addHelpButton('course_shortname', 'course_shortname_help', 'local_solicitacoes');
+        // Nome da disciplina
+        $mform->addElement('text', 'nome_disciplina', get_string('nome_disciplina', 'local_solicitacoes'), [
+            'size'        => 50,
+            'placeholder' => 'Ex: Estrutura e Organização do Estado',
+        ]);
+        $mform->setType('nome_disciplina', PARAM_TEXT);
+        $mform->addRule('nome_disciplina', null, 'required', null, 'client');
+        $mform->addHelpButton('nome_disciplina', 'nome_disciplina_help', 'local_solicitacoes');
+
+        // Turma (pré-preenchida com "Turma ")
+        $mform->addElement('text', 'turma', get_string('turma', 'local_solicitacoes'), [
+            'size'      => 20,
+            'maxlength' => 50,
+        ]);
+        $mform->setType('turma', PARAM_TEXT);
+        $mform->setDefault('turma', 'Turma ');
+        $mform->addRule('turma', null, 'required', null, 'client');
+        $mform->addHelpButton('turma', 'turma_help', 'local_solicitacoes');
 
         // Categoria do curso (implementação nativa do Moodle)
         $displaylist = core_course_category::make_categories_list();
@@ -87,9 +106,9 @@ class criar_curso_form extends moodleform {
         $mform->addRule('papel', null, 'required', null, 'client');
         $mform->addHelpButton('papel', 'papel_professor_help', 'local_solicitacoes');
 
-        // Campo de usuário professor (autocomplete)
+        // Campo de usuário(s) professor(es) (autocomplete múltiplo)
         $mform->addElement('autocomplete', 'professor_usuario', get_string('professor_usuario', 'local_solicitacoes'), array(), array(
-            'multiple' => false,
+            'multiple' => true,
             'placeholder' => get_string('usuarios_busca_help', 'local_solicitacoes'),
             'noselectionstring' => get_string('no_users_found', 'local_solicitacoes'),
             'ajax' => 'core_user/form_user_selector',
@@ -105,11 +124,10 @@ class criar_curso_form extends moodleform {
                 if (empty($userid)) return '';
                 $user = $DB->get_record('user', ['id' => $userid], 'id, firstname, lastname, username, email');
                 if (!$user) return '';
-                $fullname = fullname($user);
-                return $fullname . ' (' . $user->username . ') - ' . $user->email;
+                return fullname($user) . ' (' . $user->username . ') — ' . $user->email;
             }
         ));
-        $mform->setType('professor_usuario', PARAM_INT);
+        $mform->setType('professor_usuario', PARAM_TEXT);
         $mform->addRule('professor_usuario', null, 'required', null, 'client');
         $mform->addHelpButton('professor_usuario', 'professor_usuario_help', 'local_solicitacoes');
 
@@ -124,6 +142,26 @@ class criar_curso_form extends moodleform {
         global $DB;
         $errors = parent::validation($data, $files);
 
+        // Validar formato do código da disciplina: 2-10 letras maiúsculas + exatamente 4 dígitos
+        if (empty($data['codigo_disciplina'])) {
+            $errors['codigo_disciplina'] = get_string('error_codigo_disciplina_required', 'local_solicitacoes');
+        } else {
+            $codigo = strtoupper(trim($data['codigo_disciplina']));
+            if (!preg_match('/^[A-Z]{2,10}[0-9]{4}$/', $codigo)) {
+                $errors['codigo_disciplina'] = get_string('error_codigo_disciplina_invalid', 'local_solicitacoes');
+            }
+        }
+
+        // Nome da disciplina obrigatório
+        if (empty(trim($data['nome_disciplina'] ?? ''))) {
+            $errors['nome_disciplina'] = get_string('error_nome_disciplina_required', 'local_solicitacoes');
+        }
+
+        // Turma obrigatória
+        if (empty(trim($data['turma'] ?? ''))) {
+            $errors['turma'] = get_string('error_turma_required', 'local_solicitacoes');
+        }
+
         // Validar se a categoria existe e o usuário tem permissão
         if (!empty($data['category'])) {
             $category = core_course_category::get($data['category'], IGNORE_MISSING);
@@ -132,11 +170,17 @@ class criar_curso_form extends moodleform {
             }
         }
 
-        // Validar se o usuário professor existe
+        // Validar se todos os professores selecionados existem e estão ativos
         if (!empty($data['professor_usuario'])) {
-            $user = $DB->get_record('user', ['id' => $data['professor_usuario']], 'id, deleted, confirmed');
-            if (!$user || $user->deleted || !$user->confirmed) {
-                $errors['professor_usuario'] = get_string('error_invalid_user', 'local_solicitacoes');
+            $prof_ids = is_array($data['professor_usuario']) ? $data['professor_usuario'] : [$data['professor_usuario']];
+            foreach ($prof_ids as $prof_id) {
+                $prof_id = (int)$prof_id;
+                if ($prof_id <= 0) continue;
+                $user = $DB->get_record('user', ['id' => $prof_id], 'id, deleted, confirmed');
+                if (!$user || $user->deleted || !$user->confirmed) {
+                    $errors['professor_usuario'] = get_string('error_invalid_user', 'local_solicitacoes');
+                    break;
+                }
             }
         }
 
@@ -173,8 +217,12 @@ if ($data = $mform->get_data()) {
         $record->papel = $data->papel;                   // Papel selecionado para o professor
         $record->timecreated = time();                  // Campo correto: timecreated (não data_criacao) 
         $record->timemodified = time();                 // Campo obrigatório que estava faltando
-        $record->codigo_sigaa = $data->codigo_sigaa;
-        $record->course_shortname = $data->course_shortname;
+        $record->codigo_disciplina = strtoupper(preg_replace('/[^A-Z0-9]/', '', strtoupper(trim($data->codigo_disciplina))));
+        $record->nome_disciplina   = trim($data->nome_disciplina);
+        $record->turma             = trim($data->turma);
+        // Mantém campos legados preenchidos para compatibilidade com código antigo
+        $record->codigo_sigaa      = $record->codigo_disciplina;
+        $record->course_shortname  = $record->nome_disciplina;
         $record->course_summary = $data->course_summary;
         $record->unidade_academica_id = $data->category;  // Campo correto: unidade_academica_id (não category_id)
         $record->ano_semestre = get_config('local_solicitacoes', 'ano_semestre') ?: '';
@@ -182,13 +230,19 @@ if ($data = $mform->get_data()) {
         
         $solicitacao_id = $DB->insert_record('local_solicitacoes', $record);
 
-        // Salvar professor da disciplina (usuário selecionado)
+        // Salvar professores da disciplina (um ou mais usuários selecionados)
         if (!empty($data->professor_usuario)) {
-            $rel = new stdClass();
-            $rel->solicitacao_id = $solicitacao_id;
-            $rel->usuario_id     = $data->professor_usuario;  // Usuário selecionado como professor
-            $rel->timecreated    = time();
-            $DB->insert_record('local_usuarios_solicitacoes', $rel);
+            $prof_ids = is_array($data->professor_usuario) ? $data->professor_usuario : [$data->professor_usuario];
+            $now = time();
+            foreach ($prof_ids as $prof_id) {
+                $prof_id = (int)$prof_id;
+                if ($prof_id <= 0) continue;
+                $rel = new stdClass();
+                $rel->solicitacao_id = $solicitacao_id;
+                $rel->usuario_id     = $prof_id;
+                $rel->timecreated    = $now;
+                $DB->insert_record('local_usuarios_solicitacoes', $rel);
+            }
         }
 
         redirect(

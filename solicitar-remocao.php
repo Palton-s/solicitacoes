@@ -9,7 +9,7 @@ require_login();
 $forced_strings = [
     'form_remocao_descricao' => 'Use este formulário para solicitar a remoção de usuários de um ou mais cursos.',
     'no_users_found' => 'Nenhum usuário encontrado',
-    'observacoes_placeholder' => 'Digite observações adicionais sobre esta solicitação (opcional)...'
+    'observacoes_placeholder' => 'descreva detalhadamente o motivo da sua solicitação'
 ];
 
 // Adicionar strings ao cache temporariamente
