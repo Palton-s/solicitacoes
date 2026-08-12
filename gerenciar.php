@@ -177,9 +177,13 @@ foreach ($requests as $r) {
 
 // Preparar dados para o template
 $template_data = [
-    'filters' => $filter_tabs,
-    'has_requests' => !empty($requests),
-    'requests' => []
+    'filters'          => $filter_tabs,
+    'has_requests'     => !empty($requests),
+    'observacao_header' => (function() {
+        $s = get_string('observacao_column', 'local_solicitacoes');
+        return (strpos($s, '[[') === 0) ? 'Observação' : $s;
+    })(),
+    'requests'         => []
 ];
 
 
@@ -286,6 +290,9 @@ foreach ($requests as $r) {
             }
             if (!empty($similares)) {
                 $label = get_string('disciplinas_similares', 'local_solicitacoes');
+                if (strpos($label, '[[') === 0) {
+                    $label = 'Disciplinas similares já criadas:';
+                }
                 $observacao_display = '<small><strong>' . $label . '</strong><ul class="mb-0 pl-3">'
                     . '<li>' . implode('</li><li>', $similares) . '</li>'
                     . '</ul></small>';

@@ -125,210 +125,220 @@ function render_card(string $header_html, string $body_html, string $header_extr
     return $out;
 }
 
+// ─── Dados auxiliares ─────────────────────────────────────────────────────────
+$solicitante = core_user::get_user($request->userid);
+
+$categoria_nome = '';
+if (!empty($request->unidade_academica_id)) {
+    $cat = $DB->get_record('course_categories', ['id' => $request->unidade_academica_id]);
+    if ($cat) {
+        $categoria_nome = format_string($cat->name);
+    }
+}
+
+$admin = (!empty($request->adminid)) ? core_user::get_user($request->adminid) : null;
+
+// ─── Saída ────────────────────────────────────────────────────────────────────
 echo $OUTPUT->header();
 
-// ─── Barra de resumo (tipo · status · data) ───────────────────────────────────
+// Botão voltar
+$btn_back = new single_button($backurl, get_string('back_to_list', 'local_solicitacoes'), 'get');
+echo html_writer::div($OUTPUT->render($btn_back), 'mb-3');
 
-$header_name = ($request->tipo_acao === 'criar_curso')
-    ? $acao_label . ' — ' . format_string($request->course_shortname)
-    : $acao_label . ' — ' . format_string($request->curso_nome);
+// ── Card único ────────────────────────────────────────────────────────────────
+echo html_writer::start_div('card shadow-sm');
 
-$badge_html = html_writer::tag('span', $badge_label, [
-    'class' => 'badge badge-pill ' . $badge_class,
-    'style' => 'font-size:.85rem; vertical-align:middle;',
+// Cabeçalho do card: tipo + status
+$status_colors = [
+    'pendente'     => '#f0ad4e',
+    'aprovado'     => '#5cb85c',
+    'negado'       => '#d9534f',
+    'em_andamento' => '#5bc0de',
+    'concluido'    => '#337ab7',
+];
+$header_color = $status_colors[$request->status] ?? '#6c757d';
+
+echo html_writer::start_div('card-header d-flex align-items-center justify-content-between py-3', [
+    'style' => 'background:' . $header_color . '; color:#fff; border-bottom:none;'
 ]);
-$date_html = html_writer::tag('small',
-    userdate($request->timecreated, get_string('strftimedatetime', 'langconfig')),
-    ['class' => 'text-muted ml-3']
-);
+echo html_writer::tag('h4', s($acao_label), ['class' => 'mb-0', 'style' => 'color:#fff;']);
+echo html_writer::tag('span', s($badge_label), [
+    'class' => 'badge badge-pill',
+    'style' => 'background:rgba(0,0,0,.25); font-size:.9rem; color:#fff;'
+]);
+echo html_writer::end_div(); // card-header
 
-echo $OUTPUT->heading($header_name . ' ' . $badge_html . $date_html, 3);
+echo html_writer::start_div('card-body');
 
-// ─── Duas colunas ─────────────────────────────────────────────────────────────
-echo html_writer::start_div('row');
+// ── Seção: Dados da solicitação ───────────────────────────────────────────────
+echo html_writer::tag('h6', 'Dados da Solicitação', [
+    'class' => 'text-uppercase text-muted mb-3',
+    'style' => 'letter-spacing:.05em; font-size:.75rem;'
+]);
 
-// ════ COLUNA ESQUERDA: tipo · usuários · cursos · status ══════════════════════
-echo html_writer::start_div('col-lg-7');
+echo html_writer::start_tag('dl', ['class' => 'row mb-0']);
 
-// 1. Card: Tipo de ação --------------------------------------------------------
+function dl_row(string $label, string $value): string {
+    $dt = html_writer::tag('dt', $label, ['class' => 'col-sm-4 font-weight-semibold text-muted']);
+    $dd = html_writer::tag('dd', $value,  ['class' => 'col-sm-8 mb-2']);
+    return $dt . $dd;
+}
+
 if ($request->tipo_acao === 'criar_curso') {
-    $body = '';
-    $body .= detail_row(get_string('codigo_sigaa',     'local_solicitacoes'), format_string($request->codigo_sigaa));
-    $body .= detail_row(get_string('course_shortname', 'local_solicitacoes'), format_string($request->course_shortname));
-
-    if (!empty($request->unidade_academica_id)) {
-        $categoria = $DB->get_record('course_categories', ['id' => $request->unidade_academica_id]);
-        if ($categoria) {
-            $body .= detail_row(get_string('unidade_academica', 'local_solicitacoes'), format_string($categoria->name));
-        }
+    echo dl_row(
+        get_string('codigo_sigaa', 'local_solicitacoes'),
+        html_writer::tag('strong', s($request->codigo_sigaa))
+    );
+    echo dl_row(
+        get_string('course_shortname', 'local_solicitacoes'),
+        s($request->course_shortname)
+    );
+    if ($categoria_nome !== '') {
+        echo dl_row(get_string('unidade_academica', 'local_solicitacoes'), s($categoria_nome));
     }
-
-    $body .= detail_row(get_string('ano_semestre', 'local_solicitacoes'), format_string($request->ano_semestre));
+    echo dl_row(get_string('ano_semestre', 'local_solicitacoes'), s($request->ano_semestre));
 
     if (!empty($request->course_summary)) {
-        $body .= html_writer::tag('p', html_writer::tag('strong', get_string('course_summary', 'local_solicitacoes') . ':'), ['class' => 'mb-1']);
-        $body .= $OUTPUT->box(format_text($request->course_summary, FORMAT_HTML), 'generalbox mb-3');
+        echo dl_row(get_string('course_summary', 'local_solicitacoes'),
+            html_writer::tag('div', nl2br(s($request->course_summary)), ['style' => 'white-space:pre-wrap'])
+        );
     }
-
     if (!empty($request->razoes_criacao)) {
-        $body .= html_writer::tag('p', html_writer::tag('strong', get_string('razoes_criacao', 'local_solicitacoes') . ':'), ['class' => 'mb-1']);
-        $body .= $OUTPUT->box(
-            html_writer::tag('div', nl2br(s($request->razoes_criacao)), ['style' => 'white-space:pre-wrap']),
-            'generalbox'
+        echo dl_row(get_string('razoes_criacao', 'local_solicitacoes'),
+            html_writer::tag('div', nl2br(s($request->razoes_criacao)), ['style' => 'white-space:pre-wrap'])
         );
     }
 
-    echo render_card(html_writer::tag('strong', get_string('acao_criar_curso', 'local_solicitacoes')), $body);
 } else {
-    $body = detail_row(get_string('action_type', 'local_solicitacoes'), $acao_label);
-    echo render_card(html_writer::tag('strong', get_string('action_type', 'local_solicitacoes')), $body);
-}
+    echo dl_row(get_string('action_type', 'local_solicitacoes'), s($acao_label));
 
-// 2. Card: Usuários afetados ---------------------------------------------------
-if ($request->tipo_acao !== 'criar_curso') {
-    $card_title = ($request->tipo_acao === 'cadastro')
-        ? get_string('novo_usuario',  'local_solicitacoes')
-        : get_string('target_users', 'local_solicitacoes');
-
-    $list_items = '';
-
-    if ($request->tipo_acao === 'cadastro') {
-        $list_items .= html_writer::start_tag('li', ['class' => 'list-group-item']);
-        $list_items .= html_writer::tag('strong', format_string($request->firstname . ' ' . $request->lastname));
-        $list_items .= html_writer::tag('div',
-            get_string('cpf', 'local_solicitacoes') . ': ' . s($request->cpf) . html_writer::empty_tag('br') .
-            get_string('email_novo_usuario', 'local_solicitacoes') . ': ' . s($request->email),
-            ['class' => 'small text-muted mt-1']
-        );
-        $list_items .= html_writer::end_tag('li');
-
-    } else if (!empty($usuarios)) {
-        foreach ($usuarios as $usuario) {
-            $list_items .= html_writer::start_tag('li', ['class' => 'list-group-item']);
-            $list_items .= html_writer::tag('strong', fullname($usuario));
-            $list_items .= html_writer::tag('div',
-                s($usuario->email) . ' (' . s($usuario->username) . ')',
-                ['class' => 'small text-muted']
-            );
-            $list_items .= html_writer::end_tag('li');
-        }
-    } else {
-        foreach (explode("\n", trim($request->usuarios_nomes)) as $nome) {
-            $nome = trim($nome);
-            if ($nome !== '') {
-                $list_items .= html_writer::tag('li', format_string($nome), ['class' => 'list-group-item']);
-            }
-        }
-    }
-
-    echo render_card(
-        html_writer::tag('strong', $card_title),
-        html_writer::tag('ul', $list_items, ['class' => 'list-group list-group-flush mb-0']),
-        'p-2'
-    );
-}
-
-// 3. Card: Cursos afetados -----------------------------------------------------
-if ($request->tipo_acao !== 'criar_curso') {
-    $course_body = '';
-
+    // Cursos afetados
     if (!empty($cursos)) {
-        $table             = new html_table();
-        $table->head       = [get_string('fullnamecourse'), get_string('shortnamecourse')];
-        $table->data       = [];
-        $table->attributes = ['class' => 'table table-sm mb-0'];
-        foreach ($cursos as $curso) {
-            $table->data[] = [format_string($curso->fullname), format_string($curso->shortname)];
+        $nomes = [];
+        foreach ($cursos as $c) {
+            $url    = new moodle_url('/course/view.php', ['id' => $c->id]);
+            $nomes[] = html_writer::link($url, format_string($c->fullname)) .
+                       html_writer::tag('small', ' (' . s($c->shortname) . ')', ['class' => 'text-muted']);
         }
-        $course_body .= html_writer::table($table);
-    } else {
-        $course_body .= html_writer::tag('p', format_string($request->curso_nome), ['class' => 'mb-1']);
+        echo dl_row(get_string('course', 'local_solicitacoes'), implode('<br>', $nomes));
     }
 
+    // Papel
     if (in_array($request->tipo_acao, ['inscricao', 'cadastro']) && !empty($request->papel)) {
-        $papel_label  = $roles_lookup[$request->papel] ?? $request->papel;
-        $course_body .= html_writer::tag('p',
-            html_writer::tag('strong', get_string('role', 'local_solicitacoes') . ': ') . $papel_label,
-            ['class' => 'mt-2 mb-0']
+        echo dl_row(get_string('role', 'local_solicitacoes'),
+            $roles_lookup[$request->papel] ?? s($request->papel)
         );
     }
 
-    echo render_card(html_writer::tag('strong', get_string('course', 'local_solicitacoes')), $course_body);
+    // Usuários afetados
+    if ($request->tipo_acao === 'cadastro') {
+        $user_info = html_writer::tag('strong', s($request->firstname . ' ' . $request->lastname)) . '<br>' .
+                     html_writer::tag('small',
+                         get_string('cpf', 'local_solicitacoes') . ': ' . s($request->cpf) . '&nbsp;&nbsp;|&nbsp;&nbsp;' .
+                         get_string('email_novo_usuario', 'local_solicitacoes') . ': ' . s($request->email),
+                         ['class' => 'text-muted']
+                     );
+        echo dl_row(get_string('novo_usuario', 'local_solicitacoes'), $user_info);
+
+    } elseif (!empty($usuarios)) {
+        $user_lines = [];
+        foreach ($usuarios as $u) {
+            $url = new moodle_url('/user/profile.php', ['id' => $u->id]);
+            $user_lines[] = html_writer::link($url, fullname($u)) .
+                            html_writer::tag('small', ' — ' . s($u->email), ['class' => 'text-muted']);
+        }
+        echo dl_row(get_string('target_users', 'local_solicitacoes'), implode('<br>', $user_lines));
+    }
 }
 
-// 4. Card: Status --------------------------------------------------------------
-$status_body = detail_row(get_string('status', 'local_solicitacoes'),
-    html_writer::tag('span', $badge_label, ['class' => 'badge badge-pill ' . $badge_class])
-);
-echo render_card(html_writer::tag('strong', get_string('status', 'local_solicitacoes')), $status_body);
-
-// 4a. Card: Motivo da negação (logo abaixo do status, só se negado) ------------
-if ($request->status === 'negado' && !empty($request->motivo_negacao)) {
-    echo render_card(
-        html_writer::tag('strong', get_string('motivo_negacao', 'local_solicitacoes')),
-        html_writer::tag('div', nl2br(s($request->motivo_negacao)), ['style' => 'white-space:pre-wrap'])
-    );
-}
-
-echo html_writer::end_div(); // fim col-lg-7
-
-// ════ COLUNA DIREITA: observações · solicitante · criado em ═══════════════════
-echo html_writer::start_div('col-lg-5');
-
-// 5. Card: Observações ---------------------------------------------------------
+// Observações gerais
 if (!empty($request->observacoes)) {
-    echo render_card(
-        html_writer::tag('strong', get_string('observacoes', 'local_solicitacoes')),
-        html_writer::tag('div', nl2br(s($request->observacoes)), ['class' => 'text-muted', 'style' => 'white-space:pre-wrap'])
-    );
-}
-
-// 6. Card: Solicitante ---------------------------------------------------------
-$solicitante      = core_user::get_user($request->userid);
-$solicitante_pic  = $OUTPUT->user_picture($solicitante, ['size' => 40, 'link' => false, 'class' => 'mr-2']);
-$solicitante_body = html_writer::div(
-    $solicitante_pic .
-    html_writer::div(
-        html_writer::tag('strong', fullname($solicitante)) .
-        html_writer::tag('div', s($solicitante->email), ['class' => 'small text-muted']),
-        ''
-    ),
-    'd-flex align-items-center'
-);
-echo render_card(html_writer::tag('strong', get_string('user', 'local_solicitacoes')), $solicitante_body);
-
-// 7. Card: Responsável pelo processamento --------------------------------------
-if ($request->adminid) {
-    $admin      = core_user::get_user($request->adminid);
-    $admin_pic  = $OUTPUT->user_picture($admin, ['size' => 40, 'link' => false, 'class' => 'mr-2']);
-    $admin_info = html_writer::tag('strong', fullname($admin));
-    if ($request->timemodified != $request->timecreated) {
-        $admin_info .= html_writer::tag('div',
-            get_string('last_modified', 'local_solicitacoes') . ': ' .
-            userdate($request->timemodified, get_string('strftimedatetime', 'langconfig')),
-            ['class' => 'small text-muted']
+    $obs_text = $request->observacoes;
+    // Se tiver as linhas técnicas de debug, mostrar só as observações adicionais
+    if (str_contains($obs_text, 'OBSERVAÇÕES ADICIONAIS:')) {
+        $obs_text = trim(explode('OBSERVAÇÕES ADICIONAIS:', $obs_text)[1]);
+    } elseif (str_contains($obs_text, 'CURSOS SELECIONADOS:')) {
+        $obs_text = ''; // só informação técnica, não exibe
+    }
+    if ($obs_text !== '') {
+        echo dl_row(get_string('observacoes', 'local_solicitacoes'),
+            html_writer::tag('div', nl2br(s($obs_text)), ['class' => 'text-muted', 'style' => 'white-space:pre-wrap'])
         );
     }
-    echo render_card(
-        html_writer::tag('strong', get_string('handled_by', 'local_solicitacoes')),
-        html_writer::div($admin_pic . html_writer::div($admin_info, ''), 'd-flex align-items-center')
-    );
 }
 
-// 8. Card: Criado em -----------------------------------------------------------
-$time_body = detail_row(
+echo html_writer::end_tag('dl');
+
+// ── Divisor ──────────────────────────────────────────────────────────────────
+echo html_writer::tag('hr', '', ['class' => 'my-3']);
+
+// ── Seção: Histórico ─────────────────────────────────────────────────────────
+echo html_writer::tag('h6', 'Histórico', [
+    'class' => 'text-uppercase text-muted mb-3',
+    'style' => 'letter-spacing:.05em; font-size:.75rem;'
+]);
+
+echo html_writer::start_tag('dl', ['class' => 'row mb-0']);
+
+// Solicitante
+$solicitante_pic = $OUTPUT->user_picture($solicitante, ['size' => 24, 'link' => false, 'class' => 'mr-1']);
+$solicitante_url = new moodle_url('/user/profile.php', ['id' => $solicitante->id]);
+echo dl_row(
+    get_string('user', 'local_solicitacoes'),
+    $solicitante_pic .
+    html_writer::link($solicitante_url, fullname($solicitante)) .
+    html_writer::tag('small', '&nbsp;—&nbsp;' . s($solicitante->email), ['class' => 'text-muted'])
+);
+
+// Criado em
+echo dl_row(
     get_string('created_at', 'local_solicitacoes'),
     userdate($request->timecreated, get_string('strftimedatetime', 'langconfig'))
 );
-echo render_card(html_writer::tag('strong', get_string('created_at', 'local_solicitacoes')), $time_body);
 
-echo html_writer::end_div(); // fim col-lg-5
-echo html_writer::end_div(); // fim row
+// Aprovado/negado por
+if ($admin) {
+    $action_label = ($request->status === 'aprovado')
+        ? get_string('approve', 'local_solicitacoes')
+        : ($request->status === 'negado' ? get_string('deny', 'local_solicitacoes') : get_string('handled_by', 'local_solicitacoes'));
 
-// ─── Ações (apenas gestores) ──────────────────────────────────────────────────
+    $admin_pic = $OUTPUT->user_picture($admin, ['size' => 24, 'link' => false, 'class' => 'mr-1']);
+    $admin_url = new moodle_url('/user/profile.php', ['id' => $admin->id]);
+    $admin_val = $admin_pic .
+                 html_writer::link($admin_url, fullname($admin));
+    if ($request->timemodified && $request->timemodified != $request->timecreated) {
+        $admin_val .= html_writer::tag('small',
+            '&nbsp;—&nbsp;' . userdate($request->timemodified, get_string('strftimedatetime', 'langconfig')),
+            ['class' => 'text-muted']
+        );
+    }
+    echo dl_row($action_label . ' por', $admin_val);
+}
+
+// Motivo da negação
+if ($request->status === 'negado' && !empty($request->motivo_negacao)) {
+    echo dl_row(
+        get_string('motivo_negacao', 'local_solicitacoes'),
+        html_writer::tag('div',
+            nl2br(s($request->motivo_negacao)),
+            ['class' => 'text-danger', 'style' => 'white-space:pre-wrap']
+        )
+    );
+}
+
+echo html_writer::end_tag('dl');
+
+// ── Seção: Ações (gestores) ───────────────────────────────────────────────────
 if ($canmanage) {
-    $baseurl        = new moodle_url('/local/solicitacoes/gerenciar.php');
-    $action_buttons = '';
+    echo html_writer::tag('hr', '', ['class' => 'my-3']);
+    echo html_writer::tag('h6', 'Ações', [
+        'class' => 'text-uppercase text-muted mb-3',
+        'style' => 'letter-spacing:.05em; font-size:.75rem;'
+    ]);
+
+    $baseurl = new moodle_url('/local/solicitacoes/gerenciar.php');
+
+    echo html_writer::start_div('d-flex flex-wrap', ['style' => 'gap:.5rem;']);
 
     if ($request->status !== 'aprovado') {
         $url_aprovar = new moodle_url($baseurl, [
@@ -338,13 +348,13 @@ if ($canmanage) {
             'sesskey' => sesskey(),
         ]);
         $btn = new single_button($url_aprovar, get_string('approve', 'local_solicitacoes'), 'get', single_button::BUTTON_PRIMARY);
-        $action_buttons .= $OUTPUT->render($btn);
+        echo $OUTPUT->render($btn);
     }
 
     if ($request->status !== 'negado') {
-        $url_negar  = new moodle_url('/local/solicitacoes/negar-solicitacao.php', ['id' => $request->id]);
-        $btn        = new single_button($url_negar, get_string('deny', 'local_solicitacoes'), 'get', single_button::BUTTON_SECONDARY);
-        $action_buttons .= $OUTPUT->render($btn);
+        $url_negar = new moodle_url('/local/solicitacoes/negar-solicitacao.php', ['id' => $request->id]);
+        $btn       = new single_button($url_negar, get_string('deny', 'local_solicitacoes'), 'get', single_button::BUTTON_SECONDARY);
+        echo $OUTPUT->render($btn);
     }
 
     $url_delete = new moodle_url($baseurl, [
@@ -354,17 +364,12 @@ if ($canmanage) {
     ]);
     $btn_delete = new single_button($url_delete, get_string('delete', 'local_solicitacoes'), 'get', single_button::BUTTON_DANGER);
     $btn_delete->add_confirm_action(get_string('confirm_delete', 'local_solicitacoes'));
-    $action_buttons .= $OUTPUT->render($btn_delete);
+    echo $OUTPUT->render($btn_delete);
 
-    echo render_card(
-        html_writer::tag('strong', get_string('actions', 'local_solicitacoes')),
-        html_writer::div($action_buttons, 'd-flex flex-wrap gap-2'),
-        'bg-light'
-    );
+    echo html_writer::end_div();
 }
 
-// ─── Botão voltar ──────────────────────────────────────────────────────────────
-$btn_back = new single_button($backurl, get_string('back_to_list', 'local_solicitacoes'), 'get');
-echo $OUTPUT->render($btn_back);
+echo html_writer::end_div(); // card-body
+echo html_writer::end_div(); // card
 
 echo $OUTPUT->footer();
