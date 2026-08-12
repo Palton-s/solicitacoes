@@ -223,6 +223,9 @@ $string['error_hidden_category_invalid'] = 'A categoria oculta configurada é in
 $string['hidden_course_category'] = 'Categoria oculta para remoção de curso';
 $string['hidden_course_category_desc'] = 'Categoria para onde os cursos serão movidos quando uma solicitação de remoção de curso for aprovada. O curso também ficará invisível.';
 
+$string['observacao_column']      = 'Observação';
+$string['disciplinas_similares']  = 'Disciplinas similares já criadas:';
+
 // Configurações de papéis
 $string['general_settings'] = 'Configurações Gerais';
 $string['allowed_categories_courses'] = 'Categorias permitidas para seleção de cursos';

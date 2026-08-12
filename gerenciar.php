@@ -156,6 +156,25 @@ usort($requests, function($a, $b) {
     return $b->timecreated - $a->timecreated;
 });
 
+// Pré-carregar cursos das categorias permitidas para verificação de similaridade
+// (feito uma única vez; só executa se houver solicitações do tipo criar_curso)
+$allowed_courses_for_similarity = [];
+foreach ($requests as $r) {
+    if ($r->tipo_acao === 'criar_curso') {
+        [$cat_cond, $cat_params] = local_solicitacoes_get_allowed_categories_sql('ctx');
+        $sim_sql = "SELECT c.id, c.fullname, c.shortname
+                      FROM {course} c
+                      JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = :ctxcourse
+                     WHERE c.id > 1 AND $cat_cond
+                     ORDER BY c.fullname ASC";
+        $allowed_courses_for_similarity = $DB->get_records_sql(
+            $sim_sql,
+            array_merge(['ctxcourse' => CONTEXT_COURSE], $cat_params)
+        );
+        break; // basta encontrar um; a lista é a mesma para todos
+    }
+}
+
 // Preparar dados para o template
 $template_data = [
     'filters' => $filter_tabs,
@@ -246,6 +265,34 @@ foreach ($requests as $r) {
         $papel_display = isset($roles_lookup[$r->papel]) ? $roles_lookup[$r->papel] : $r->papel;
     }
 
+    // Coluna Observação: para criar_curso, lista disciplinas com nome similar (>= 90%)
+    $observacao_display = '';
+    if ($r->tipo_acao === 'criar_curso' && !empty($allowed_courses_for_similarity)) {
+        $search = strtolower(trim($r->course_shortname ?? ''));
+        if ($search !== '') {
+            $similares = [];
+            foreach ($allowed_courses_for_similarity as $existing) {
+                $pct_short = 0.0;
+                $pct_full  = 0.0;
+                similar_text($search, strtolower($existing->shortname), $pct_short);
+                similar_text($search, strtolower($existing->fullname),  $pct_full);
+                if (max($pct_short, $pct_full) >= 90.0) {
+                    $url = new moodle_url('/course/view.php', ['id' => $existing->id]);
+                    $similares[] = html_writer::link($url,
+                        format_string($existing->shortname) . ' — ' . format_string($existing->fullname),
+                        ['target' => '_blank']
+                    );
+                }
+            }
+            if (!empty($similares)) {
+                $label = get_string('disciplinas_similares', 'local_solicitacoes');
+                $observacao_display = '<small><strong>' . $label . '</strong><ul class="mb-0 pl-3">'
+                    . '<li>' . implode('</li><li>', $similares) . '</li>'
+                    . '</ul></small>';
+            }
+        }
+    }
+
     // Preparar dados para o template
     $baseurl = new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]);
     
@@ -255,6 +302,7 @@ foreach ($requests as $r) {
         'cursos_display' => $cursos_display,
         'usuarios_display' => $usuarios_display,
         'papel_display' => $papel_display,
+        'observacao_display' => $observacao_display,
         'created_date' => userdate($r->timecreated),
         'status_label' => $statuslabel,
         'status_badge_class' => $status_badge_class,

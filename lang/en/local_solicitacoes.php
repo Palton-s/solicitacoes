@@ -193,6 +193,9 @@ $string['error_hidden_category_invalid'] = 'Configured hidden category is invali
 $string['hidden_course_category'] = 'Hidden category for course removal';
 $string['hidden_course_category_desc'] = 'Category where courses are moved when a course removal request is approved. The course is also set to hidden.';
 
+$string['observacao_column']      = 'Note';
+$string['disciplinas_similares']  = 'Similar courses already created:';
+
 // Role settings
 $string['general_settings'] = 'General Settings';
 $string['allowed_categories_courses'] = 'Allowed categories for course selection';
