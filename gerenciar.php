@@ -241,7 +241,7 @@ $back_url = (new moodle_url('/course/view.php', ['id' => 1776]))->out(false);
 $template_data = [
     'filters'          => $filter_tabs,
     'has_requests'     => !empty($requests),
-    'observacao_header' => local_solicitacoes_str('observacao_column'),
+    'observacao_header' => local_solicitacoes_str('observacoes'),
     'form_action_url'  => (new moodle_url('/local/solicitacoes/gerenciar.php'))->out(false),
     'sesskey'          => sesskey(),
     'current_filter'   => $filter,
@@ -360,16 +360,44 @@ foreach ($requests as $r) {
         $papel_display = isset($roles_lookup[$r->papel]) ? $roles_lookup[$r->papel] : $r->papel;
     }
 
-    // Coluna Observação: para criar_curso, lista disciplinas com nome similar (>= 90%)
+    // Coluna Justificativa: mostra o texto inserido pelo solicitante (truncado)
     $observacao_display = '';
+
+    // Extrair texto limpo conforme tipo de ação
+    if ($r->tipo_acao === 'criar_curso') {
+        $just_raw = trim($r->razoes_criacao ?? '');
+    } else {
+        $obs = trim($r->observacoes ?? '');
+        // Inscrições acumulam informações técnicas — extrai só a parte do usuário
+        if (str_contains($obs, 'OBSERVAÇÕES ADICIONAIS:')) {
+            $obs = trim(explode('OBSERVAÇÕES ADICIONAIS:', $obs)[1]);
+        } elseif (str_contains($obs, 'CURSOS SELECIONADOS:')) {
+            $obs = '';
+        }
+        $just_raw = $obs;
+    }
+
+    // Renderizar: se longo, trunca em 120 chars e exibe texto completo no title (tooltip)
+    if ($just_raw !== '') {
+        $max = 120;
+        if (mb_strlen($just_raw) > $max) {
+            $short = mb_substr($just_raw, 0, $max) . '…';
+            $observacao_display = html_writer::tag('span', s($short), [
+                'title' => s($just_raw),
+                'style' => 'cursor:help; white-space:normal;',
+            ]);
+        } else {
+            $observacao_display = s($just_raw);
+        }
+    }
+
+    // Para criar_curso: adiciona aviso de disciplinas similares abaixo da justificativa
     if ($r->tipo_acao === 'criar_curso' && !empty($allowed_courses_for_similarity)) {
-        // Usa nome_disciplina (novos registros) ou course_shortname (legado) como texto de busca
         $search = strtolower(trim($r->nome_disciplina ?? $r->course_shortname ?? ''));
         if ($search !== '') {
             $similares = [];
             foreach ($allowed_courses_for_similarity as $existing) {
-                $pct_short = 0.0;
-                $pct_full  = 0.0;
+                $pct_short = 0.0; $pct_full = 0.0;
                 similar_text($search, strtolower($existing->shortname), $pct_short);
                 similar_text($search, strtolower($existing->fullname),  $pct_full);
                 if (max($pct_short, $pct_full) >= 90.0) {
@@ -381,13 +409,10 @@ foreach ($requests as $r) {
                 }
             }
             if (!empty($similares)) {
-                $label = get_string('disciplinas_similares', 'local_solicitacoes');
-                if (strpos($label, '[[') === 0) {
-                    $label = 'Disciplinas similares já criadas:';
-                }
-                $observacao_display = '<small><strong>' . $label . '</strong><ul class="mb-0 pl-3">'
-                    . '<li>' . implode('</li><li>', $similares) . '</li>'
-                    . '</ul></small>';
+                $label = local_solicitacoes_str('disciplinas_similares');
+                $sim_html = '<small class="text-danger"><strong>' . $label . '</strong>'
+                    . '<ul class="mb-0 pl-3"><li>' . implode('</li><li>', $similares) . '</li></ul></small>';
+                $observacao_display = ($observacao_display ? $observacao_display . '<br>' : '') . $sim_html;
             }
         }
     }

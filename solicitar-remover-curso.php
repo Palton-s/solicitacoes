@@ -40,6 +40,7 @@ class remover_curso_form extends moodleform {
         $mform->addElement('textarea', 'observacoes', get_string('observacoes', 'local_solicitacoes'),
             ['rows' => 5, 'cols' => 50, 'placeholder' => get_string('observacoes_placeholder', 'local_solicitacoes')]);
         $mform->setType('observacoes', PARAM_TEXT);
+        $mform->addRule('observacoes', null, 'required', null, 'client');
         $mform->addHelpButton('observacoes', 'observacoes_help', 'local_solicitacoes');
 
         $this->add_action_buttons(true, get_string('request_submit', 'local_solicitacoes'));

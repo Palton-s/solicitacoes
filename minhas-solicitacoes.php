@@ -106,6 +106,7 @@ $template_data = [
     'str_course'               => local_solicitacoes_str('course'),
     'str_target_users'         => local_solicitacoes_str('target_users'),
     'str_role'                 => local_solicitacoes_str('role'),
+    'str_justificativa'        => local_solicitacoes_str('observacoes'),
     'str_created_at'           => local_solicitacoes_str('created_at'),
     'str_status'               => local_solicitacoes_str('status'),
     'str_actions'              => local_solicitacoes_str('actions'),
@@ -202,12 +203,35 @@ foreach ($requests as $r) {
     }
 
     // Preparar dados para o template
+    // Justificativa truncada
+    if ($r->tipo_acao === 'criar_curso') {
+        $just_raw = trim($r->razoes_criacao ?? '');
+    } else {
+        $obs = trim($r->observacoes ?? '');
+        if (str_contains($obs, 'OBSERVAÇÕES ADICIONAIS:')) {
+            $obs = trim(explode('OBSERVAÇÕES ADICIONAIS:', $obs)[1]);
+        } elseif (str_contains($obs, 'CURSOS SELECIONADOS:')) {
+            $obs = '';
+        }
+        $just_raw = $obs;
+    }
+    $just_max = 120;
+    if (mb_strlen($just_raw) > $just_max) {
+        $justificativa_display = html_writer::tag('span', s(mb_substr($just_raw, 0, $just_max) . '…'), [
+            'title' => s($just_raw),
+            'style' => 'cursor:help; white-space:normal;',
+        ]);
+    } else {
+        $justificativa_display = s($just_raw);
+    }
+
     $request_data = [
         'request_id' => $r->id,
         'acao_label' => $acao_label,
         'cursos_display' => $cursos_display,
         'usuarios_display' => $usuarios_display,
-        'papel_display' => $papel_display,
+        'papel_display'       => $papel_display,
+        'justificativa_display' => $justificativa_display,
         'created_date' => userdate($r->timecreated),
         'status_label' => $statuslabel,
         'status_badge_class' => $status_class, // Badge com estilo colorido

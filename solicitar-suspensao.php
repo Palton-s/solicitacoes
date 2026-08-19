@@ -105,6 +105,7 @@ class suspensao_form extends moodleform {
         $mform->addElement('textarea', 'observacoes', get_string('observacoes', 'local_solicitacoes'), 
             array('rows' => 5, 'cols' => 50, 'placeholder' => get_string_with_fallback('observacoes_placeholder', 'local_solicitacoes')));
         $mform->setType('observacoes', PARAM_TEXT);
+        $mform->addRule('observacoes', null, 'required', null, 'client');
         $mform->addHelpButton('observacoes', 'observacoes_help', 'local_solicitacoes');
 
         // Botões de ação
