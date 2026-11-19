@@ -103,6 +103,7 @@ function local_solicitacoes_str_defaults(): array {
         // Observação / similaridade
         'observacao_column'       => 'Observação',
         'disciplinas_similares'   => 'Disciplinas similares já criadas:',
+        'checking_similar_courses' => 'Verificando disciplinas similares...',
         // Página de seleção de ação
         'selecionar_acao_titulo'    => 'O que você deseja fazer?',
         'selecionar_acao_subtitulo' => 'Escolha o tipo de solicitação que deseja enviar',
@@ -466,27 +467,82 @@ function local_solicitacoes_get_allowed_categories_sql(string $ctx_alias = 'ctx'
         return ['1=1', []];
     }
 
-    list($in_sql, $in_params) = $DB->get_in_or_equal($cat_ids, SQL_PARAMS_NAMED, 'allowedcatid');
-    $cat_contexts = $DB->get_records_sql(
-        "SELECT ctx.path FROM {context} ctx
-         WHERE ctx.contextlevel = :ctxcatlevel AND ctx.instanceid $in_sql",
-        array_merge(['ctxcatlevel' => CONTEXT_COURSECAT], $in_params)
-    );
+    // Caminhos dos contextos das categorias: em cache (a chave muda junto com a configuração).
+    $cache = cache::make('local_solicitacoes', 'allowedcatpaths');
+    $cachekey = 'p' . md5(implode(',', $cat_ids));
+    $paths = $cache->get($cachekey);
+    if ($paths === false) {
+        list($in_sql, $in_params) = $DB->get_in_or_equal($cat_ids, SQL_PARAMS_NAMED, 'allowedcatid');
+        $paths = array_values($DB->get_fieldset_sql(
+            "SELECT ctx.path FROM {context} ctx
+             WHERE ctx.contextlevel = :ctxcatlevel AND ctx.instanceid $in_sql",
+            array_merge(['ctxcatlevel' => CONTEXT_COURSECAT], $in_params)
+        ));
+        $cache->set($cachekey, $paths);
+    }
 
-    if (empty($cat_contexts)) {
+    if (empty($paths)) {
         return ['1=0', []];
     }
 
     $conditions = [];
     $params = [];
-    $i = 0;
-    foreach ($cat_contexts as $catctx) {
-        $params["allowedcatpath_{$i}"] = $catctx->path . '/%';
+    foreach ($paths as $i => $path) {
+        $params["allowedcatpath_{$i}"] = $path . '/%';
         $conditions[] = "{$ctx_alias}.path LIKE :allowedcatpath_{$i}";
-        $i++;
     }
 
     return ['(' . implode(' OR ', $conditions) . ')', $params];
+}
+
+/**
+ * Adiciona ao formulário um campo de cursos com busca assíncrona (AJAX).
+ *
+ * Nenhum curso é carregado na página: a busca acontece conforme o usuário
+ * digita, via web service local_solicitacoes_search_courses.
+ *
+ * @param MoodleQuickForm $mform
+ * @param string $scope Um dos \local_solicitacoes\local\course_search::SCOPE_*
+ * @param string $name Nome do campo.
+ */
+function local_solicitacoes_add_course_selector($mform, string $scope, string $name = 'curso_nome'): void {
+    $mform->addElement('autocomplete', $name, get_string('curso_nome', 'local_solicitacoes'), [], [
+        'multiple'          => true,
+        'ajax'              => 'local_solicitacoes/course_selector',
+        'data-scope'        => $scope,
+        'placeholder'       => get_string('search_courses_placeholder', 'local_solicitacoes'),
+        'noselectionstring' => get_string('no_courses_selected', 'local_solicitacoes'),
+        'casesensitive'     => false,
+        'valuehtmlcallback' => function($courseid) {
+            return \local_solicitacoes\local\course_search::get_label((int)$courseid);
+        },
+    ]);
+    $mform->setType($name, PARAM_SEQUENCE);
+    $mform->addRule($name, null, 'required', null, 'client');
+    $mform->addHelpButton($name, 'curso_nome_help', 'local_solicitacoes');
+}
+
+/**
+ * Adiciona ao formulário um campo de usuários com busca assíncrona (AJAX).
+ *
+ * @param MoodleQuickForm $mform
+ * @param string $name Nome do campo.
+ * @param string $label Rótulo já traduzido.
+ * @param int $paramtype Tipo PARAM_* do campo.
+ */
+function local_solicitacoes_add_user_selector($mform, string $name, string $label, $paramtype = PARAM_SEQUENCE): void {
+    $mform->addElement('autocomplete', $name, $label, [], [
+        'multiple'          => true,
+        'ajax'              => 'local_solicitacoes/user_selector',
+        'placeholder'       => get_string('usuarios_busca_help', 'local_solicitacoes'),
+        'noselectionstring' => get_string('no_users_selected', 'local_solicitacoes'),
+        'casesensitive'     => false,
+        'valuehtmlcallback' => function($userid) {
+            return \local_solicitacoes\local\user_search::get_label((int)$userid);
+        },
+    ]);
+    $mform->setType($name, $paramtype);
+    $mform->addRule($name, null, 'required', null, 'client');
 }
 
 /**

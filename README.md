@@ -1,9 +1,10 @@
 # Plugin Moodle: Solicitações de Gerenciamento de Curso (`local_solicitacoes`)
 
-> **⚠️ ATUALIZAÇÃO IMPORTANTE:** Este plugin foi migrado para usar o sistema nativo de busca de usuários do Moodle.  
-> **Requisito:** Usuários precisam da permissão `moodle/user:viewdetails` para usar a busca de usuários.
+> **v1.6.0:** a busca de cursos e de usuários passou a ser assíncrona (AJAX via web services do próprio plugin).
+> Nenhuma lista de cursos é carregada junto com a página, o que evita erros 502/504 em ambientes lentos.
+> A busca de usuários **não exige mais** `moodle/user:viewdetails`/`viewalldetails`: basta `local/solicitacoes:submit`.
 
-**Versão:** v1.4.0 (`2026030903`)  
+**Versão:** v1.6.0 (`2026111900`)  
 **Requer:** Moodle 4.0 ou superior (`2022041900`)  
 **Maturidade:** Estável  
 **Licença:** GNU GPL v3
@@ -29,13 +30,9 @@ Plugin local do Moodle que fornece um fluxo de solicitações para operações d
 
 **Recursos gerais:**
 - Formulários nativos usando Moodle Forms API
-- Seleção de cursos com autocomplete — filtra apenas cursos aos quais o solicitante tem acesso (matrícula direta, papel em categoria ou papel em nível de sistema)
+- Seleção de cursos com autocomplete **assíncrono** (mín. 3 caracteres): filtra apenas cursos aos quais o solicitante tem acesso (matrícula direta, papel em categoria ou papel em nível de sistema)
 - Cursos ocultos acessíveis ao usuário também são listados
-- **Busca avançada de usuários** via sistema nativo do Moodle (`core_user/form_user_selector`):
-  - 🔍 **Busca por múltiplos campos:** firstname, lastname, fullname, username e email
-  - 🎯 **Busca inteligente:** não diferencia maiúsculas/minúsculas
-  - 👥 **Seleção múltipla** com interface intuitiva
-  - **⚠️ Requer permissão `moodle/user:viewdetails`**
+- **Busca de usuários assíncrona** (web service `local_solicitacoes_search_users`): nome, sobrenome, username/CPF e e-mail; seleção múltipla
 - Notificações internas (popup) e por e-mail nos eventos: criação, aprovação e negação
 - Painel de gerenciamento com filtros por status e tipo
 - Suporte multilíngue: Português (Brasil) e Inglês
@@ -57,17 +54,14 @@ Plugin local do Moodle que fornece um fluxo de solicitações para operações d
 local/solicitacoes/
 ├── amd/
 │   ├── src/
-│   │   └── user_selector.js        # [OBSOLETO] Seletor customizado - não usado
-│   └── build/
-│       └── user_selector.min.js    # [OBSOLETO] Versão minificada - não usado
-├── ajax/
-│   ├── buscar-cursos.php           # Endpoint AJAX: autocomplete de cursos
-│   ├── buscar-usuarios.php         # [OBSOLETO] Endpoint customizado - não usado
-│   ├── buscar-categorias.php       # Endpoint AJAX: autocomplete de categorias
-│   ├── test_db.php                 # Diagnóstico de BD (desenvolvimento)
-│   └── test_simple.php             # Teste simples (desenvolvimento)
+│   │   ├── course_selector.js      # Autocomplete de cursos (AJAX)
+│   │   ├── user_selector.js        # Autocomplete de usuários (AJAX)
+│   │   └── similar_courses.js      # Aviso de disciplinas similares (gerenciar.php)
+│   └── build/                      # Versões carregadas pelo Moodle (*.min.js)
 ├── classes/
 │   ├── solicitacoes_controller.php # Controlador principal (salvar, notificar)
+│   ├── external/                   # Web services AJAX (search_courses, search_users, get_similar_courses)
+│   ├── local/                      # course_search, user_search, similar_courses
 │   └── form/
 │       └── request_form.php        # Formulário genérico (Form API)
 ├── db/
@@ -95,7 +89,7 @@ local/solicitacoes/
 ├── gerenciar.php                   # Painel de gerenciamento (requer :manage)
 ├── index.php                       # Página inicial / redirecionamento
 ├── lib.php                         # Funções auxiliares e callbacks do Moodle
-├── limpar_cache.php                # Utilitário para limpar cache (dev)
+├── limpar_cache.php                # Limpa cache de strings (somente admin, com confirmação)
 ├── minhas-solicitacoes.php         # Lista de solicitações do usuário logado
 ├── negar-solicitacao.php           # Formulário de negação com motivo
 ├── selecionar-acao.php             # Seleção do tipo de solicitação
@@ -243,72 +237,54 @@ O plugin registra três provedores de mensagem, enviados via popup e e-mail por 
 
 ---
 
-## Sistema de Busca de Usuários
+## Busca assíncrona (desempenho em ambientes lentos)
 
-O plugin agora utiliza o **sistema nativo do Moodle** (`core_user/form_user_selector`) para busca de usuários.
+Os formulários não carregam mais listas de cursos no HTML. Os campos de curso e de
+usuário usam o elemento `autocomplete` do Moodle com módulos AMD próprios, que chamam
+web services do plugin via `lib/ajax/service.php` (sessão do usuário + sesskey; **não**
+é preciso habilitar os web services do site).
 
-**⚠️ Requisito de Permissão:**
-Os usuários que fazem solicitações precisam ter a permissão `moodle/user:viewdetails` para usar a busca de usuários.
+| Função externa | Capability | Uso |
+|---|---|---|
+| `local_solicitacoes_search_courses` (`query`, `scope`, `limit`) | `local/solicitacoes:submit` | Campo de cursos dos formulários |
+| `local_solicitacoes_search_users` (`query`, `limit`) | `local/solicitacoes:submit` | Campos de usuários/professores |
+| `local_solicitacoes_get_similar_courses` (`requestids[]`) | `local/solicitacoes:manage` | Aviso de disciplinas similares em `gerenciar.php` |
 
-**Como configurar a permissão:**
-1. Vá em **Administração do Site → Usuários → Permissões → Definir papéis**
-2. Edite o papel desejado (ex: "Authenticated user")
-3. Encontre `moodle/user:viewdetails` e defina como **Permitir**
-4. Salve as alterações
+**O que foi otimizado:**
+- Busca só dispara com 3+ caracteres, espera o usuário parar de digitar e devolve no máximo 30 resultados (`LIMIT` no banco).
+- Resultados repetidos ficam em cache no navegador; os cursos/categorias acessíveis ao usuário ficam em cache de sessão (MUC `useraccess`, 5 min).
+- Os caminhos das categorias permitidas ficam em cache de aplicação (MUC `allowedcatpaths`, 10 min).
+- A validação do formulário confere **apenas os IDs selecionados**, em uma consulta.
+- O lock de sessão é liberado durante a busca, então requisições em paralelo não ficam enfileiradas.
+- Em `gerenciar.php`, a verificação de disciplinas similares roda depois que a página abre (lotes de 50) e usa um pré-filtro por tamanho que descarta os cursos que nunca chegariam a 90% antes de chamar `similar_text`. Os solicitantes são carregados em uma única consulta.
 
-### 🔍 **Funcionalidades da Busca de Usuários**
+**Busca de usuários:**
+- Termo com `@` → e-mail começando com o termo
+- Só dígitos (CPF, com ou sem pontuação) → username começando com os dígitos (usa índice)
+- Demais → cada palavra precisa aparecer no nome, sobrenome, ou no início do username/e-mail
 
-**Campos de Busca:**
-- ✅ **Firstname** (nome)
-- ✅ **Lastname** (sobrenome)
-- ✅ **Fullname** (nome completo)
-- ✅ **Username** (nome de usuário)
-- ✅ **Email** (endereço de e-mail)
-
-**Características:**
-- 🎯 **Busca inteligente:** não diferencia maiúsculas/minúsculas
-- 🔍 **Busca parcial:** funciona com qualquer parte do texto
-- 👥 **Seleção múltipla:** permite selecionar vários usuários simultaneamente
-- 🛡️ **Filtros automaticos:** exclui usuários deletados e não confirmados
-- 📋 **Preview completo:** mostra nome completo, username e email do usuario selecionado
-
-**Exemplo de uso:**
-- Digite "joão" → encontra usuários com firstname "João", lastname "João", ou username "joao123"
-- Digite "@gmail" → encontra todos usuários com email do Gmail
-- Digite "prof" → encontra usuários com "prof" no nome, username ou email
-
-**Arquivos não utilizados (sistema anterior):**
-- `amd/src/user_selector.js` — sistema customizado (não usado)
-- `amd/build/user_selector.min.js` — sistema customizado (não usado)  
-- `ajax/buscar-usuarios.php` — endpoint customizado (não usado)
-
-> Estes arquivos podem ser removidos se você não planeja voltar ao sistema customizado.
+> Observação: como os acessos ficam em cache por até 5 minutos, um usuário recém-matriculado pode levar esse tempo para ver o curso na busca.
 
 ---
 
 ## Lógica de Filtragem de Cursos
 
-Nos formulários de inscrição, remoção, suspensão e cadastro, o campo de seleção de curso exibe apenas os cursos aos quais o solicitante tem acesso — incluindo cursos ocultos acessíveis:
+O escopo é definido por campo (`course_search::SCOPE_*`):
 
-| Condição | Cursos exibidos |
-|---|---|
-| Usuário é `siteadmin` | Todos os cursos (visíveis e ocultos) |
-| Usuário tem papel no contexto do sistema | Todos os cursos (visíveis e ocultos) |
-| Demais usuários | Cursos com matrícula ativa (`enrol_get_users_courses`) + cursos de categorias onde o usuário possui papel atribuído (`role_assignments` com `contextlevel = CONTEXT_COURSECAT`) |
-
-A validação server-side no `validation()` re-executa `get_available_courses()` para rejeitar IDs de cursos fora do escopo do solicitante, prevenindo manipulação de formulário.
-
----
-
-## Endpoints AJAX
-
-Todos os endpoints exigem `require_login()` e `require_sesskey()`.
-
-| Arquivo | Parâmetros GET | Retorno |
+| Escopo | Formulários | Cursos |
 |---|---|---|
-| `ajax/buscar-usuarios.php` | `q` (termo), `limit` (máx. 50) | JSON: `[{id, fullname, username, email, label, suspended}]` |
-| `ajax/buscar-cursos.php` | `q` (termo), `categoryid` (opcional) | JSON: lista de cursos |
-| `ajax/buscar-categorias.php` | `q` (termo) | JSON: lista de categorias |
+| `allowed` | Inscrição, Cadastro | Acessíveis ao solicitante **e** dentro das categorias permitidas nas configurações |
+| `accessible` | Remoção, Suspensão | Acessíveis ao solicitante |
+| `all` | Remover curso | Todos |
+
+"Acessíveis":
+
+| Condição | Cursos |
+|---|---|
+| Usuário é `siteadmin` ou tem papel no contexto do sistema | Todos os cursos (visíveis e ocultos) |
+| Demais usuários | Cursos com matrícula ativa + cursos de categorias onde o usuário possui papel atribuído |
+
+A validação server-side (`course_search::validate_selection()`) rejeita IDs de cursos fora do escopo do solicitante, prevenindo manipulação do formulário.
 
 ---
 

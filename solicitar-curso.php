@@ -107,28 +107,9 @@ class criar_curso_form extends moodleform {
         $mform->addHelpButton('papel', 'papel_professor_help', 'local_solicitacoes');
 
         // Campo de usuário(s) professor(es) (autocomplete múltiplo)
-        $mform->addElement('autocomplete', 'professor_usuario', get_string('professor_usuario', 'local_solicitacoes'), array(), array(
-            'multiple' => true,
-            'placeholder' => get_string('usuarios_busca_help', 'local_solicitacoes'),
-            'noselectionstring' => get_string('no_users_found', 'local_solicitacoes'),
-            'ajax' => 'core_user/form_user_selector',
-            'data-includecontactableprivacy' => false,
-            'data-includesuspended' => true,
-            'data-includeunenrolled' => true,
-            'data-includeenrolled' => true,
-            'data-includeall' => true,
-            'showsuggestions' => true,
-            'casesensitive' => false,
-            'valuehtmlcallback' => function($userid) {
-                global $DB;
-                if (empty($userid)) return '';
-                $user = $DB->get_record('user', ['id' => $userid], 'id, firstname, lastname, username, email');
-                if (!$user) return '';
-                return fullname($user) . ' (' . $user->username . ') — ' . $user->email;
-            }
-        ));
-        $mform->setType('professor_usuario', PARAM_TEXT);
-        $mform->addRule('professor_usuario', null, 'required', null, 'client');
+        // Busca assíncrona (web service local_solicitacoes_search_users).
+        local_solicitacoes_add_user_selector($mform, 'professor_usuario',
+            get_string('professor_usuario', 'local_solicitacoes'), PARAM_TEXT);
         $mform->addHelpButton('professor_usuario', 'professor_usuario_help', 'local_solicitacoes');
 
         // Botões de ação

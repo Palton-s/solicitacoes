@@ -47,8 +47,6 @@ if (!has_capability('local/solicitacoes:submit', $context)) {
  */
 class cadastro_form extends moodleform {
 
-    private $available_courses_cache = null;
-
     protected function definition() {
         global $CFG, $DB;
         
@@ -64,16 +62,8 @@ class cadastro_form extends moodleform {
                       '</div>';
         $mform->addElement('html', $aviso_html);
 
-        // Campo de curso (autocomplete com cursos carregados no PHP)
-        $cursos_disponiveis = $this->get_available_courses();
-        $mform->addElement('autocomplete', 'curso_nome', get_string('curso_nome', 'local_solicitacoes'), $cursos_disponiveis, array(
-            'multiple' => true,
-            'placeholder' => get_string('searching_courses', 'local_solicitacoes'),
-            'noselectionstring' => get_string('no_courses_found', 'local_solicitacoes'),
-        ));
-        $mform->setType('curso_nome', PARAM_SEQUENCE);
-        $mform->addRule('curso_nome', null, 'required', null, 'client');
-        $mform->addHelpButton('curso_nome', 'curso_nome_help', 'local_solicitacoes');
+        // Campo de curso: busca assíncrona (AJAX), nenhum curso é carregado na página.
+        local_solicitacoes_add_course_selector($mform, \local_solicitacoes\local\course_search::SCOPE_ALLOWED);
 
         // Primeiro nome do usuário
         $mform->addElement('text', 'firstname', get_string('firstname', 'local_solicitacoes'), 
@@ -128,122 +118,19 @@ class cadastro_form extends moodleform {
     }
 
     /**
-     * Buscar cursos disponíveis para o usuário atual:
-     * - admins e usuários com papel no contexto do sistema veem todos os cursos
-     * - demais: cursos onde está matriculado + cursos de categorias com papel atribuído
-     */
-    protected function get_available_courses() {
-        global $DB, $USER;
-
-        if ($this->available_courses_cache !== null) {
-            return $this->available_courses_cache;
-        }
-
-        $cursos_options = array();
-
-        try {
-            $system_context = context_system::instance();
-            [$cat_cond, $cat_params] = local_solicitacoes_get_allowed_categories_sql('ctx');
-
-            if (is_siteadmin() || $DB->record_exists('role_assignments', [
-                'userid'    => $USER->id,
-                'contextid' => $system_context->id,
-            ])) {
-                $sql = "SELECT c.id, c.fullname, c.shortname
-                        FROM {course} c
-                        JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = :ctxcourse
-                        WHERE c.id > 1 AND $cat_cond
-                        ORDER BY c.fullname ASC";
-                $cursos = $DB->get_records_sql($sql, array_merge(['ctxcourse' => CONTEXT_COURSE], $cat_params));
-            } else {
-                // 1. Cursos onde o usuário está matriculado
-                $cursos = enrol_get_users_courses($USER->id, true);
-
-                // 2. Buscar paths das categorias onde o usuário tem papel
-                $role_cat_paths = $DB->get_records_sql(
-                    "SELECT ctx.id, ctx.path
-                     FROM {role_assignments} ra
-                     JOIN {context} ctx ON ctx.id = ra.contextid
-                     WHERE ra.userid = :userid AND ctx.contextlevel = :ctxcat",
-                    ['userid' => $USER->id, 'ctxcat' => CONTEXT_COURSECAT]
-                );
-
-                // 3. Cursos dessas categorias com padrões fixos (sargable)
-                if (!empty($role_cat_paths)) {
-                    $path_conditions = [];
-                    $params = ['ctxcourse' => CONTEXT_COURSE];
-                    $i = 0;
-                    foreach ($role_cat_paths as $catctx) {
-                        $params["catpath_{$i}"] = $catctx->path . '/%';
-                        $path_conditions[] = "ctx.path LIKE :catpath_{$i}";
-                        $i++;
-                    }
-
-                    $sql_cat = "SELECT DISTINCT c.id, c.fullname, c.shortname
-                                FROM {course} c
-                                JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = :ctxcourse
-                                WHERE c.id != 1
-                                AND (" . implode(' OR ', $path_conditions) . ")
-                                ORDER BY c.fullname ASC";
-                    $cursos = $cursos + $DB->get_records_sql($sql_cat, $params);
-                }
-
-                // 4. Filtrar pela categoria permitida nas configurações
-                if (!empty($cursos) && $cat_cond !== '1=1') {
-                    $ids = array_keys($cursos);
-                    [$id_sql, $id_params] = $DB->get_in_or_equal($ids, SQL_PARAMS_NAMED, 'crsid');
-                    $cursos = $DB->get_records_sql(
-                        "SELECT c.id, c.fullname, c.shortname
-                         FROM {course} c
-                         JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = :ctxcourse
-                         WHERE c.id $id_sql AND $cat_cond
-                         ORDER BY c.fullname ASC",
-                        array_merge(['ctxcourse' => CONTEXT_COURSE], $id_params, $cat_params)
-                    );
-                }
-            }
-
-            foreach ($cursos as $curso) {
-                $cursos_options[$curso->id] = $curso->fullname . ' (' . $curso->shortname . ')';
-            }
-        } catch (Exception $e) {
-            error_log("Erro ao buscar cursos: " . $e->getMessage());
-        }
-
-        $this->available_courses_cache = $cursos_options;
-        return $cursos_options;
-    }
-
-    /**
      * Validação personalizada do formulário
      */
     public function validation($data, $files) {
         global $DB;
         $errors = parent::validation($data, $files);
 
-        // Validar se pelo menos um curso foi selecionado e se são válidos
-        if (!empty($data['curso_nome'])) {
-            $cursos_selecionados = is_array($data['curso_nome']) ? $data['curso_nome'] : [$data['curso_nome']];
-            
-            if (empty($cursos_selecionados)) {
-                $errors['curso_nome'] = get_string('error_course_required', 'local_solicitacoes');
-            } else {
-                // Validar cada curso selecionado e verificar se o usuário tem acesso
-                $cursos_acessiveis = $this->get_available_courses();
-                $cursos_invalidos = array();
-                foreach ($cursos_selecionados as $curso_id) {
-                    $curso_id = (int)$curso_id;
-                    if ($curso_id <= 0 || !array_key_exists($curso_id, $cursos_acessiveis)) {
-                        $cursos_invalidos[] = $curso_id;
-                    }
-                }
-                
-                if (!empty($cursos_invalidos)) {
-                    $errors['curso_nome'] = get_string('error_invalid_courses', 'local_solicitacoes', implode(', ', $cursos_invalidos));
-                }
-            }
-        } else {
-            $errors['curso_nome'] = get_string('error_course_required', 'local_solicitacoes');
+        // Validar os cursos selecionados: consulta apenas os IDs enviados.
+        $erro_cursos = \local_solicitacoes\local\course_search::validate_selection(
+            $data['curso_nome'] ?? null,
+            \local_solicitacoes\local\course_search::SCOPE_ALLOWED
+        );
+        if ($erro_cursos !== null) {
+            $errors['curso_nome'] = $erro_cursos;
         }
 
         // Validar se o CPF já existe (usado como username)

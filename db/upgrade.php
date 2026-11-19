@@ -293,5 +293,22 @@ function xmldb_local_solicitacoes_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026081202, 'local', 'solicitacoes');
     }
 
+    // Upgrade para versão 2026111901 - Índices para a paginação de gerenciar.php.
+    if ($oldversion < 2026111901) {
+        $table = new xmldb_table('local_solicitacoes');
+
+        $index = new xmldb_index('timecreated_idx', XMLDB_INDEX_NOTUNIQUE, ['timecreated']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        $index = new xmldb_index('status_timecreated_idx', XMLDB_INDEX_NOTUNIQUE, ['status', 'timecreated']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        upgrade_plugin_savepoint(true, 2026111901, 'local', 'solicitacoes');
+    }
+
     return true;
 }

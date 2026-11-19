@@ -35,6 +35,8 @@
       <INDEXES>
         <INDEX NAME="status_idx" UNIQUE="false" FIELDS="status"/>
         <INDEX NAME="tipo_acao_idx" UNIQUE="false" FIELDS="tipo_acao"/>
+        <INDEX NAME="timecreated_idx" UNIQUE="false" FIELDS="timecreated"/>
+        <INDEX NAME="status_timecreated_idx" UNIQUE="false" FIELDS="status, timecreated"/>
       </INDEXES>
     </TABLE>
     

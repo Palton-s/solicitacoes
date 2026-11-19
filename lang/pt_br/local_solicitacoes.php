@@ -289,3 +289,15 @@ $string['form_cadastro_descricao']   = 'Use este formulário para solicitar o ca
 $string['form_criar_curso_titulo']   = 'Solicitar Criação de Disciplina';
 $string['form_remover_curso_titulo'] = 'Solicitar Remoção de Curso';
 $string['form_remover_curso_descricao'] = 'Ao aprovar, o curso não será excluído. Ele será movido para a categoria oculta configurada no plugin e ficará invisível.';
+
+// Busca assíncrona (AJAX) e cache.
+$string['search_courses_placeholder'] = 'Digite pelo menos 3 letras do nome ou código do curso';
+$string['no_courses_selected']        = 'Nenhum curso selecionado';
+$string['no_users_selected']          = 'Nenhum usuário selecionado';
+$string['search_min_chars']           = 'Digite pelo menos {$a} caracteres para buscar';
+$string['search_error']               = 'A busca demorou demais ou falhou. Tente novamente com um termo mais específico.';
+$string['user_suspended_tag']         = 'suspenso';
+$string['checking_similar_courses']   = 'Verificando disciplinas similares...';
+$string['cachedef_useraccess']        = 'Cursos e categorias acessíveis ao usuário (busca de cursos)';
+$string['cachedef_allowedcatpaths']   = 'Caminhos das categorias permitidas nas configurações';
+$string['showing_requests']           = 'Exibindo {$a->from}–{$a->to} de {$a->total} solicitações';

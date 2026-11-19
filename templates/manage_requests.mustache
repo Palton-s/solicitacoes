@@ -28,9 +28,16 @@
 
             {{#has_requests}}
 
+            {{! ── Paginação (topo) ── }}
+            <div class="d-flex flex-wrap align-items-center justify-content-between mb-2" style="gap:.5rem;">
+                <small class="text-muted">{{paging_summary}}</small>
+                <div>{{{paging_bar}}}</div>
+            </div>
+
             <form id="sol-bulk-form" method="post" action="{{form_action_url}}">
                 <input type="hidden" name="sesskey"  value="{{sesskey}}">
                 <input type="hidden" name="filter"   value="{{current_filter}}">
+                <input type="hidden" name="page"     value="{{current_page}}">
                 <input type="hidden" name="action"   value="bulk_approve">
 
                 {{! ── Barra de ação em massa ─────────────────────────────────── }}
@@ -107,6 +114,9 @@
                     </table>
                 </div>
             </form>
+
+            {{! ── Paginação (rodapé) ── }}
+            <div class="mt-3">{{{paging_bar}}}</div>
 
             <script>
             (function () {

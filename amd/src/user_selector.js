@@ -1,67 +1,102 @@
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * ⚠️ ARQUIVO OBSOLETO - NÃO É MAIS USADO
- * 
- * Este módulo foi substituído pelo sistema nativo 'core_user/form_user_selector'
- * Mantido apenas para compatibilidade ou caso seja necessário reverter
- * 
- * Custom user selector AMD module for local_solicitacoes.
- * Replaces core_user/form_user_selector to avoid the moodle/user:viewdetails
- * capability requirement that regular users do not have.
+ * Busca assíncrona de usuários para o elemento autocomplete do Moodle.
+ *
+ * Usa o web service local_solicitacoes_search_users, que exige apenas a
+ * capacidade local/solicitacoes:submit (não precisa de moodle/user:viewalldetails).
+ *
+ * @module     local_solicitacoes/user_selector
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define([], function() {
+define(['jquery', 'core/ajax', 'core/str'], function($, Ajax, Str) {
+
+    var MIN_CHARS = 3;
+    var cache = {};
+    var stringsPromise = null;
+
+    /**
+     * Strings usadas como mensagem no dropdown.
+     *
+     * @returns {Promise}
+     */
+    var getStrings = function() {
+        if (!stringsPromise) {
+            stringsPromise = Str.get_strings([
+                {key: 'search_min_chars', component: 'local_solicitacoes', param: MIN_CHARS},
+                {key: 'search_error', component: 'local_solicitacoes'}
+            ]);
+        }
+        return stringsPromise;
+    };
+
     return {
         /**
-         * Fetch users from the local AJAX endpoint.
+         * Consulta o web service local_solicitacoes_search_users.
          *
-         * @param {string} selector  The CSS selector for the autocomplete element.
-         * @param {string} query     The search string typed by the user.
-         * @param {Function} success Called with the raw response array on success.
-         * @param {Function} failure Called with an Error on failure.
+         * @param {String} selector Seletor do <select> original.
+         * @param {String} query Texto digitado.
+         * @param {Function} success Callback de sucesso.
+         * @param {Function} failure Callback de erro.
          */
         transport: function(selector, query, success, failure) {
-            var url = M.cfg.wwwroot +
-                '/local/solicitacoes/ajax/buscar-usuarios.php' +
-                '?q=' + encodeURIComponent(query) +
-                '&limit=30' +
-                '&sesskey=' + encodeURIComponent(M.cfg.sesskey);
+            var term = $.trim(query || '');
 
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', url, true);
-            xhr.setRequestHeader('Accept', 'application/json');
-            xhr.onload = function() {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    try {
-                        var data = JSON.parse(xhr.responseText);
-                        success(data);
-                    } catch (e) {
-                        failure(e);
-                    }
-                } else {
-                    failure(new Error('HTTP ' + xhr.status));
-                }
-            };
-            xhr.onerror = function() {
-                failure(new Error('Network error'));
-            };
-            xhr.send();
+            if (term.length < MIN_CHARS) {
+                getStrings().then(function(strings) {
+                    success(strings[0]);
+                    return strings;
+                }).catch(failure);
+                return;
+            }
+
+            var key = term.toLowerCase();
+            if (cache.hasOwnProperty(key)) {
+                success(cache[key]);
+                return;
+            }
+
+            Ajax.call([{
+                methodname: 'local_solicitacoes_search_users',
+                args: {query: term, limit: 30}
+            }])[0].then(function(response) {
+                cache[key] = response;
+                success(response);
+                return response;
+            }).catch(function() {
+                getStrings().then(function(strings) {
+                    success(strings[1]);
+                    return strings;
+                }).catch(failure);
+            });
         },
 
         /**
-         * Transform the raw user objects into {value, label} pairs for the autocomplete.
+         * Converte a resposta em opções {value, label}.
          *
-         * @param {string} selector  The CSS selector for the autocomplete element.
-         * @param {Array}  results   Raw response from transport().
-         * @returns {Array} Array of {value, label} objects.
+         * @param {String} selector Seletor do <select> original.
+         * @param {Object|String} results Resposta do transport (ou mensagem).
+         * @returns {Array|String}
          */
         processResults: function(selector, results) {
-            if (!Array.isArray(results)) {
-                return [];
+            if (typeof results === 'string') {
+                return results;
             }
-            return results.map(function(user) {
-                return {
-                    value: user.id,
-                    label: user.label || (user.fullname + ' (' + user.username + ')')
-                };
+            return (results.users || []).map(function(user) {
+                return {value: user.id, label: user.label};
             });
         }
     };

@@ -28,13 +28,9 @@ global $DB, $OUTPUT;
 
 // Buscar papéis disponíveis para exibição
 $systemcontext = context_system::instance();
-$all_roles = role_get_names($systemcontext, ROLENAME_ALIAS, false);
 $roles_lookup = [];
-foreach ($all_roles as $roleid => $rolename) {
-    $role = $DB->get_record('role', ['id' => $roleid], 'shortname');
-    if ($role) {
-        $roles_lookup[$role->shortname] = role_get_name($role);
-    }
+foreach (get_all_roles() as $role) {
+    $roles_lookup[$role->shortname] = role_get_name($role);
 }
 
 // Tratar ações via GET/POST
@@ -42,6 +38,7 @@ $action = optional_param('action', '', PARAM_ALPHA);
 $id     = optional_param('id', 0, PARAM_INT);
 $status = optional_param('status', '', PARAM_ALPHA);
 $filter = optional_param('filter', 'pendente', PARAM_ALPHA);
+$page   = max(0, optional_param('page', 0, PARAM_INT));
 $motivo_negacao = optional_param('motivo_negacao', '', PARAM_TEXT);
 
 // Ação: Atualizar status
@@ -52,7 +49,7 @@ if ($action === 'updatestatus' && $id && in_array($status, ['pendente','aprovado
         if ($status === 'aprovado') {
             $resultado = \local_solicitacoes\solicitacoes_controller::execute_request_action($id);
             if (!$resultado['success']) {
-                redirect(new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]), 
+                redirect(new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter, 'page' => $page]), 
                          $resultado['message'], null, \core\output\notification::NOTIFY_ERROR);
             }
         }
@@ -77,7 +74,7 @@ if ($action === 'updatestatus' && $id && in_array($status, ['pendente','aprovado
             local_solicitacoes_notify_aprovada($id);
         }
         
-        redirect(new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]),
+        redirect(new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter, 'page' => $page]),
                  get_string('success_update', 'local_solicitacoes'), null, \core\output\notification::NOTIFY_SUCCESS);
     }
 }
@@ -87,7 +84,7 @@ if ($action === 'delete' && $id) {
     require_sesskey();
     if ($DB->record_exists('local_solicitacoes', ['id' => $id])) {
         $DB->delete_records('local_solicitacoes', ['id' => $id]);
-        redirect(new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]),
+        redirect(new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter, 'page' => $page]),
                  get_string('success_delete', 'local_solicitacoes'), null, \core\output\notification::NOTIFY_SUCCESS);
     }
 }
@@ -100,7 +97,7 @@ if ($action === 'bulk_approve') {
 
     if (empty($selected_ids)) {
         redirect(
-            new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]),
+            new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter, 'page' => $page]),
             'Nenhuma solicitação selecionada.',
             null,
             \core\output\notification::NOTIFY_WARNING
@@ -144,7 +141,7 @@ if ($action === 'bulk_approve') {
     }
 
     redirect(
-        new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]),
+        new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter, 'page' => $page]),
         $msg,
         null,
         $msg_type
@@ -162,32 +159,48 @@ foreach ($filter_options as $key => $label) {
     ];
 }
 
-// Buscar solicitações com filtro
-$params = [];
-$where_clause = '';
+// Buscar solicitações com filtro, paginadas.
+$perpage = 50;
 
+$params = [];
+$where  = '1=1';
 if ($filter !== 'all') {
-    $where_clause = ' AND s.status = :status';  // Mudou de WHERE para AND
+    $where = 'status = :status';
     $params['status'] = $filter;
 }
-#$requests = $DB->get_records('local_solicitacoes', $where, 'timecreated DESC');
-$sql = "SELECT s.*, 
-               c.id AS cid, c.fullname AS cname,
-               u.id AS uid, u.firstname AS ufirst, u.lastname AS ulast
-          FROM {local_solicitacoes} s
-          LEFT JOIN {local_curso_solicitacoes} cs ON cs.solicitacao_id = s.id
-          LEFT JOIN {course} c ON cs.curso_id = c.id
-          LEFT JOIN {local_usuarios_solicitacoes} us ON us.solicitacao_id = s.id
-          LEFT JOIN {user} u ON us.usuario_id = u.id
-         WHERE 1=1 $where_clause";
 
+$total_requests = $DB->count_records_select('local_solicitacoes', $where, $params);
 
+// Página além do fim (ex.: após excluir o último item da última página): volta para a última existente.
+$last_page = max(0, (int)ceil($total_requests / $perpage) - 1);
+if ($page > $last_page) {
+    $page = $last_page;
+}
 
-$recordset = $DB->get_recordset_sql($sql, $params);
+// 1º passo: somente os IDs da página atual (consulta leve, com LIMIT).
+// O LIMIT não pode ir na consulta com JOIN abaixo, que gera uma linha por curso × usuário.
+$page_ids = array_keys($DB->get_records_select(
+    'local_solicitacoes', $where, $params, 'timecreated DESC, id DESC', 'id', $page * $perpage, $perpage
+));
 
+// 2º passo: dados completos apenas das solicitações da página.
 $requests = [];
-$counter = 0; // Criar índice único manualmente
-foreach ($recordset as $record) {
+$recordset = null;
+if (!empty($page_ids)) {
+    [$ids_sql, $ids_params] = $DB->get_in_or_equal($page_ids, SQL_PARAMS_NAMED, 'pgid');
+    $sql = "SELECT s.*,
+                   c.id AS cid, c.fullname AS cname,
+                   u.id AS uid, u.firstname AS ufirst, u.lastname AS ulast
+              FROM {local_solicitacoes} s
+              LEFT JOIN {local_curso_solicitacoes} cs ON cs.solicitacao_id = s.id
+              LEFT JOIN {course} c ON cs.curso_id = c.id
+              LEFT JOIN {local_usuarios_solicitacoes} us ON us.solicitacao_id = s.id
+              LEFT JOIN {user} u ON us.usuario_id = u.id
+             WHERE s.id $ids_sql";
+    $recordset = $DB->get_recordset_sql($sql, $ids_params);
+}
+
+foreach (($recordset ?? []) as $record) {
     $id = $record->id;
     if (!isset($requests[$id])) {
         // Inicializa o objeto da solicitação
@@ -205,33 +218,41 @@ foreach ($recordset as $record) {
     if (!empty($record->uid) && !isset($requests[$id]->usuarios_alvo[$record->uid])) {
         $requests[$id]->usuarios_alvo[$record->uid] = $record->ufirst . ' ' . $record->ulast;
     }
-    
-    $counter++;
 }
-$recordset->close(); // IMPORTANTE: fechar o recordset
+if ($recordset) {
+    $recordset->close(); // IMPORTANTE: fechar o recordset
+}
 
-// Ordena por data de criação (mais recentes primeiro)
+// Ordena por data de criação (mais recentes primeiro), mesma ordem da paginação.
 usort($requests, function($a, $b) {
-    return $b->timecreated - $a->timecreated;
+    return ($b->timecreated <=> $a->timecreated) ?: ($b->id <=> $a->id);
 });
 
-// Pré-carregar cursos das categorias permitidas para verificação de similaridade
-// (feito uma única vez; só executa se houver solicitações do tipo criar_curso)
-$allowed_courses_for_similarity = [];
-foreach ($requests as $r) {
-    if ($r->tipo_acao === 'criar_curso') {
-        [$cat_cond, $cat_params] = local_solicitacoes_get_allowed_categories_sql('ctx');
-        $sim_sql = "SELECT c.id, c.fullname, c.shortname
-                      FROM {course} c
-                      JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = :ctxcourse
-                     WHERE c.id > 1 AND $cat_cond
-                     ORDER BY c.fullname ASC";
-        $allowed_courses_for_similarity = $DB->get_records_sql(
-            $sim_sql,
-            array_merge(['ctxcourse' => CONTEXT_COURSE], $cat_params)
-        );
-        break; // basta encontrar um; a lista é a mesma para todos
-    }
+// URL base da listagem (preserva filtro e página nas ações e redirecionamentos).
+$list_url = new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter, 'page' => $page]);
+$paging_bar = $OUTPUT->paging_bar($total_requests, $page, $perpage,
+    new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]));
+$paging_summary = '';
+if ($total_requests > 0) {
+    $paging_summary = get_string('showing_requests', 'local_solicitacoes', (object)[
+        'from'  => $page * $perpage + 1,
+        'to'    => min($total_requests, ($page + 1) * $perpage),
+        'total' => $total_requests,
+    ]);
+}
+
+// A verificação de disciplinas similares (criar_curso) é carregada via AJAX
+// depois que a página abre: local_solicitacoes/similar_courses.
+$has_similarity_check = false;
+
+// Solicitantes: uma única consulta em vez de uma por linha.
+$requester_ids = array_unique(array_map(function($r) {
+    return (int)$r->userid;
+}, $requests));
+$requesters = [];
+if (!empty($requester_ids)) {
+    $requester_fields = 'id, ' . implode(', ', \core_user\fields::get_name_fields());
+    $requesters = $DB->get_records_list('user', 'id', $requester_ids, '', $requester_fields);
 }
 
 // Link "Voltar" para a coordenação de cursos
@@ -245,6 +266,9 @@ $template_data = [
     'form_action_url'  => (new moodle_url('/local/solicitacoes/gerenciar.php'))->out(false),
     'sesskey'          => sesskey(),
     'current_filter'   => $filter,
+    'current_page'     => $page,
+    'paging_bar'       => $paging_bar,
+    'paging_summary'   => $paging_summary,
     'back_url'         => $back_url,
     // Strings da tabela (passadas do PHP para evitar [[key]] no template)
     'str_back'             => local_solicitacoes_str('back'),
@@ -325,9 +349,9 @@ foreach ($requests as $r) {
     }
 
     // 3. Dados do Solicitante
-    $solicitante = core_user::get_user($r->userid);
+    $solicitante = $requesters[$r->userid] ?? null;
     $solicitante_url = new moodle_url('/user/profile.php', ['id' => $r->userid]);
-    $solicitante_nome = html_writer::link($solicitante_url, fullname($solicitante));
+    $solicitante_nome = $solicitante ? html_writer::link($solicitante_url, fullname($solicitante)) : '-';
 
     // Status formatado com cores
     $statuskey = 'status_' . $r->status;
@@ -392,33 +416,19 @@ foreach ($requests as $r) {
     }
 
     // Para criar_curso: adiciona aviso de disciplinas similares abaixo da justificativa
-    if ($r->tipo_acao === 'criar_curso' && !empty($allowed_courses_for_similarity)) {
-        $search = strtolower(trim($r->nome_disciplina ?? $r->course_shortname ?? ''));
-        if ($search !== '') {
-            $similares = [];
-            foreach ($allowed_courses_for_similarity as $existing) {
-                $pct_short = 0.0; $pct_full = 0.0;
-                similar_text($search, strtolower($existing->shortname), $pct_short);
-                similar_text($search, strtolower($existing->fullname),  $pct_full);
-                if (max($pct_short, $pct_full) >= 90.0) {
-                    $url = new moodle_url('/course/view.php', ['id' => $existing->id]);
-                    $similares[] = html_writer::link($url,
-                        format_string($existing->shortname) . ' — ' . format_string($existing->fullname),
-                        ['target' => '_blank']
-                    );
-                }
-            }
-            if (!empty($similares)) {
-                $label = local_solicitacoes_str('disciplinas_similares');
-                $sim_html = '<small class="text-danger"><strong>' . $label . '</strong>'
-                    . '<ul class="mb-0 pl-3"><li>' . implode('</li><li>', $similares) . '</li></ul></small>';
-                $observacao_display = ($observacao_display ? $observacao_display . '<br>' : '') . $sim_html;
-            }
-        }
+    // (placeholder preenchido de forma assíncrona; some se não houver similares)
+    if ($r->tipo_acao === 'criar_curso' && trim($r->nome_disciplina ?? $r->course_shortname ?? '') !== '') {
+        $has_similarity_check = true;
+        $sim_html = html_writer::div(
+            html_writer::tag('small', s(local_solicitacoes_str('checking_similar_courses')), ['class' => 'text-muted']),
+            'local-solicitacoes-similar',
+            ['data-requestid' => $r->id]
+        );
+        $observacao_display = ($observacao_display ? $observacao_display . '<br>' : '') . $sim_html;
     }
 
     // Preparar dados para o template
-    $baseurl = new moodle_url('/local/solicitacoes/gerenciar.php', ['filter' => $filter]);
+    $baseurl = $list_url;
 
     $request_data = [
         'request_id'   => $r->id,
@@ -453,6 +463,10 @@ foreach ($requests as $r) {
     ];
     
     $template_data['requests'][] = $request_data;
+}
+
+if ($has_similarity_check) {
+    $PAGE->requires->js_call_amd('local_solicitacoes/similar_courses', 'init');
 }
 
 // Renderizar o template com todos os dados

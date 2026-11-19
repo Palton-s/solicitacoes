@@ -256,3 +256,15 @@ $string['form_cadastro_titulo']      = 'Request New User Registration';
 $string['form_criar_curso_titulo']   = 'Request Course Creation';
 $string['form_remover_curso_titulo'] = 'Request Course Removal';
 $string['form_remover_curso_descricao'] = 'On approval, the course is not deleted. It is moved to the configured hidden category and set to hidden.';
+
+// Asynchronous (AJAX) search and caches.
+$string['search_courses_placeholder'] = 'Type at least 3 letters of the course name or code';
+$string['no_courses_selected']        = 'No courses selected';
+$string['no_users_selected']          = 'No users selected';
+$string['search_min_chars']           = 'Type at least {$a} characters to search';
+$string['search_error']               = 'The search took too long or failed. Try again with a more specific term.';
+$string['user_suspended_tag']         = 'suspended';
+$string['checking_similar_courses']   = 'Checking for similar courses...';
+$string['cachedef_useraccess']        = 'Courses and categories accessible to the user (course search)';
+$string['cachedef_allowedcatpaths']   = 'Context paths of the categories allowed in the settings';
+$string['showing_requests']           = 'Showing {$a->from}–{$a->to} of {$a->total} requests';

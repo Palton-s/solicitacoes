@@ -27,15 +27,8 @@ class remover_curso_form extends moodleform {
                       '</div>';
         $mform->addElement('html', $aviso_html);
 
-        $cursos_disponiveis = $this->get_available_courses();
-        $mform->addElement('autocomplete', 'curso_nome', get_string('curso_nome', 'local_solicitacoes'), $cursos_disponiveis, [
-            'multiple' => true,
-            'placeholder' => get_string('searching_courses', 'local_solicitacoes'),
-            'noselectionstring' => get_string('no_courses_found', 'local_solicitacoes'),
-        ]);
-        $mform->setType('curso_nome', PARAM_SEQUENCE);
-        $mform->addRule('curso_nome', null, 'required', null, 'client');
-        $mform->addHelpButton('curso_nome', 'curso_nome_help', 'local_solicitacoes');
+        // Campo de curso: busca assíncrona (AJAX), nenhum curso é carregado na página.
+        local_solicitacoes_add_course_selector($mform, \local_solicitacoes\local\course_search::SCOPE_ALL);
 
         $mform->addElement('textarea', 'observacoes', get_string('observacoes', 'local_solicitacoes'),
             ['rows' => 5, 'cols' => 50, 'placeholder' => get_string('observacoes_placeholder', 'local_solicitacoes')]);
@@ -46,46 +39,15 @@ class remover_curso_form extends moodleform {
         $this->add_action_buttons(true, get_string('request_submit', 'local_solicitacoes'));
     }
 
-    protected function get_available_courses() {
-        global $DB;
-
-        $cursos_options = [];
-
-        $sql = "SELECT id, fullname, shortname
-                  FROM {course}
-                 WHERE id > 1
-                 ORDER BY fullname ASC";
-
-        $cursos = $DB->get_records_sql($sql);
-        foreach ($cursos as $curso) {
-            $cursos_options[$curso->id] = $curso->fullname . ' (' . $curso->shortname . ')';
-        }
-
-        return $cursos_options;
-    }
-
     public function validation($data, $files) {
-        global $DB;
-
         $errors = parent::validation($data, $files);
 
-        if (empty($data['curso_nome'])) {
-            $errors['curso_nome'] = get_string('error_course_required', 'local_solicitacoes');
-            return $errors;
-        }
-
-        $cursos_selecionados = is_array($data['curso_nome']) ? $data['curso_nome'] : [$data['curso_nome']];
-        $cursos_invalidos = [];
-
-        foreach ($cursos_selecionados as $curso_id) {
-            $curso_id = (int)$curso_id;
-            if ($curso_id <= 0 || !$DB->record_exists('course', ['id' => $curso_id])) {
-                $cursos_invalidos[] = $curso_id;
-            }
-        }
-
-        if (!empty($cursos_invalidos)) {
-            $errors['curso_nome'] = get_string('error_invalid_courses', 'local_solicitacoes', implode(', ', $cursos_invalidos));
+        $erro_cursos = \local_solicitacoes\local\course_search::validate_selection(
+            $data['curso_nome'] ?? null,
+            \local_solicitacoes\local\course_search::SCOPE_ALL
+        );
+        if ($erro_cursos !== null) {
+            $errors['curso_nome'] = $erro_cursos;
         }
 
         return $errors;

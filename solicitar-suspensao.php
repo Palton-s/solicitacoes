@@ -63,42 +63,11 @@ class suspensao_form extends moodleform {
                       '</div>';
         $mform->addElement('html', $aviso_html);
 
-        // Campo de curso (autocomplete com cursos carregados no PHP)
-        $cursos_disponiveis = $this->get_available_courses();
-        $mform->addElement('autocomplete', 'curso_nome', get_string('curso_nome', 'local_solicitacoes'), $cursos_disponiveis, array(
-            'multiple' => true,
-            'placeholder' => get_string('searching_courses', 'local_solicitacoes'),
-            'noselectionstring' => get_string('no_courses_found', 'local_solicitacoes'),
-        ));
-        $mform->setType('curso_nome', PARAM_SEQUENCE);
-        $mform->addRule('curso_nome', null, 'required', null, 'client');
-        $mform->addHelpButton('curso_nome', 'curso_nome_help', 'local_solicitacoes');
+        // Campo de curso: busca assíncrona (AJAX), nenhum curso é carregado na página.
+        local_solicitacoes_add_course_selector($mform, \local_solicitacoes\local\course_search::SCOPE_ACCESSIBLE);
 
-        // Campo de usuários (autocomplete múltiplo) - Sistema nativo do Moodle
-        // Busca por: firstname, lastname, fullname, username e email
-        $mform->addElement('autocomplete', 'usuarios_busca', get_string('usuarios_busca', 'local_solicitacoes'), array(), array(
-            'multiple' => true,
-            'placeholder' => get_string('usuarios_busca_help', 'local_solicitacoes'),
-            'noselectionstring' => get_string_with_fallback('no_users_found', 'local_solicitacoes'),
-            'ajax' => 'core_user/form_user_selector',
-            'data-includecontactableprivacy' => false,
-            'data-includesuspended' => true,
-            'data-includeunenrolled' => true,
-            'data-includeenrolled' => true,
-            'data-includeall' => true,
-            'showsuggestions' => true,
-            'casesensitive' => false,
-            'valuehtmlcallback' => function($userid) {
-                global $DB;
-                if (empty($userid)) return '';
-                $user = $DB->get_record('user', ['id' => $userid], 'id, firstname, lastname, username, email');
-                if (!$user) return '';
-                $fullname = fullname($user);
-                return $fullname . ' (' . $user->username . ') - ' . $user->email;
-            }
-        ));
-        $mform->setType('usuarios_busca', PARAM_SEQUENCE);
-        $mform->addRule('usuarios_busca', null, 'required', null, 'client');
+        // Campo de usuários: busca assíncrona (web service local_solicitacoes_search_users).
+        local_solicitacoes_add_user_selector($mform, 'usuarios_busca', get_string('usuarios_busca', 'local_solicitacoes'));
         $mform->addHelpButton('usuarios_busca', 'usuarios_busca_help', 'local_solicitacoes');
 
         // Observações
@@ -110,67 +79,6 @@ class suspensao_form extends moodleform {
 
         // Botões de ação
         $this->add_action_buttons(true, get_string('request_submit', 'local_solicitacoes'));
-    }
-
-    /**
-     * Buscar cursos disponíveis para o usuário atual:
-     * - admins e usuários com papel no contexto do sistema veem todos os cursos
-     * - demais: cursos onde está matriculado + cursos de categorias com papel atribuído
-     */
-    protected function get_available_courses() {
-        global $DB, $USER;
-        
-        $cursos_options = array();
-        
-        try {
-            $system_context = context_system::instance();
-
-            // Admins e usuários com papel no contexto do sistema (ex: gerentes) veem tudo
-            if (is_siteadmin() || $DB->record_exists('role_assignments', [
-                'userid'    => $USER->id,
-                'contextid' => $system_context->id,
-            ])) {
-                $sql = "SELECT id, fullname, shortname 
-                        FROM {course} 
-                        WHERE id > 1
-                        ORDER BY fullname ASC";
-                $cursos = $DB->get_records_sql($sql);
-            } else {
-                // 1. Cursos onde o usuário está matriculado (inclui ocultos acessíveis)
-                $cursos = enrol_get_users_courses($USER->id, true);
-
-                // 2. Cursos pertencentes a categorias onde o usuário tem papel (ocultos inclusive)
-                $sql_cat = "SELECT DISTINCT c.id, c.fullname, c.shortname 
-                            FROM {course} c
-                            JOIN {context} ctx ON ctx.instanceid = c.id AND ctx.contextlevel = :ctxcourse
-                            WHERE c.id != 1
-                            AND EXISTS (
-                                SELECT 1 FROM {role_assignments} ra
-                                JOIN {context} catctx ON catctx.id = ra.contextid
-                                WHERE ra.userid = :userid
-                                AND catctx.contextlevel = :ctxcat
-                                AND ctx.path LIKE " . $DB->sql_concat('catctx.path', "'/%'") . "
-                            )
-                            ORDER BY c.fullname ASC";
-
-                $cat_courses = $DB->get_records_sql($sql_cat, [
-                    'ctxcourse' => CONTEXT_COURSE,
-                    'userid'    => $USER->id,
-                    'ctxcat'    => CONTEXT_COURSECAT,
-                ]);
-
-                // Combinar (chaves são IDs de curso — sem duplicatas)
-                $cursos = $cursos + $cat_courses;
-            }
-
-            foreach ($cursos as $curso) {
-                $cursos_options[$curso->id] = $curso->fullname . ' (' . $curso->shortname . ')';
-            }
-        } catch (Exception $e) {
-            error_log("Erro ao buscar cursos: " . $e->getMessage());
-        }
-        
-        return $cursos_options;
     }
 
     /**
@@ -195,29 +103,13 @@ class suspensao_form extends moodleform {
             $errors['usuarios_busca'] = get_string('error_usuarios_required', 'local_solicitacoes');
         }
 
-        // Validar se pelo menos um curso foi selecionado e se são válidos
-        if (!empty($data['curso_nome'])) {
-            $cursos_selecionados = is_array($data['curso_nome']) ? $data['curso_nome'] : [$data['curso_nome']];
-            
-            if (empty($cursos_selecionados)) {
-                $errors['curso_nome'] = get_string('error_course_required', 'local_solicitacoes');
-            } else {
-                // Validar cada curso selecionado e verificar se o usuário tem acesso
-                $cursos_acessiveis = $this->get_available_courses();
-                $cursos_invalidos = array();
-                foreach ($cursos_selecionados as $curso_id) {
-                    $curso_id = (int)$curso_id;
-                    if ($curso_id <= 0 || !array_key_exists($curso_id, $cursos_acessiveis)) {
-                        $cursos_invalidos[] = $curso_id;
-                    }
-                }
-                
-                if (!empty($cursos_invalidos)) {
-                    $errors['curso_nome'] = get_string('error_invalid_courses', 'local_solicitacoes', implode(', ', $cursos_invalidos));
-                }
-            }
-        } else {
-            $errors['curso_nome'] = get_string('error_course_required', 'local_solicitacoes');
+        // Validar os cursos selecionados: consulta apenas os IDs enviados.
+        $erro_cursos = \local_solicitacoes\local\course_search::validate_selection(
+            $data['curso_nome'] ?? null,
+            \local_solicitacoes\local\course_search::SCOPE_ACCESSIBLE
+        );
+        if ($erro_cursos !== null) {
+            $errors['curso_nome'] = $erro_cursos;
         }
 
         return $errors;
